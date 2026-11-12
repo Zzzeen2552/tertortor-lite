@@ -3,9 +3,8 @@
 ## Sebelum mulai (manual, ±5 menit)
 
 1. Pasang **Claude desktop app** (tab Code) dan login dengan akun Claude yang dipakai di PC itu.
-2. **Akses repo private** `Zzzeen2552/tertortor-lite`. Pilih salah satu:
-   - login GitHub sebagai `Zzzeen2552` di PC itu, atau
-   - undang akun GitHub lain sebagai collaborator (repo → Settings → Collaborators).
+2. Repo `Zzzeen2552/tertortor-lite` public: clone tidak butuh login GitHub. Login hanya perlu bila PC itu juga akan
+   push perubahan (akun `Zzzeen2552` atau collaborator).
 3. Di Chrome: pasang ekstensi **Claude in Chrome**, lalu login sendiri ke **Google Flow**, **Google AI Studio**, dan
    **RunningHub**. Claude tidak boleh mengetik password untukmu.
 4. Buka Claude Code dengan folder kerja `Documents`.
@@ -16,7 +15,7 @@
 Siapkan TERTORTOR LITE di PC Windows ini. Kerjakan berurutan, cek tiap langkah, dan berhenti lalu tanya saya kalau ada yang butuh login, password, API key, atau izin admin. Jangan pernah mengetik password atau API key untuk saya.
 
 1. Cek prasyarat: git, Node.js 22 atau lebih baru, ffmpeg + ffprobe di PATH. Yang belum ada, pasang lewat winget (Git.Git, OpenJS.NodeJS, Gyan.FFmpeg), buka shell baru, lalu cek versinya lagi.
-2. Clone https://github.com/Zzzeen2552/tertortor-lite.git ke %USERPROFILE%\Documents\TERTORTOR-LITE. Repo-nya private: kalau Git minta login GitHub, minta saya login sendiri. Kalau foldernya sudah ada, cukup git pull.
+2. Clone https://github.com/Zzzeen2552/tertortor-lite.git ke %USERPROFILE%\Documents\TERTORTOR-LITE. Repo-nya public, jadi clone tidak butuh login. Kalau foldernya sudah ada, cukup git pull.
 3. Di folder TERTORTOR-LITE: npm install, lalu npx hyperframes skills (memasang skill HyperFrames ke ~/.claude/skills).
 4. Bangun kit efek suara: node tools/sfx.mjs.
 5. Pasang whisper.cpp: unduh rilis Windows resmi whisper-bin-x64.zip dari github.com/ggml-org/whisper.cpp/releases, ekstrak sehingga ada tools/bin/whisper/Release/whisper-cli.exe. Sebutkan ukuran file sebelum mengunduh. Folder tools/bin tidak ikut git.
