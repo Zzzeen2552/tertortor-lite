@@ -13,6 +13,7 @@ import { checkConcepts, pickConcept, refFiles } from "../ref.mjs";
 import { isMusafo, checkMusafo, createMusafo, STORY_TYPES, storyType, storylineApproval, approveStoryline, loadHooks, checkHooks, editScript, fillEnglish, sourceFlowErrors, draftApproval, saveDraft, approveDraft, productionState, startProduction, saveStoryline, charRefs, charSheet, looksOf, setLook } from "../musafo.mjs";
 import { editScriptMd, scriptParagraphs, pendingEdits } from "../script-edit.mjs";
 import { working, finished, claudeWaiting } from "../progress.mjs";
+import { state as chatState, send as chatSend, stop as chatStop, reset as chatReset } from "../studio-chat.mjs";
 import { share, revoke, shareInfo } from "../share.mjs";
 import { listBooks, loadBook, useStory, readJob, listChannels, addChannel, channelOf, fetchArticle, sourceToLibrary } from "../stories.mjs";
 import { structure, placeOf, clipPlaces, addSub, subDir, listProducts } from "../categories.mjs";
@@ -398,6 +399,22 @@ createServer(async (req, res) => {
         const r = await fetch(`${relay.replace(/\/$/, "")}/worker${req.url.slice(4)}`, { method: req.method, headers: { authorization: `Bearer ${token}`, "content-type": "application/json" }, ...(req.method === "POST" ? { body: await readBody(req) } : {}), signal: AbortSignal.timeout(30e3) });
         return send(res, r.status, Buffer.from(await r.arrayBuffer()), "application/json");
       } catch (e) { return send(res, 502, { error: `Relay tidak terjangkau: ${e.message}` }); }
+    }
+    // Chat panel (user 2026-11-13): Claude Code headless in this folder (tools/studio-chat.mjs). No login here, so only this
+    // page on this machine may use it (the web relay lets admins only through, then replays it here as localhost).
+    if (/^\/api\/chat(\/|$)/.test(p)) {
+      const host = String(req.headers.host || "");
+      if (!/^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host) || (req.headers.origin && new URL(req.headers.origin).host !== host)) return send(res, 403, { error: "origin" });
+      if (p === "/api/chat" && req.method === "GET") return send(res, 200, chatState());
+      if (req.method === "POST") {
+        const body = JSON.parse((await readBody(req)).toString() || "{}");
+        try {
+          if (p === "/api/chat") return send(res, 200, chatSend(body.text, body.context));
+          if (p === "/api/chat/stop") return send(res, 200, chatStop());
+          if (p === "/api/chat/new") return send(res, 200, chatReset());
+        } catch (e) { return send(res, 400, { error: e.message }); }
+      }
+      return send(res, 404, { error: "not found" });
     }
     // what Claude is doing after the user's clicks, with estimates, and whether a Claude session is listening at all
     if (p === "/api/working" && req.method === "GET") return send(res, 200, { claude: claudeWaiting(), items: working() });

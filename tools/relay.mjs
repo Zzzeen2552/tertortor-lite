@@ -65,9 +65,9 @@ const SLUG = "[a-z0-9-]+";
 const R = (s) => new RegExp(`^${s}$`);
 const ROUTES = {
   GET: [R("/"), R("/favicon\\.ico"), R("/api/(videos|structure|presets|voices|looks|library|audio|stories|working)"), R(`/api/videos/${SLUG}`),
-    R(`/api/videos/${SLUG}/thumb/${SLUG}\\.jpg`), R("/files/(videos|library)/[^\\\\]+"), R(`/api/subs/(explainer|storytelling|advertisement)/${SLUG}/(logo|buffer|cover)`), R("/api/buffer/channels"), R("/api/users"), R("/api/trash")],
+    R(`/api/videos/${SLUG}/thumb/${SLUG}\\.jpg`), R("/files/(videos|library)/[^\\\\]+"), R(`/api/subs/(explainer|storytelling|advertisement)/${SLUG}/(logo|buffer|cover)`), R("/api/buffer/channels"), R("/api/users"), R("/api/trash"), R("/api/chat")],
   // /api/users*: answered by the relay itself (accounts live here), never relayed to the laptop; admin only
-  POST: [R("/api/users/invite"), R("/api/users/[^/]+/(role|revoke|restore)"), R("/api/videos"), R("/api/subs"), R("/api/stories/(channel|source|scan|use)"),
+  POST: [R("/api/chat(/stop|/new)?"), R("/api/users/invite"), R("/api/users/[^/]+/(role|revoke|restore)"), R("/api/videos"), R("/api/subs"), R("/api/stories/(channel|source|scan|use)"),
     R(`/api/videos/${SLUG}/share`), R(`/api/videos/${SLUG}/thumbnail(/options|/video)?`), R(`/api/videos/${SLUG}/(buffer|buffer-caption|delete)`), R(`/api/trash/${SLUG}/restore`), R(`/api/subs/(explainer|storytelling|advertisement)/${SLUG}/(buffer|buffer-key)`), R(`/api/videos/${SLUG}/(approve|beats-approve|clone-approve|storyline|storyline-approve|draft|draft-approve|production|concept|ref|preset|look|voice|ready|script|flow/[\\w-]+)`)],
   DELETE: [R("/api/users/invite/[0-9a-f]{64}"), R("/api/users/[^/]+"), R(`/api/videos/${SLUG}/(approve|beats-approve|clone-approve)`), R(`/api/videos/${SLUG}/share`), R(`/api/subs/(explainer|storytelling|advertisement)/${SLUG}/(logo|buffer-key)`)],
   PUT: [R(`/api/videos/${SLUG}/upload`), R("/api/stories/upload"), R(`/api/subs/(explainer|storytelling|advertisement)/${SLUG}/upload`), R(`/api/subs/(explainer|storytelling|advertisement)/${SLUG}/logo`)],
@@ -520,6 +520,8 @@ createServer(async (req, res) => {
     if (p === "/api/relay/push-test" && m === "POST") return send(res, 200, await pushAll({ title: "TERTORTOR", body: "Tes notifikasi: kalau ini muncul, notifikasi proses selesai juga akan muncul.", url: "/" }));
     if (!allowed(m, p)) return send(res, 404, { error: "not found" });
     // accounts live here, not on the laptop: answered by the relay itself (also with the laptop off), admins only
+    // Chat panel = Claude Code running on the laptop: admins only (user 2026-11-13)
+    if (/^\/api\/chat(\/|$)/.test(p) && me.role !== "admin") return send(res, 403, { error: "Chat Claude hanya untuk admin." });
     if (p.startsWith("/api/users")) return me.role === "admin" ? answer(res, await usersApi(m, p.slice(4), req, me.email)) : send(res, 403, { error: "Hanya admin yang bisa mengelola user." });
 
     const path = p + url.search;

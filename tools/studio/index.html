@@ -249,6 +249,29 @@ select.sel,input[list]{width:100%;background:var(--panel);border:1px solid var(-
   .two{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat .big{font-size:36px}.kv{grid-template-columns:minmax(0,1fr)}}
+/* Chat panel (user 2026-11-13): Claude Code on the laptop, from inside Studio */
+.chat-fab{position:fixed;right:20px;bottom:20px;z-index:60;width:54px;height:54px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 20px rgba(0,0,0,.22);display:grid;place-items:center;cursor:pointer}
+.chat-fab svg{width:24px;height:24px}
+.chat-fab .dot{position:absolute;top:6px;right:6px;width:11px;height:11px;border-radius:50%;background:#2fb36b;border:2px solid var(--accent);display:none}
+.chat-fab.busy .dot{display:block;animation:chatPulse 1.2s ease-in-out infinite}
+@keyframes chatPulse{50%{opacity:.35}}
+.chat{position:fixed;top:0;right:0;bottom:0;z-index:70;width:min(440px,100vw);background:var(--panel);border-left:1px solid var(--line);box-shadow:-10px 0 30px rgba(0,0,0,.14);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .2s ease}
+.chat.open{transform:none}
+.chat-h{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.chat-h b{flex:1;font-size:15px} .chat-h small{display:block;color:var(--muted);font-weight:400;font-size:11.5px}
+.chat-log{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.chat-m{max-width:92%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.chat-m.user{align-self:flex-end;background:var(--accent-soft);border-bottom-right-radius:4px}
+.chat-m.assistant{align-self:flex-start;background:var(--panel-2);border-bottom-left-radius:4px}
+.chat-m.tool,.chat-m.info{align-self:flex-start;padding:2px 4px;font:11.5px/1.4 var(--f-mono,monospace);color:var(--muted);white-space:normal}
+.chat-m.tool::before{content:"⚙ "} .chat-m.info::before{content:"ⓘ "}
+.chat-m.error{align-self:flex-start;background:color-mix(in srgb,#e5484d 14%,transparent);color:var(--fg);font-size:13px}
+.chat-m code{font:12.5px var(--f-mono,monospace);background:rgba(127,127,127,.15);padding:1px 4px;border-radius:4px}
+.chat-m a{color:var(--accent-text);text-decoration:underline}
+.chat-empty{color:var(--muted);font-size:13.5px;line-height:1.55;margin:auto 0;text-align:center;padding:0 10px}
+.chat-work{font-size:12px;color:var(--muted);padding:0 16px 6px;min-height:18px}
+.chat-f{display:flex;gap:8px;padding:10px 12px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.chat-f textarea{flex:1;resize:none;min-height:44px;max-height:160px;font:14px/1.45 inherit;padding:10px 12px;border-radius:14px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--fg)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -285,6 +308,16 @@ select.sel,input[list]{width:100%;background:var(--panel);border:1px solid var(-
   <main class="main" id="main"></main>
 </div>
 <div class="toast" id="toast"></div>
+<button class="chat-fab" id="chatFab" hidden aria-label="Chat dengan Claude" title="Chat dengan Claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="dot"></span></button>
+<section class="chat" id="chat" aria-label="Chat Claude" aria-hidden="true">
+  <div class="chat-h"><b>Claude<small>jalan di laptop · TERTORTOR LITE</small></b>
+    <button class="btn sm" id="chatStop" hidden>Hentikan</button>
+    <button class="btn sm" id="chatNew" title="Mulai percakapan baru">Baru</button>
+    <button class="icon-btn" id="chatX" aria-label="Tutup chat">×</button></div>
+  <div class="chat-log" id="chatLog"></div>
+  <div class="chat-work" id="chatWork"></div>
+  <form class="chat-f" id="chatF"><textarea id="chatIn" rows="1" placeholder="Tulis ke Claude… (Enter kirim, Shift+Enter baris baru)"></textarea><button class="btn pri" id="chatSend">Kirim</button></form>
+</section>
 <div class="pop" id="workPop" hidden><div class="box" role="dialog" aria-modal="true" aria-labelledby="workPopH"><h3 id="workPopH"></h3><div id="workPopB"></div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn pri" id="workPopOk">Oke</button></div></div></div>
 <div class="donebox" id="doneBox" hidden><span id="doneMsg" style="flex:1"></span><a id="doneLink" href="#">Buka</a><button id="doneX" aria-label="Tutup">×</button></div>
 
@@ -2231,6 +2264,72 @@ async function route() {
 }
 window.onhashchange = route;
 route();
+
+// ---------- Chat panel (user 2026-11-13): Claude Code headless on the laptop (tools/studio-chat.mjs) ----------
+// Local Studio = the owner; through the web relay admins only. Polls /api/chat (fast while Claude works).
+const chat = { open: false, timer: null, last: "", busy: false };
+const chatMd = (t) => esc(t)
+  .replace(/```[\w-]*\n?([\s\S]*?)```/g, (_, c) => `<code style="display:block;white-space:pre-wrap">${c}</code>`)
+  .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+  .replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>")
+  .replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+// which page the user is on, so "this video" means something to Claude
+const chatContext = () => {
+  const h = location.hash, m = h.match(/^#\/v\/([\w-]+)(?:\/([\w-]+))?/);
+  if (m) { const v = videos.find((x) => x.slug === m[1]); return `editor video ${m[1]}${v ? ` ("${v.title}", tahap ${v.next})` : ""}${m[2] ? `, tab ${m[2]}` : ""}`; }
+  const s = h.match(/^#\/s\/([\w-]+)\/([\w-]+)/);
+  if (s) return `halaman sub ${s[1]}/${s[2]}`;
+  return h && h !== "#/" ? `halaman ${h.slice(2)}` : "";
+};
+function chatRender(st) {
+  chat.busy = st.running || st.queued.length > 0;
+  $("#chatFab").classList.toggle("busy", chat.busy);
+  $("#chatStop").hidden = !chat.busy;
+  const since = st.startedAt ? Math.round((Date.now() - Date.parse(st.startedAt)) / 1000) : 0;
+  $("#chatWork").textContent = st.running ? `Claude sedang bekerja… ${since}s${st.queued.length ? ` · ${st.queued.length} pesan antre` : ""}` : "";
+  const key = st.messages.length + "|" + (st.messages.at(-1)?.at ?? "");
+  if (key === chat.last) return;
+  chat.last = key;
+  const log = $("#chatLog"), atEnd = log.scrollHeight - log.scrollTop - log.clientHeight < 80;
+  log.innerHTML = st.messages.length ? st.messages.map((m) => `<div class="chat-m ${m.role}">${m.role === "assistant" ? chatMd(m.text) : esc(m.text)}</div>`).join("")
+    : `<div class="chat-empty"><b>Ngobrol dengan Claude dari sini.</b><br>Claude jalan di laptop, di folder TERTORTOR LITE, dan membaca CLAUDE.md yang sama. Kalau kamu sedang membuka satu video, Claude tahu video yang mana.<br><br>Edit file dan perintah npm/node boleh. Commit, push, kirim ke Buffer, dan publish tetap minta izinmu dulu.</div>`;
+  if (atEnd || st.running) log.scrollTop = log.scrollHeight;
+}
+async function chatPoll() {
+  clearTimeout(chat.timer);
+  try { const r = await fetch("/api/chat"); if (r.ok) chatRender(await r.json()); } catch {}
+  if (chat.open || chat.busy) chat.timer = setTimeout(chatPoll, chat.busy ? 1500 : 8000);
+}
+const chatPost = async (path, body) => {
+  const r = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body ?? {}) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || r.status);
+  chatRender(j); chatPoll();
+};
+function chatToggle(open = !chat.open) {
+  chat.open = open;
+  $("#chat").classList.toggle("open", open); $("#chat").setAttribute("aria-hidden", String(!open));
+  $("#chatFab").hidden = open;
+  if (open) { chat.last = ""; chatPoll(); setTimeout(() => $("#chatIn").focus(), 150); }
+}
+meReady.then(() => {
+  if (me && me.role !== "admin") return; // chat = Claude on the laptop: owner and admins only
+  $("#chatFab").hidden = false;
+  $("#chatFab").onclick = () => chatToggle(true);
+  $("#chatX").onclick = () => chatToggle(false);
+  $("#chatStop").onclick = () => chatPost("/api/chat/stop").catch((e) => toast(e.message));
+  $("#chatNew").onclick = () => { if (confirm("Mulai percakapan baru? Riwayat yang sekarang diarsipkan.")) chatPost("/api/chat/new").catch((e) => toast(e.message)); };
+  const inp = $("#chatIn");
+  inp.oninput = () => { inp.style.height = "auto"; inp.style.height = Math.min(160, inp.scrollHeight) + "px"; };
+  inp.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("#chatF").requestSubmit(); } };
+  $("#chatF").onsubmit = async (e) => {
+    e.preventDefault();
+    const text = inp.value.trim(); if (!text) return;
+    inp.value = ""; inp.oninput();
+    try { await chatPost("/api/chat", { text, context: chatContext() }); } catch (err) { inp.value = text; toast("Gagal kirim: " + err.message); }
+  };
+  chatPoll(); // shows the green dot if Claude is still working from an earlier message
+});
 </script>
 </body>
 </html>

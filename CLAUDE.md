@@ -79,6 +79,13 @@ Footage generate disimpan sekali di `library/` lalu dipakai ulang (`npm run libr
 berlisensi lewat `npm run stock` (lisensi non-komersial ditolak, kredit ke `credits.md`). Feedback user dicatat ke
 `.claude/skills/video-vertikal/LESSONS.md`.
 
+**Chat Claude di Studio** (user 2026-11-13): tombol bulat kanan bawah membuka laci chat. Tiap pesan menjalankan Claude Code
+headless di folder ini (`tools/studio-chat.mjs`: `claude -p --output-format stream-json`, lanjut dengan `--resume`, satu
+proses sekaligus, pesan berikutnya antre), riwayat di `.studio-chat.json` (gitignored; "Baru" mengarsipkan ke `.studio-chat/`).
+Konteks halaman (slug video, tab) ikut di awal pesan. Tanpa jendela izin, jadi alatnya dibatasi: edit file (acceptEdits),
+baca/cari, `npm run`, `node tools/`, `npx hyperframes`, git hanya baca; commit/push/`buffer.mjs send`/publish/`wait-event`
+ditolak. Butuh Claude Code CLI terpasang dan sudah login di PC ini (`claude --version`). Route `/api/chat*` hanya dari localhost.
+
 ## Jenis proyek
 
 - **Kerangka** (`"draft": true`) tampil sebagai "belum didesain" dan tidak bisa membuat proyek. Jangan diisi warna, font,
