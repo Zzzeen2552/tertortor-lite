@@ -1,0 +1,84 @@
+<template>
+  <!-- register: screen (REAL screenshot assets/screens/__ID__.png or REAL screen recording assets/screens/__ID__.mp4)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Phone demo. World: HUD + yellow floor. The device is CSS; what is on its screen is always a real capture.
+       ROW = top of the row being talked about, in screen pixels (screen = 412 x 878). Mark "tap": ring + that row of the
+       SAME capture lifts out of the phone (callout). Mark "dive" (optional): the camera flies into the screen until the
+       capture fills the frame. Corner labels are yours (no digits). -->
+  <style>
+    #root { position: absolute; inset: 0; background: var(--ground); overflow: hidden; }
+    #__ID__-label { position: absolute; left: 90px; right: 90px; top: 190px; height: 170px; display: flex; flex-wrap: wrap; align-content: flex-end; justify-content: center; column-gap: 0.25em; text-align: center; font-size: 72px; }
+    #__ID__-cam { position: absolute; inset: 0; transform-origin: 540px 833px; }
+    #__ID__-phone { left: 320px; top: 380px; width: 440px; height: 906px; padding: 14px; border-radius: 74px; }
+    #__ID__-phone .screen, #__ID__-phone .glare { border-radius: 60px; }
+    #__ID__-placeholder { width: 100%; height: 100%; display: grid; place-items: center; font: 700 34px var(--font-mono); color: var(--muted); background: repeating-linear-gradient(45deg, #15151c 0 20px, #1b1b24 20px 40px); }
+    #__ID__-ring { position: absolute; left: 322px; width: 436px; height: 130px; border: 7px solid var(--accent); border-radius: 26px; opacity: 0; }
+    #__ID__-callout { left: 334px; width: 412px; height: 130px; background-size: 412px 878px; background-color: #1b1b24; opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="hf-layer hf-hud">
+      <div id="__ID__-grid" class="hf-grid" data-layout-allow-overflow></div>
+      <div id="__ID__-floor" class="hf-floor" data-layout-allow-overflow></div>
+    </div>
+    <div id="__ID__-cam" data-layout-allow-overflow>
+      <div id="__ID__-phone" class="hf-phone">
+        <div class="screen">
+          <!-- Replace the placeholder with the real capture:
+               <img id="__ID__-shot" src="assets/screens/__ID__.png" alt="" />
+               or <video id="__ID__-shot" src="assets/screens/__ID__.mp4" data-start="0" data-duration="<beat seconds>" muted playsinline></video>
+               and give #__ID__-callout style="background-image:url(assets/screens/__ID__.png)" (a still of the same capture). -->
+          <div id="__ID__-placeholder">SCREENSHOT</div>
+          <div class="island"></div>
+        </div>
+        <div class="glare"></div>
+      </div>
+      <div id="__ID__-ring"></div>
+      <div id="__ID__-callout" class="hf-callout"></div>
+    </div>
+    <div id="__ID__-label" class="hf-head" data-safe="text" style="top:190px">__HERO__</div>
+    <div id="__ID__-corners" class="hf-layer hf-corners"><i></i><i></i><i></i><i></i><span>Settings</span><span class="rec">Live</span><span>Screen</span><span>▮▮▯▯</span></div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const css = getComputedStyle(document.documentElement), ACC = css.getPropertyValue("--accent").trim() || "#FFD23F", ON = css.getPropertyValue("--on-accent").trim() || "#0B0B0F"; // the video's colour tone
+    const ROW = 300; // top of the row being talked about, inside the screen (0-878)
+    function split(sel, autoBig) {
+      const el = document.querySelector(sel);
+      if (!el || el.dataset.split) return el;
+      el.dataset.split = "1";
+      if (autoBig && (el.textContent.trim().length <= 10 || /\d/.test(el.textContent))) el.classList.add("big");
+      const out = [];
+      for (const n of [...el.childNodes]) {
+        if (n.nodeType === 3) for (const w of n.textContent.split(/\s+/).filter(Boolean)) out.push(`<span class="w" data-layout-allow-overflow><b data-layout-allow-occlusion>${w}</b></span>`);
+        else if (n.nodeType === 1) out.push(`<span class="w${n.tagName === "EM" ? " k" : ""}" data-layout-allow-overflow><b data-layout-allow-occlusion>${n.innerHTML}</b></span>`);
+      }
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+      return el;
+    }
+    // place the ring and the callout on ROW (screen origin = phone top 380 + padding 14)
+    const ring = document.querySelector("#__ID__-ring"), call = document.querySelector("#__ID__-callout");
+    if (ring) ring.style.top = `${394 + ROW}px`;
+    if (call) { call.style.top = `${394 + ROW}px`; call.style.backgroundPosition = `0 ${-ROW}px`; }
+    const label = split("#__ID__-label", false);
+    const n = label ? label.querySelectorAll(".w").length : 1;
+    const tap = C.tap ?? Math.min(1.2, C.dur * 0.5);
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#__ID__-floor", { backgroundPosition: "0px 0px, 0px 0px" }, { backgroundPosition: "0px 240px, 0px 0px", duration: C.dur, ease: "none" }, 0);
+    tl.fromTo("#__ID__-grid", { x: 0 }, { x: 90, duration: C.dur, ease: "none" }, 0);
+    tl.fromTo("#__ID__-corners", { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" }, 0);
+    tl.fromTo("#__ID__-label .w > b", { yPercent: 115, rotate: 8 }, { yPercent: 0, rotate: 0, duration: 0.36, ease: "power4.out", stagger: Math.min(0.05, 0.22 / Math.max(1, n - 1)) }, 0);
+    // the phone rises in with a little 3D tilt that settles, then floats
+    tl.fromTo("#__ID__-phone", { y: 420, rotateX: 18, rotateZ: -6, opacity: 0, transformPerspective: 1400 }, { y: 0, rotateX: 0, rotateZ: 0, opacity: 1, duration: 0.6, ease: "back.out(1.2)" }, 0.04);
+    tl.fromTo("#__ID__-phone", { y: 0 }, { y: -18, duration: Math.max(0.6, C.dur - 0.65), ease: "sine.inOut", immediateRender: false }, 0.65);
+    tl.fromTo("#__ID__-label .k > b", { backgroundSize: "0% 84%", color: ACC }, { backgroundSize: "100% 84%", color: ON, duration: 0.25, ease: "power4.out", immediateRender: false }, tap);
+    tl.fromTo("#__ID__-ring", { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(2.5)" }, tap);
+    // callout: the same row lifts out of the screen toward the viewer
+    tl.fromTo("#__ID__-callout", { opacity: 0, scale: 1, x: 0, y: 0 }, { opacity: 1, scale: 1.24, x: 40, y: -24, duration: 0.4, ease: "back.out(1.6)" }, tap + 0.12);
+    if (C.dive != null) {
+      // fly into the screen: screen width 412 -> 1080 (x2.62), centre 833 -> 960
+      tl.to(["#__ID__-ring", "#__ID__-callout", "#__ID__-label", "#__ID__-corners"], { opacity: 0, duration: 0.2, ease: "power2.in" }, C.dive);
+      tl.fromTo("#__ID__-cam", { scale: 1, y: 0 }, { scale: 2.62, y: 127, duration: 0.55, ease: "power3.inOut", immediateRender: false }, C.dive);
+    }
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

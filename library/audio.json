@@ -1,0 +1,168 @@
+{
+  "items": [
+    {
+      "id": "sfx-freesound-29fa57",
+      "hash": "29fa57da13",
+      "kind": "sfx",
+      "file": "audio/sfx-freesound-29fa57.mp3",
+      "title": "DSLR Camera Click",
+      "tags": [
+        "shutter",
+        "click",
+        "kamera",
+        "flash"
+      ],
+      "source": "freesound",
+      "url": "https://freesound.org/people/akonze/sounds/157812/",
+      "license": "Creative Commons 0 (CC0 1.0)",
+      "by": "akonze",
+      "duration": 4.25,
+      "created": "2026-11-05T11:50:58.016Z",
+      "usedIn": [
+        "tripple-triangle-cap"
+      ],
+      "category": "advertisement",
+      "sub": "flashcut"
+    },
+    {
+      "id": "sfx-freesound-c482e1",
+      "hash": "c482e10e29",
+      "kind": "sfx",
+      "file": "audio/sfx-freesound-c482e1.mp3",
+      "title": "Big Boom",
+      "tags": [
+        "boom",
+        "subdrop",
+        "hit",
+        "bass"
+      ],
+      "source": "freesound",
+      "url": "https://freesound.org/people/unfa/sounds/189779/",
+      "license": "Creative Commons 0 (CC0 1.0)",
+      "by": "unfa",
+      "duration": 13.04,
+      "created": "2026-11-05T11:51:14.088Z",
+      "usedIn": [
+        "tripple-triangle-cap"
+      ],
+      "category": "advertisement",
+      "sub": "flashcut"
+    },
+    {
+      "id": "sfx-freesound-1200f2",
+      "hash": "1200f27975",
+      "kind": "sfx",
+      "file": "audio/sfx-freesound-1200f2.mp3",
+      "title": "Hard Subby Kick",
+      "tags": [
+        "kick",
+        "sub",
+        "hit",
+        "bass"
+      ],
+      "source": "freesound",
+      "url": "https://freesound.org/people/NoirPantalon/sounds/102130/",
+      "license": "Creative Commons 0 (CC0 1.0)",
+      "by": "NoirPantalon",
+      "duration": 0.44,
+      "created": "2026-11-05T11:51:16.749Z",
+      "usedIn": [
+        "tripple-triangle-cap"
+      ],
+      "category": "advertisement",
+      "sub": "flashcut"
+    },
+    {
+      "id": "sfx-freesound-112afe",
+      "hash": "112afe97a9",
+      "kind": "sfx",
+      "file": "audio/sfx-freesound-112afe.mp3",
+      "title": "Sound interference",
+      "tags": [
+        "glitch",
+        "digital",
+        "interference"
+      ],
+      "source": "freesound",
+      "url": "https://freesound.org/people/Breviceps/sounds/445105/",
+      "license": "Creative Commons 0 (CC0 1.0)",
+      "by": "Breviceps",
+      "duration": 2.04,
+      "created": "2026-11-05T11:51:20.337Z",
+      "usedIn": [
+        "tripple-triangle-cap"
+      ],
+      "category": "advertisement",
+      "sub": "flashcut"
+    },
+    {
+      "id": "sfx-freesound-67592e",
+      "hash": "67592e27bb",
+      "kind": "sfx",
+      "file": "audio/sfx-freesound-67592e.mp3",
+      "title": "quick woosh",
+      "tags": [
+        "whoosh",
+        "cepat",
+        "transisi"
+      ],
+      "source": "freesound",
+      "url": "https://freesound.org/people/florianreichelt/sounds/683101/",
+      "license": "Creative Commons 0 (CC0 1.0)",
+      "by": "florianreichelt",
+      "duration": 2.05,
+      "created": "2026-11-05T11:51:24.837Z",
+      "usedIn": [
+        "tripple-triangle-cap"
+      ],
+      "category": "advertisement",
+      "sub": "flashcut"
+    },
+    {
+      "id": "sfx-freesound-2e34fa",
+      "hash": "2e34fab04f",
+      "kind": "sfx",
+      "file": "audio/sfx-freesound-2e34fa.mp3",
+      "title": "Button Click",
+      "tags": [
+        "click",
+        "tick",
+        "tap"
+      ],
+      "source": "freesound",
+      "url": "https://freesound.org/people/KorgMS2000B/sounds/54405/",
+      "license": "Creative Commons 0 (CC0 1.0)",
+      "by": "KorgMS2000B",
+      "duration": 0.02,
+      "created": "2026-11-05T11:51:26.993Z",
+      "usedIn": [
+        "tripple-triangle-cap"
+      ],
+      "category": "advertisement",
+      "sub": "flashcut"
+    },
+    {
+      "id": "sfx-freesound-f7daa2",
+      "hash": "f7daa2d0e0",
+      "kind": "sfx",
+      "file": "audio/sfx-freesound-f7daa2.mp3",
+      "title": "fabric rubbing / pulling",
+      "tags": [
+        "kain",
+        "fabric",
+        "gesekan"
+      ],
+      "source": "freesound",
+      "url": "https://freesound.org/people/dynamique/sounds/554561/",
+      "license": "Creative Commons 0 (CC0 1.0)",
+      "by": "dynamique",
+      "duration": 33.38,
+      "created": "2026-11-05T11:51:39.334Z",
+      "usedIn": [
+        "tripple-triangle-cap"
+      ],
+      "category": "advertisement",
+      "sub": "flashcut"
+    }
+  ]
+}

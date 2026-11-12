@@ -1,0 +1,63 @@
+{
+  "book": {
+    "id": "kecelakaan-yang-menciptakan-legenda",
+    "title": "Kecelakaan yang Menciptakan Legenda",
+    "author": "",
+    "channel": "berakitkehulu",
+    "kind": "teks",
+    "file": "",
+    "pages": 1,
+    "chars": 2242,
+    "project": "kecelakaan-yang-menciptakan-legenda"
+  },
+  "chunks": {
+    "1-1": {
+      "at": "2026-11-10T02:37:20.512Z",
+      "found": 1,
+      "by": "gemini gemini-3.8-flash"
+    }
+  },
+  "stories": [
+    {
+      "title": "Kecelakaan yang Menciptakan Teh Botol Sosro",
+      "pages": [
+        1,
+        1
+      ],
+      "partial": false,
+      "summary": "Keluarga Sosrodjo kesulitan menjual teh terbaik mereka karena masyarakat zaman dulu menganggap semua teh sama saja. Mereka mencoba demo menyeduh teh langsung di pasar, tetapi calon pembeli pergi karena tidak sabar menunggu air mendidih. Percobaan mengangkut teh panas yang diseduh di pabrik menggunakan van juga gagal karena teh tumpah di jalan. Karena putus asa, mereka mencoba menyeduh teh di pabrik dan memasukkannya ke dalam botol limun bekas, yang justru sangat disukai konsumen dan menjadi minuman teh siap minum pertama di Indonesia.",
+      "arc": {
+        "pembuka": "Keluarga Sosrodjo memiliki teh terbaik di Indonesia, tetapi penjualan mentok karena pelanggan menganggap semua teh sama saja.",
+        "konflik": "Demo menyeduh teh langsung di pasar gagal karena orang-orang tidak sabar menunggu air mendidih, lalu percobaan membawa teh rebusan dengan van membuat teh tumpah dan berceceran di jalan.",
+        "titikBalik": "Karena putus asa, teh diseduh di pabrik lalu dimasukkan ke dalam botol limun bekas.",
+        "emosi": "Menggelikan dan menginspirasi.",
+        "pelajaran": "Kegagalan bisa jadi awal inovasi terbesarmu, teruslah mencoba."
+      },
+      "figures": [
+        {
+          "name": "Keluarga Sosrodjo"
+        }
+      ],
+      "brand": "Teh Botol Sosro",
+      "place": "Indonesia",
+      "era": "",
+      "quotes": [],
+      "emotion": 4,
+      "visual": 5,
+      "clarity": 5,
+      "estSeconds": 50,
+      "notes": "",
+      "pagesCheck": {
+        "how": "belum",
+        "shift": 0,
+        "at": "2026-11-10"
+      },
+      "chunk": "1-1",
+      "status": "dipakai",
+      "project": "kecelakaan-yang-menciptakan-legenda",
+      "parts": 1,
+      "score": 4.7,
+      "id": "k001"
+    }
+  ]
+}

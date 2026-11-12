@@ -1,0 +1,10 @@
+{
+  "tail": 0.6,
+  "cutLead": 0.07,
+  "beats": [
+    { "id": "hook", "job": "the theft", "hero": "Stolen.", "register": "footage", "framing": "full-bleed", "character": false, "marks": { "slam": "tonight" } },
+    { "id": "clock", "job": "the clock", "hero": "Gone in <em>five</em> seconds", "register": "footage", "framing": "close", "cue": "switches", "marks": { "slam": "5" } },
+    { "id": "fix", "job": "settings", "hero": "Turn on stolen device <em>protection</em>", "register": "screen", "framing": "medium", "cue": "open settings", "marks": { "tap": "turn on", "dive": "protection" } },
+    { "id": "safe", "job": "the payoff", "hero": "Useless to <em>anyone</em> but you", "register": "drawn", "framing": "full-bleed", "cue": "now the", "marks": { "check": "anyone" } }
+  ]
+}

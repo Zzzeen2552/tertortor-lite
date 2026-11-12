@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="id" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      /*@brand*/ :root { --ground: #0B0B0F; --ink: #F5F3EE; --muted: #8A8A96; --accent: #FF7A2F; --alert: #FF4D3A; --card: #17171F; --paper: #ECE8DF; --on-accent: #0B0B0F; --font-display: "Outfit", sans-serif; --font-body: "Outfit", sans-serif; --font-caption: "Outfit", sans-serif; --font-mono: "JetBrains Mono", monospace; } :root { --font-num: "League Gothic", "Oswald", sans-serif; --line: rgba(245,243,238,.07); --floor: color-mix(in srgb, var(--accent) 32%, transparent); }
+.hf-head { margin: 0; font: 800 124px/0.98 var(--font-display); letter-spacing: -0.035em; color: var(--ink); }
+.hf-head .w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.04em 0.03em 0.1em; margin: -0.04em -0.03em -0.1em; }
+.hf-head .w > b { display: inline-block; font-weight: inherit; transform-origin: 0 100%; }
+.hf-head .w.k { padding-left: 0.1em; padding-right: 0.1em; margin-left: -0.1em; margin-right: -0.1em; }
+.hf-head .w.k > b { color: var(--accent); padding: 0 0.06em; margin: 0 -0.06em; background: linear-gradient(var(--accent), var(--accent)) no-repeat 0 60% / 0% 84%; }
+.hf-head.big { font: 400 360px/0.86 var(--font-num); letter-spacing: -0.005em; text-transform: uppercase; }
+.hf-kicker { display: inline-flex; align-items: center; gap: 18px; font: 700 38px/1 var(--font-body); color: var(--accent); letter-spacing: .1em; text-transform: uppercase; }
+.hf-kicker::before { content: ""; width: 44px; height: 8px; background: var(--accent); }
+/* layers: every beat sits in a world (hud / floor / wall / paper / spot), never on a bare fill */
+.hf-layer { position: absolute; inset: 0; overflow: hidden; }
+.hf-hud { background: radial-gradient(90% 60% at 50% 42%, #17171f 0%, var(--ground) 72%); }
+.hf-grid { position: absolute; inset: -180px; background: linear-gradient(var(--line) 2px, transparent 2px) 0 0 / 90px 90px, linear-gradient(90deg, var(--line) 2px, transparent 2px) 0 0 / 90px 90px; -webkit-mask-image: radial-gradient(70% 55% at 50% 45%, #000 30%, transparent 100%); mask-image: radial-gradient(70% 55% at 50% 45%, #000 30%, transparent 100%); }
+.hf-floor { position: absolute; left: -60%; right: -60%; top: 1020px; height: 1400px; background: linear-gradient(var(--floor) 3px, transparent 3px) 0 0 / 120px 120px, linear-gradient(90deg, var(--floor) 3px, transparent 3px) 0 0 / 120px 120px; transform: perspective(700px) rotateX(66deg); transform-origin: 50% 0; -webkit-mask-image: linear-gradient(transparent 0%, #000 35%); mask-image: linear-gradient(transparent 0%, #000 35%); }
+.hf-wall { position: absolute; left: -200px; right: -200px; top: 120px; font: 400 170px/0.92 var(--font-num); color: rgba(245,243,238,.06); text-transform: uppercase; white-space: nowrap; }
+.hf-wall > div { display: block; }
+.hf-wall .on { color: var(--accent); opacity: .9; }
+.hf-spot { position: absolute; left: 50%; top: -120px; width: 1100px; height: 1500px; margin-left: -550px; background: radial-gradient(60% 100% at 50% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 75%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); }
+.hf-paper { background: var(--paper); }
+.hf-paper .hf-head { color: var(--ground); }
+.hf-paper .hf-head .w.k > b { color: var(--on-accent); background-image: linear-gradient(var(--accent), var(--accent)); }
+.hf-form { position: absolute; left: 60px; right: 60px; top: 190px; bottom: 590px; border: 3px solid rgba(11,11,15,.85); background: repeating-linear-gradient(transparent 0 118px, rgba(11,11,15,.12) 118px 120px); }
+.hf-form > header { display: flex; justify-content: space-between; padding: 22px 28px; border-bottom: 3px solid rgba(11,11,15,.85); font: 600 28px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: rgba(11,11,15,.7); }
+/* HUD corners: hairline brackets + small mono labels (no digits: every number on screen must be spoken) */
+.hf-corners i { position: absolute; width: 46px; height: 46px; border: 0 solid rgba(245,243,238,.35); }
+.hf-corners i:nth-of-type(1) { left: 50px; top: 180px; border-width: 3px 0 0 3px; }
+.hf-corners i:nth-of-type(2) { right: 50px; top: 180px; border-width: 3px 3px 0 0; }
+.hf-corners i:nth-of-type(3) { left: 50px; top: 1280px; border-width: 0 0 3px 3px; }
+.hf-corners i:nth-of-type(4) { right: 150px; top: 1280px; border-width: 0 3px 3px 0; }
+.hf-corners span { position: absolute; font: 500 28px/1 var(--font-mono); color: rgba(245,243,238,.66); text-shadow: 0 2px 10px rgba(0,0,0,.7); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+.hf-corners span:nth-of-type(1) { left: 112px; top: 190px; }
+.hf-corners span:nth-of-type(2) { right: 112px; top: 190px; }
+.hf-corners span:nth-of-type(3) { left: 112px; top: 1290px; }
+.hf-corners span:nth-of-type(4) { right: 212px; top: 1290px; }
+.hf-corners .rec::before { content: ""; display: inline-block; width: 18px; height: 18px; margin-right: 14px; border-radius: 50%; background: var(--alert); vertical-align: 1px; }
+.hf-paper .hf-corners i { border-color: rgba(11,11,15,.5); }
+.hf-paper .hf-corners span { color: rgba(11,11,15,.62); text-shadow: none; }
+/* components (snippets in presets/hyperframe/blocks.html) */
+.hf-monitor { position: absolute; border: 3px solid rgba(245,243,238,.28); background: #000; overflow: hidden; }
+.hf-monitor video, .hf-monitor img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hf-monitor > .tag { position: absolute; left: 0; top: 0; padding: 10px 18px; background: var(--accent); color: var(--on-accent); font: 700 28px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+.hf-ring { position: absolute; }
+.hf-ring circle { fill: none; stroke-width: 7; }
+.hf-ring .track { stroke: rgba(245,243,238,.14); }
+.hf-ring .fill { stroke: var(--accent); stroke-linecap: butt; }
+.hf-ring .num { position: absolute; inset: 0; display: grid; place-items: center; font: 400 210px/1 var(--font-num); color: var(--ink); }
+.hf-bars { position: absolute; display: grid; gap: 34px; }
+.hf-bars .row { display: grid; grid-template-columns: 260px 1fr; align-items: center; gap: 28px; font: 700 40px/1 var(--font-body); color: var(--ink); }
+.hf-bars .bar { height: 34px; background: rgba(245,243,238,.1); }
+.hf-bars .bar > i { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; }
+.hf-check { position: absolute; margin: 0; padding: 0; list-style: none; display: grid; gap: 30px; font: 700 52px/1.1 var(--font-body); color: var(--ground); }
+.hf-check li { position: relative; display: flex; align-items: center; gap: 30px; }
+.hf-check li > u { flex: none; width: 56px; height: 56px; border: 5px solid var(--ground); display: grid; place-items: center; text-decoration: none; }
+.hf-check li > u > b { width: 26px; height: 26px; background: var(--ground); }
+.hf-check li > s { position: absolute; left: 80px; right: -10px; top: 52%; height: 7px; background: var(--alert); transform-origin: 0 50%; }
+.hf-term { position: absolute; padding: 34px 40px; border: 3px solid rgba(245,243,238,.2); background: rgba(23,23,31,.92); font: 500 60px/1.2 var(--font-mono); color: var(--ink); }
+.hf-term .p { color: var(--accent); margin-right: .5em; }
+.hf-term .c { display: inline-block; opacity: 0; }
+.hf-term .caret { display: inline-block; width: .55em; height: 1em; margin-left: .06em; vertical-align: -.12em; background: var(--accent); }
+.hf-path { position: absolute; overflow: visible; }
+.hf-path text { font: 800 64px var(--font-display); fill: var(--ink); letter-spacing: -0.02em; }
+.hf-path text .k { fill: var(--accent); }
+.hf-path .curve { fill: none; stroke: var(--accent); stroke-width: 3; opacity: .6; }
+/* phone demo: a believable device around a REAL screenshot or screen recording (never a drawn UI) */
+.hf-phone { position: absolute; width: 500px; height: 1030px; padding: 16px; border-radius: 84px; background: linear-gradient(145deg, #3a3a42 0%, #16161b 38%, #2b2b32 62%, #0e0e12 100%); box-shadow: inset 0 0 0 2px rgba(255,255,255,.14), inset 0 0 0 6px #050507, 0 50px 120px rgba(0,0,0,.75); transform-origin: 50% 50%; }
+.hf-phone::before { content: ""; position: absolute; left: -6px; top: 230px; width: 6px; height: 110px; border-radius: 3px 0 0 3px; background: #2a2a31; box-shadow: 0 140px 0 #2a2a31; }
+.hf-phone::after { content: ""; position: absolute; right: -6px; top: 300px; width: 6px; height: 160px; border-radius: 0 3px 3px 0; background: #2a2a31; }
+.hf-phone .screen { position: relative; width: 100%; height: 100%; border-radius: 68px; overflow: hidden; background: #000; }
+.hf-phone .screen > img, .hf-phone .screen > video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.hf-phone .island { position: absolute; left: 50%; top: 22px; width: 150px; height: 44px; margin-left: -75px; border-radius: 22px; background: #000; z-index: 2; }
+.hf-phone .glare { position: absolute; inset: 0; border-radius: 68px; background: linear-gradient(115deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 28%); pointer-events: none; z-index: 3; }
+/* callout: a crop of the SAME real screenshot lifted out of the phone (background-image + position = the row talked about) */
+.hf-callout { position: absolute; border-radius: 26px; background-repeat: no-repeat; box-shadow: 0 0 0 4px var(--accent), 0 30px 80px rgba(0,0,0,.7); }
+/* bento: feature cards around one idea (labels from the script, no invented claims) */
+.hf-bento { position: absolute; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.hf-bento > div { padding: 30px 32px; border-radius: 28px; background: var(--card); border: 2px solid rgba(245,243,238,.08); font: 700 38px/1.15 var(--font-body); color: var(--ink); }
+.hf-bento > div small { display: block; margin-bottom: 14px; font: 500 28px/1 var(--font-mono); color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.hf-bento > div.wide { grid-column: span 2; }
+.hf-bento > div.hot { background: var(--accent); color: var(--on-accent); }
+.hf-bento > div.hot small { color: var(--on-accent); opacity: .6; }/*@end*/
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--ground); }
+      #root { position: relative; width: 100%; height: 100%; font-family: var(--font-body); color: var(--ink); }
+      .clip { position: absolute; inset: 0; }
+      #captions { z-index: 50; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="12.833333333333334" data-width="1080" data-height="1920">
+      <!-- Beat hosts: one per beat in beats.json. tools/cues.mjs writes their data-start / data-duration. -->
+      <!--@beats-->
+      <div id="hook" class="clip" data-composition-id="hook" data-composition-src="compositions/hook.html" data-start="0" data-duration="2.5" data-track-index="0" data-track-kind="graphics" data-width="1080" data-height="1920"></div>
+      <div id="clock" class="clip" data-composition-id="clock" data-composition-src="compositions/clock.html" data-start="2.5" data-duration="2.2333333333333334" data-track-index="1" data-track-kind="graphics" data-width="1080" data-height="1920"></div>
+      <div id="fix" class="clip" data-composition-id="fix" data-composition-src="compositions/fix.html" data-start="4.733333333333333" data-duration="3.2666666666666666" data-track-index="0" data-track-kind="graphics" data-width="1080" data-height="1920"></div>
+      <div id="safe" class="clip" data-composition-id="safe" data-composition-src="compositions/safe.html" data-start="8" data-duration="4.833333333333333" data-track-index="1" data-track-kind="graphics" data-width="1080" data-height="1920"></div>
+      <!--@beats-end-->
+
+      <div id="captions" class="clip" data-composition-id="captions" data-composition-src="compositions/captions.html"
+        data-start="0" data-duration="12.833333333333334" data-track-index="9" data-track-kind="captions" data-width="1080" data-height="1920"></div>
+
+      <!--@sfx-->
+      <audio id="sfx-0" src="assets/sfx/hit.wav" data-start="1.120" data-duration="0.600" data-volume="0.32" data-track-index="11"></audio>
+      <audio id="sfx-1" src="assets/sfx/whoosh.wav" data-start="2.240" data-duration="0.420" data-volume="0.18" data-track-index="12"></audio>
+      <audio id="sfx-2" src="assets/sfx/hit.wav" data-start="3.440" data-duration="0.600" data-volume="0.32" data-track-index="11"></audio>
+      <audio id="sfx-3" src="assets/sfx/whoosh.wav" data-start="4.473" data-duration="0.420" data-volume="0.18" data-track-index="12"></audio>
+      <audio id="sfx-4" src="assets/sfx/tick.wav" data-start="5.760" data-duration="0.080" data-volume="0.22" data-track-index="11"></audio>
+      <audio id="sfx-5" src="assets/sfx/whoosh.wav" data-start="7.040" data-duration="0.420" data-volume="0.18" data-track-index="12"></audio>
+      <audio id="sfx-6" src="assets/sfx/whoosh.wav" data-start="7.740" data-duration="0.420" data-volume="0.18" data-track-index="11"></audio>
+      <audio id="sfx-7" src="assets/sfx/pop.wav" data-start="9.520" data-duration="0.180" data-volume="0.25" data-track-index="12"></audio>
+      <!--@sfx-end-->
+
+      <audio id="voice" src="assets/voice.wav" data-start="0" data-duration="12.4" data-track-index="10"></audio>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

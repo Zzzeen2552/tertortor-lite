@@ -1,0 +1,76 @@
+<template>
+  <!-- register: type  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- World: HUD (drifting grid + corner brackets). Short heroes (<= 10 characters) or any digit switch to League Gothic 360 px
+       and get a word wall of the hero behind them; mark "slam" lights one word in the wall and hits the key word (<em>, else
+       the last) with the yellow box. Corner labels are yours to rewrite per video (no digits). -->
+  <style>
+    #root { position: absolute; inset: 0; background: var(--ground); overflow: hidden; }
+    #__ID__-cam, #__ID__-punch { position: absolute; inset: 0; transform-origin: 50% 45%; }
+    #__ID__-kicker { position: absolute; left: 90px; right: 90px; top: 560px; }
+    #__ID__-line { position: absolute; left: 90px; right: 90px; top: 630px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="hf-layer hf-hud">
+      <div id="__ID__-grid" class="hf-grid" data-layout-allow-overflow></div>
+      <div id="__ID__-wall" class="hf-wall" data-layout-allow-overflow></div>
+    </div>
+    <div id="__ID__-cam">
+      <div id="__ID__-punch">
+        <div id="__ID__-kicker" class="hf-kicker" data-safe="text" style="top:560px">__JOB__</div>
+        <h1 id="__ID__-line" class="hf-head" data-safe="text" style="top:630px">__HERO__</h1>
+      </div>
+    </div>
+    <div id="__ID__-corners" class="hf-layer hf-corners"><i></i><i></i><i></i><i></i><span>Hyperframe</span><span class="rec">Live</span><span>Scene</span><span>▮▮▮▯</span></div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/; // beat-local seconds from beats.json marks, written by tools/cues.mjs
+    const css = getComputedStyle(document.documentElement), ACC = css.getPropertyValue("--accent").trim() || "#FFD23F", ON = css.getPropertyValue("--on-accent").trim() || "#0B0B0F"; // the video's colour tone
+    // word spans: <span class="w" data-layout-allow-overflow><b>word</b></span>; the .w clips, the <b> slides. <em> becomes the key word (.k).
+    function split(sel, autoBig) {
+      const el = document.querySelector(sel);
+      if (!el || el.dataset.split) return el;
+      el.dataset.split = "1";
+      if (autoBig && (el.textContent.trim().length <= 10 || /\d/.test(el.textContent))) el.classList.add("big");
+      const out = [];
+      for (const n of [...el.childNodes]) {
+        if (n.nodeType === 3) for (const w of n.textContent.split(/\s+/).filter(Boolean)) out.push(`<span class="w" data-layout-allow-overflow><b>${w}</b></span>`);
+        else if (n.nodeType === 1) out.push(`<span class="w${n.tagName === "EM" ? " k" : ""}" data-layout-allow-overflow><b>${n.innerHTML}</b></span>`);
+      }
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+      return el;
+    }
+    const line = split("#__ID__-line", true);
+    const n = line ? line.querySelectorAll(".w").length : 1;
+    const big = !!line?.classList.contains("big");
+    // word wall: 8 rows of the hero repeated, one word in the middle row lights up at the mark (built once, deterministic)
+    const wall = document.querySelector("#__ID__-wall");
+    if (wall && big && !wall.children.length) {
+      const word = line.textContent.trim().split(/\s+/).pop();
+      let h = "";
+      for (let r = 0; r < 8; r++) h += `<div class="row">${Array.from({ length: 6 }, (_, c) => `<span${r === 4 && c === 2 ? ' class="hit"' : ""}>${word} </span>`).join("")}</div>`;
+      wall.innerHTML = h;
+    }
+    const slam = C.slam ?? Math.min(0.7, C.dur * 0.4);
+    // FIRST = true on the video's first beat: the hero is already on screen at frame 0 (thumbnail), the mark carries the motion
+    const FIRST = false;
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#__ID__-grid", { y: 0 }, { y: -90, duration: C.dur, ease: "none" }, 0);
+    if (big) {
+      tl.fromTo("#__ID__-wall .row:nth-child(odd)", { x: 0 }, { x: -140, duration: C.dur, ease: "none" }, 0);
+      tl.fromTo("#__ID__-wall .row:nth-child(even)", { x: -140 }, { x: 0, duration: C.dur, ease: "none" }, 0);
+      tl.fromTo("#__ID__-wall .hit", { color: "rgba(245,243,238,0.06)" }, { color: ACC, duration: 0.12, ease: "none", immediateRender: false }, slam);
+    }
+    if (!FIRST) tl.fromTo("#__ID__-corners", { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" }, 0);
+    tl.fromTo("#__ID__-kicker", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.3, ease: "power4.out" }, 0);
+    // hero readable within 0.3 s: the last word starts by 0.25 s
+    if (!FIRST) tl.fromTo("#__ID__-line .w > b", { yPercent: 115, rotate: 8 }, { yPercent: 0, rotate: 0, duration: 0.38, ease: "power4.out", stagger: Math.min(0.05, 0.22 / Math.max(1, n - 1)) }, 0.03);
+    tl.fromTo("#__ID__-line .k > b", { backgroundSize: "0% 84%", color: ACC }, { backgroundSize: "100% 84%", color: ON, duration: 0.3, ease: "power4.out", immediateRender: false }, slam);
+    // punch the clip box itself, so the scaled word is never cut by its own mask
+    tl.fromTo("#__ID__-line .k", { scale: 1.22 }, { scale: 1, duration: 0.3, ease: "power4.out", immediateRender: false }, slam);
+    tl.fromTo("#__ID__-punch", { scale: 1 }, { scale: 1.045, duration: 0.08, ease: "power2.out" }, slam);
+    tl.fromTo("#__ID__-punch", { scale: 1.045 }, { scale: 1.015, duration: 0.4, ease: "power3.out", immediateRender: false }, slam + 0.08);
+    tl.fromTo("#__ID__-cam", { scale: 1, x: 0 }, { scale: 1.05, x: -20, duration: C.dur, ease: "none" }, 0);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

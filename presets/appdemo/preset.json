@@ -1,0 +1,40 @@
+{
+  "id": "appdemo",
+  "type": "advertisement",
+  "label": "App Demo",
+  "description": "Khusus Advertisement (bukan pilihan explainer): demo aplikasi tanpa narasi dari screenshot UI asli. Headline serif diketik dengan kata miring beraksen, ponsel, potongan UI melayang keluar, kartu bertumpuk, daftar manfaat, logo penutup. Warna shade biru BRI. Resep di advertisement/appdemo/style.md.",
+  "colors": {
+    "ground": "#F4F8FE",
+    "ink": "#0E2148",
+    "muted": "#5B6B88",
+    "accent": "#1F5BC6",
+    "alert": "#D92D20",
+    "card": "#FFFFFF",
+    "deep": "#0B3D91",
+    "sky": "#D6E5FB",
+    "haze": "#B9D1F4",
+    "mist": "#E9F1FD",
+    "bezel": "#0E1A33"
+  },
+  "tones": [
+    { "label": "Biru BRI", "accent": "#1F5BC6" },
+    { "label": "Navy BRI", "accent": "#0B3D91" },
+    { "label": "Biru langit", "accent": "#2E7BE6" }
+  ],
+  "fonts": {
+    "display": "Lora",
+    "body": "Inter",
+    "caption": "Inter",
+    "mono": "JetBrains Mono"
+  },
+  "fontFaces": [
+    { "family": "Lora", "src": "assets/fonts/lora-latin-400-normal.woff2", "weight": "400", "style": "normal" },
+    { "family": "Lora", "src": "assets/fonts/lora-latin-500-normal.woff2", "weight": "500", "style": "normal" },
+    { "family": "Lora", "src": "assets/fonts/lora-latin-600-normal.woff2", "weight": "600", "style": "normal" },
+    { "family": "Lora", "src": "assets/fonts/lora-latin-500-italic.woff2", "weight": "500", "style": "italic" },
+    { "family": "Lora", "src": "assets/fonts/lora-latin-600-italic.woff2", "weight": "600", "style": "italic" }
+  ],
+  "captions": { "y": 1180, "size": 58, "weight": 600, "maxWords": 3, "uppercase": false, "color": "#0E2148", "activeColor": "#FFFFFF", "activeBg": "#1F5BC6", "pill": "rgba(255,255,255,0.94)", "radius": 18, "textShadow": "none", "enabled": false },
+  "css": "",
+  "music": { "bpm": 96, "key": "D", "mode": "major", "prog": [1, 6, 4, 5], "lead": "epiano", "bass": "sub", "pad": "warmpad", "drums": "lofi", "density": 0.28, "gain": 0.9 }
+}

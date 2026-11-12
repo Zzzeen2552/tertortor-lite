@@ -1,0 +1,169 @@
+{
+  "book": {
+    "id": "merk-paling-nasionalis-dari-potong-nama",
+    "title": "Merk Paling Nasionalis Dari Potong Nama",
+    "author": "Tokoh Indonesia",
+    "channel": "berakitkehulu",
+    "kind": "link",
+    "url": "https://tokoh.id/publikasi/wawancara/nasionalisme-konglomerat-alim-markus/",
+    "file": "",
+    "pages": 7,
+    "chars": 15033,
+    "project": "merk-paling-nasionalis-dari-potong-nama"
+  },
+  "chunks": {
+    "1-7": {
+      "at": "2026-11-10T22:46:32.479Z",
+      "found": 6,
+      "by": "gemini gemini-3.8-flash"
+    }
+  },
+  "stories": [
+    {
+      "title": "Semangat Nasionalisme Alim Markus: 'Cintailah Produk-Produk Indonesia'",
+      "pages": [
+        1,
+        1
+      ],
+      "partial": false,
+      "summary": "Alim Markus, pendiri Maspion, memandang slogan 'Cintailah Produk-Produk Indonesia' sebagai cerminan nasionalisme yang harus dibangkitkan. Setiap 17 Agustus, ia rutin menjadi inspektur upacara untuk ribuan karyawan Maspion, menekankan bahwa bekerja di Maspion berarti membangun Indonesia. Baginya, jika produk lokal tidak bisa bersaing dengan produk impor, Indonesia belum merdeka dan masih terjajah, sehingga ia ingin membangkitkan semangat kemandirian ekonomi.",
+      "arc": {
+        "pembuka": "Alim Markus, pria kelahiran Surabaya, dikenal dengan slogan 'Cintailah Produk-Produk Indonesia' yang menjadi cermin semangat nasionalismenya.",
+        "konflik": "Ia merasa bahwa jika barang-barang produksi Indonesia tidak mampu bersaing dengan produk impor, maka bangsa ini belum sepenuhnya merdeka dan masih terjajah secara ekonomi.",
+        "titikBalik": "Keyakinan ini mendorongnya untuk secara rutin menjadi inspektur upacara setiap 17 Agustus di kompleks Maspion, di hadapan ribuan karyawan. Ia menggunakan momen ini untuk menanamkan bahwa bekerja di Maspion bukan hanya untuk perusahaan, melainkan untuk membangun negara Indonesia.",
+        "emosi": "Inspiratif, patriotik.",
+        "pelajaran": "Nasionalisme tidak hanya tentang bendera, tetapi juga tentang kemandirian ekonomi dan kekuatan produk dalam negeri. Kepemimpinan yang menanamkan nilai-nilai luhur kepada karyawan."
+      },
+      "figures": [
+        {
+          "name": "Alim Markus"
+        }
+      ],
+      "brand": "Maspion",
+      "place": "Surabaya (implied)",
+      "era": "Sejak era Orde Baru (implied)",
+      "quotes": [],
+      "emotion": 4,
+      "visual": 4,
+      "clarity": 5,
+      "estSeconds": 70,
+      "notes": "",
+      "pagesCheck": {
+        "how": "belum",
+        "shift": 0,
+        "at": "2026-11-10"
+      },
+      "chunk": "1-7",
+      "status": "dipakai",
+      "project": "merk-paling-nasionalis-dari-potong-nama",
+      "parts": 1,
+      "score": 4.3,
+      "id": "k001"
+    },
+    {
+      "title": "Dari Maspioneer Menjadi Maspion: Sebuah Kisah Nama Hoki",
+      "pages": [
+        2,
+        2
+      ],
+      "partial": false,
+      "summary": "Nama 'Maspion' berasal dari 'Maspioneer'. Sekitar 41 tahun lalu, Panji Witjaksana dari perusahaan Pioneer mengajukan komplain karena kemiripan nama. Alim Markus memutuskan untuk memotong nama tersebut, menyisakan 'Maspion'. Perubahan ini ternyata membawa hoki, lebih mudah diucapkan, dan bahkan diplesetkan menjadi 'Mengajak Anda Selalu Percaya Industri Olahan Nasional' atau 'Master Champion'.",
+      "arc": {
+        "pembuka": "Awalnya, perusahaan Alim Markus bernama Maspioneer, sebuah nama yang mungkin terdengar gagah.",
+        "konflik": "Sekitar 41 tahun lalu, Panji Witjaksana dari perusahaan Pioneer mengajukan komplain, merasa nama 'Maspioneer' terlalu mirip dengan nama perusahaannya.",
+        "titikBalik": "Menanggapi komplain tersebut, Alim Markus memutuskan untuk memotong nama perusahaannya, menyisakan 'Maspion'.",
+        "emosi": "Humoris, ringan.",
+        "pelajaran": "Terkadang, kesederhanaan dan adaptasi bisa membawa keberuntungan tak terduga dalam branding. Pentingnya menanggapi masukan atau potensi konflik dengan bijak."
+      },
+      "figures": [
+        {
+          "name": "Alim Markus"
+        },
+        {
+          "name": "Panji Witjaksana"
+        }
+      ],
+      "brand": "Maspion",
+      "place": "",
+      "era": "Sekitar 41 tahun lalu (dari 2007)",
+      "quotes": [
+        {
+          "text": "Pak Alim, nama perusahaan saya Pioneer, sementara perusahaan Anda adalah Maspioneer. Ini tidak baik.",
+          "who": "Panji Witjaksana",
+          "page": 2,
+          "verified": true
+        }
+      ],
+      "emotion": 3,
+      "visual": 3,
+      "clarity": 5,
+      "estSeconds": 60,
+      "notes": "",
+      "pagesCheck": {
+        "how": "kutipan",
+        "shift": 0,
+        "at": "2026-11-10"
+      },
+      "chunk": "1-7",
+      "status": "dipakai",
+      "project": "merk-paling-nasionalis-dari-potong-nama",
+      "parts": 1,
+      "score": 3.7,
+      "id": "k002"
+    },
+    {
+      "title": "Pengorbanan Alim Markus: Berhenti Sekolah demi Usaha Keluarga",
+      "pages": [
+        5,
+        6
+      ],
+      "partial": false,
+      "summary": "Alim Markus, anak tertua dari pendiri UD Logam Jawa (cikal bakal Grup Maspion), memilih berhenti sekolah ketika SMP demi membantu usaha orang tuanya. Keputusan ini menunjukkan dedikasinya pada bisnis keluarga sejak usia muda, yang kemudian membawanya menjadi Presdir Grup Maspion sejak 1971 dan membesarkan perusahaan bersama adik-adiknya.",
+      "arc": {
+        "pembuka": "Alim Markus adalah anak tertua dari pasangan pendiri UD Logam Jawa, cikal bakal Grup Maspion.",
+        "konflik": "Di usia SMP, ia dihadapkan pada pilihan antara melanjutkan pendidikan atau membantu usaha orang tuanya yang baru dirintis.",
+        "titikBalik": "Ia memilih untuk berhenti sekolah, meyakini bahwa 'basic knowledge-nya sudah cukup' dan pengetahuan tidak harus selalu didapat dari sekolah. Keputusan ini memungkinkan ia mencurahkan pikiran dan tenaganya untuk mengembangkan perusahaan keluarga.",
+        "emosi": "Inspiratif, pengorbanan.",
+        "pelajaran": "Dedikasi terhadap keluarga dan usaha, pentingnya pembelajaran praktis, dan keberanian mengambil jalur non-konvensional untuk mencapai kesuksesan."
+      },
+      "figures": [
+        {
+          "name": "Alim Markus"
+        },
+        {
+          "name": "Alim Husin"
+        },
+        {
+          "name": "Angkasa Rachmawati"
+        }
+      ],
+      "brand": "Maspion",
+      "place": "",
+      "era": "Awal 1960-an (implied)",
+      "quotes": [
+        {
+          "text": "Saya sekolah SMP, tidak mau melanjutkan karena bagi saya basic knowledge-nya sudah cukup. Untuk mendapatkan pengetahuan, tidak perlu dari sekolah.",
+          "who": "Alim Markus",
+          "page": 6,
+          "verified": true
+        }
+      ],
+      "emotion": 4,
+      "visual": 4,
+      "clarity": 5,
+      "estSeconds": 60,
+      "notes": "Kutipan mengenai alasan berhenti sekolah berada di halaman P6, namun konteks peristiwa terjadi di P5.",
+      "pagesCheck": {
+        "how": "kutipan",
+        "shift": 0,
+        "at": "2026-11-10"
+      },
+      "chunk": "1-7",
+      "status": "dipakai",
+      "project": "merk-paling-nasionalis-dari-potong-nama",
+      "parts": 1,
+      "score": 4.3,
+      "id": "k003"
+    }
+  ]
+}

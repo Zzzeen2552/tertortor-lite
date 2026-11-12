@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "studio-lite", "runtimeExecutable": "node", "runtimeArgs": ["tools/studio/server.mjs"], "port": 4331 }
+  ]
+}

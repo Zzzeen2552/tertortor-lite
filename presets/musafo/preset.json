@@ -1,0 +1,50 @@
+{
+  "id": "musafo",
+  "type": "musafo",
+  "label": "Musafo",
+  "description": "Khusus proyek Musafo (bukan pilihan untuk explainer): ilustrasi 3D golden hour, caption Indonesia putih + terjemahan Inggris kuning.",
+  "colors": {
+    "ground": "#0D1416",
+    "ink": "#FFFFFF",
+    "muted": "#9FB3B8",
+    "accent": "#F2C14E",
+    "alert": "#E07A5F",
+    "card": "#1C2A2E"
+  },
+  "fonts": {
+    "display": "Montserrat",
+    "body": "Inter",
+    "caption": "Montserrat",
+    "mono": "JetBrains Mono"
+  },
+  "captions": {
+    "y": 1130,
+    "bottom": 1480,
+    "shadow": "0 2px 6px rgba(0,0,0,.85)",
+    "size": 46,
+    "weight": 700,
+    "enSize": 32,
+    "color": "#FFFFFF",
+    "enColor": "#3FD0C9",
+    "pill": "rgba(8,12,14,0.35)",
+    "radius": 6,
+    "maxWords": 9,
+    "arabicFont": "\"Musafo Arabic\", serif"
+  },
+  "css": "",
+  "fontFaces": [
+    {
+      "family": "Musafo Arabic",
+      "src": "local('Segoe UI')",
+      "weight": "normal"
+    },
+    {
+      "family": "Musafo Arabic",
+      "src": "local('Segoe UI Bold')",
+      "weight": "bold"
+    }
+  ],
+  "sfx": {
+    "enabled": false
+  }
+}

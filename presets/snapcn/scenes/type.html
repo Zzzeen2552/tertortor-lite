@@ -1,0 +1,71 @@
+<template>
+  <!-- register: type  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Whips in from the side with motion blur, words fly in blurred, mark "slam" sweeps the highlighter and punches the camera.
+       One or two words (<= 14 characters) = WORD mode: one giant word, a trailing "." turns into an accent dot.
+       FLIP = true: the whole frame in the accent colour (one or two beats per video, on a drop). DIR = 1 / -1 sets the whip side. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-page { position: absolute; inset: 0; transform-origin: 50% 45%; }
+    #__ID__-punch { transform-origin: 50% 45%; }
+    #__ID__-kicker { position: absolute; left: 90px; right: 90px; top: 560px; display: flex; justify-content: center; }
+    #__ID__-line { position: absolute; left: 90px; right: 90px; top: 670px; text-align: center; }
+    #__ID__-line.word { top: 640px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-page" class="snap-page">
+      <div id="__ID__-whip" class="snap-whip">
+        <div id="__ID__-punch" class="snap-whip">
+          <div id="__ID__-kicker" data-safe="text" style="top:560px"><span id="__ID__-chip" class="snap-chip"><i></i>__JOB__</span></div>
+          <h1 id="__ID__-line" class="snap-head" data-safe="text" style="top:670px">__HERO__</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/; // beat-local seconds from beats.json marks, written by tools/cues.mjs
+    // FIRST = true on the video's first beat: everything is already on screen at frame 0 (thumbnail)
+    const FIRST = false;
+    const FLIP = false;
+    const DIR = 1;
+    const line = document.querySelector("#__ID__-line");
+    if (line && !line.dataset.split) {
+      line.dataset.split = "1";
+      const text = line.textContent.trim();
+      const word = text.split(/\s+/).length <= 2 && text.length <= 14;
+      if (word) {
+        line.classList.add("word");
+        // giant, but the longest word must fit 900 px of Poppins 600 (about 0.62 em per character)
+        const longest = Math.max(...text.split(/\s+/).map((w) => w.length));
+        line.style.fontSize = `${Math.min(236, Math.floor(1450 / longest))}px`;
+      }
+      // word spans (text nodes word by word, <em> kept whole); a trailing "." becomes the accent dot
+      const out = [];
+      for (const n of [...line.childNodes]) {
+        if (n.nodeType === 3) for (const w of n.textContent.split(/\s+/).filter(Boolean)) out.push(`<span class="w">${w.replace(/\.$/, '<span class="dot">.</span>')}</span>`);
+        else if (n.nodeType === 1) out.push(`<span class="w">${n.outerHTML}</span>`);
+      }
+      line.innerHTML = out.join(" ");
+      const key = line.querySelector("em")?.closest(".w") ?? line.querySelector(".w:last-child");
+      if (key) key.classList.add("snap-hl");
+    }
+    if (FLIP) document.querySelector("#__ID__-page")?.classList.add("flip");
+    const isWord = !!line?.classList.contains("word");
+    const words = line ? line.querySelectorAll(".w").length : 1;
+    const each = Math.min(0.06, 0.24 / Math.max(1, words - 1)); // last word up before 0.35 s
+    const slam = C.slam ?? Math.min(0.6, C.dur * 0.4);
+    const tl = gsap.timeline({ paused: true });
+    if (!FIRST) {
+      tl.fromTo("#__ID__-whip", { x: 300 * DIR, filter: "blur(18px)" }, { x: 0, filter: "blur(0px)", duration: 0.32, ease: "expo.out" }, 0);
+      tl.fromTo("#__ID__-chip", { clipPath: "inset(0 100% 0 0 round 999px)" }, { clipPath: "inset(0 0% 0 0 round 999px)", duration: 0.4, ease: "expo.out" }, 0.06);
+      tl.fromTo("#__ID__-line .w", isWord ? { opacity: 0, x: 120 * DIR, scale: 1.1, filter: "blur(20px)" } : { opacity: 0, y: 30, filter: "blur(10px)" },
+        { opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)", duration: isWord ? 0.42 : 0.45, ease: "expo.out", stagger: each }, 0.03);
+    }
+    if (line?.querySelector(".dot")) tl.fromTo("#__ID__-line .dot", { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(3)", transformOrigin: "50% 80%" }, FIRST ? 0 : 0.28);
+    tl.fromTo("#__ID__-line .snap-hl", { backgroundSize: "0% 0.36em" }, { backgroundSize: "100% 0.36em", duration: 0.35, ease: "expo.out" }, slam);
+    // punch on the hit, then settle; the page keeps drifting closer the whole beat
+    tl.fromTo("#__ID__-punch", { scale: 1 }, { scale: 1.07, duration: 0.07, ease: "power2.out" }, slam);
+    tl.fromTo("#__ID__-punch", { scale: 1.07 }, { scale: 1.02, duration: 0.4, ease: "expo.out", immediateRender: false }, slam + 0.07);
+    tl.fromTo("#__ID__-page", { scale: 1 }, { scale: 1.06, duration: C.dur, ease: "none" }, 0);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

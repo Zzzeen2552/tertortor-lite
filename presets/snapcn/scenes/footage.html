@@ -1,0 +1,40 @@
+<template>
+  <!-- register: footage (generated photoreal shot: assets/footage/__ID__.mp4, 768p, <=10 s, muted)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Text never sits straight on the video: it lives in the white card. Mark "slam" sweeps the highlighter in the card. -->
+  <style>
+    #root { position: absolute; inset: 0; background: var(--night); overflow: hidden; }
+    #__ID__-media { position: absolute; inset: 0; }
+    #__ID__-clip { width: 100%; height: 100%; object-fit: cover; }
+    #__ID__-placeholder { position: absolute; inset: 0; display: grid; place-items: center; font: 500 34px var(--font-mono); color: #666; background: linear-gradient(#1d1d21, #0a0a0b); }
+    #__ID__-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(250,249,246,.5) 0%, rgba(250,249,246,0) 34%, rgba(0,0,0,0) 62%, rgba(0,0,0,.35) 100%); }
+    #__ID__-card { position: absolute; left: 90px; right: 90px; top: 250px; padding: 40px 48px 48px; display: flex; flex-direction: column; align-items: flex-start; gap: 26px; }
+    #__ID__-head { font-size: 88px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-whip" class="snap-whip">
+    <div id="__ID__-media">
+      <!-- Replace the placeholder with: <video id="__ID__-clip" src="assets/footage/__ID__.mp4" data-start="0" data-duration="(beat seconds)" muted playsinline> -->
+      <div id="__ID__-placeholder">FOOTAGE</div>
+    </div>
+    <div id="__ID__-scrim"></div>
+    <div id="__ID__-card" class="snap-card" data-safe="text" style="top:250px">
+      <span id="__ID__-chip" class="snap-chip"><i></i>__JOB__</span>
+      <div id="__ID__-head" class="snap-head"><span class="snap-hl">__HERO__</span></div>
+    </div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    // FIRST = true on the video's first beat: the card is already on screen at frame 0 (thumbnail)
+    const FIRST = false;
+    // DIR = 1 / -1: the side the scene whips in from (alternate it between beats)
+    const DIR = 1;
+    const tl = gsap.timeline({ paused: true });
+    if (typeof FIRST === "undefined" || !FIRST) tl.fromTo("#__ID__-whip", { x: 300 * DIR, filter: "blur(18px)" }, { x: 0, filter: "blur(0px)", duration: 0.32, ease: "expo.out" }, 0);
+    tl.fromTo("#__ID__-media", { scale: 1.06 }, { scale: 1, duration: C.dur, ease: "none" }, 0);
+    if (!FIRST) tl.fromTo("#__ID__-card", { opacity: 0, y: 50, scale: 0.94, filter: "blur(10px)" }, { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.55, ease: "expo.out" }, 0.04);
+    tl.fromTo("#__ID__-chip", { clipPath: "inset(0 100% 0 0 round 999px)" }, { clipPath: "inset(0 0% 0 0 round 999px)", duration: 0.45, ease: "expo.out" }, 0.12);
+    tl.fromTo("#__ID__-head .snap-hl", { backgroundSize: "0% 0.36em" }, { backgroundSize: "100% 0.36em", duration: 0.45, ease: "expo.out" }, C.slam ?? Math.min(0.7, C.dur * 0.4));
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

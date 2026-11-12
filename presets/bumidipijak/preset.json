@@ -1,0 +1,66 @@
+{
+  "id": "bumidipijak",
+  "type": "bumidipijak",
+  "label": "BumiDiPijak",
+  "description": "Khusus proyek BumiDiPijak (bukan pilihan untuk explainer): lukisan minyak gelap berkabut (standar sejak 2026-11-08), caption Indonesia putih + terjemahan Inggris terakota muda.",
+  "colors": {
+    "ground": "#1F1B17",
+    "ink": "#FFFFFF",
+    "muted": "#C9BBA6",
+    "accent": "#D9895F",
+    "alert": "#B5543A",
+    "card": "#2E2822",
+    "paper": "#D8C8AE",
+    "sage": "#8E9C80"
+  },
+  "fonts": {
+    "display": "Merriweather",
+    "body": "Merriweather",
+    "caption": "Merriweather",
+    "mono": "JetBrains Mono"
+  },
+  "captions": {
+    "y": 1130,
+    "bottom": 1480,
+    "shadow": "0 2px 6px rgba(0,0,0,.85)",
+    "size": 46,
+    "weight": 700,
+    "enSize": 32,
+    "color": "#FFFFFF",
+    "enColor": "#F2B48C",
+    "pill": "rgba(20,16,12,0.45)",
+    "radius": 6,
+    "maxWords": 9,
+    "arabicFont": "serif"
+  },
+  "css": "",
+  "sfx": {
+    "enabled": false
+  },
+  "fontFaces": [
+    {
+      "family": "Merriweather",
+      "src": "assets/fonts/merriweather-latin-400-normal.woff2",
+      "weight": "400",
+      "style": "normal"
+    },
+    {
+      "family": "Merriweather",
+      "src": "assets/fonts/merriweather-latin-700-normal.woff2",
+      "weight": "700",
+      "style": "normal"
+    },
+    {
+      "family": "Merriweather",
+      "src": "assets/fonts/merriweather-latin-400-italic.woff2",
+      "weight": "400",
+      "style": "italic"
+    },
+    {
+      "family": "Merriweather",
+      "src": "assets/fonts/merriweather-latin-700-italic.woff2",
+      "weight": "700",
+      "style": "italic"
+    }
+  ]
+}

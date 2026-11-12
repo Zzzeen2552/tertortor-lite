@@ -1,0 +1,14 @@
+[
+  {
+    "id": "berakitkehulu",
+    "label": "Berakit ke Hulu",
+    "type": "berakitkehulu"
+  },
+  {
+    "id": "bumidipijak",
+    "label": "BumiDiPijak",
+    "type": "bumidipijak",
+    "description": "Kisah sejarah dan legenda Jawa dari Babad Tanah Jawa: alur Musafo, gambar arang-pastel di kertas cokelat muda.",
+    "order": "page"
+  }
+]

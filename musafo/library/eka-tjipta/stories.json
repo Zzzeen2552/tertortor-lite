@@ -1,0 +1,281 @@
+{
+  "book": {
+    "id": "eka-tjipta",
+    "title": "Eka Tjipta",
+    "author": "disway.id",
+    "channel": "berakitkehulu",
+    "kind": "link",
+    "url": "https://disway.id/catatan-harian-dahlan/1786/eka-tjipta",
+    "file": "",
+    "pages": 10,
+    "chars": 22524,
+    "project": "eka-tjipta"
+  },
+  "chunks": {
+    "1-10": {
+      "at": "2026-11-05T08:12:59.730Z",
+      "found": 12,
+      "by": "gemini gemini-3.8-flash"
+    }
+  },
+  "stories": [
+    {
+      "title": "Franky dan bakti sosial: tetap angkat karung",
+      "pages": [
+        1,
+        1
+      ],
+      "partial": false,
+      "summary": "Penulis beberapa kali bertemu Franky Wijaya, anak Eka yang mengendalikan grup usaha, dalam kegiatan bakti sosial Tzu Chi. Meski sudah menjadi konglomerat, Franky tetap ikut mengangkat karung saat kegiatan. Kegiatan itu banyak dilakukan di daerah miskin, dan pusat Tzu Chi ada di Hualien, Taiwan, tempat Franky juga pernah dikunjungi penulis.",
+      "arc": {
+        "pembuka": "Penulis bertemu Franky dalam kegiatan bakti sosial Tzu Chi.",
+        "konflik": "Tidak ada konflik besar; kisahnya tentang kontras antara status konglomerat dan kerja fisik sederhana.",
+        "titikBalik": "Franky tetap mengangkat karung saat bakti sosial.",
+        "emosi": "Hangat dan sederhana.",
+        "pelajaran": "Kerendahan hati pewaris usaha besar bisa terlihat dari kerja nyata di lapangan."
+      },
+      "figures": [
+        {
+          "name": "Franky Wijaya"
+        }
+      ],
+      "brand": "Sinar Mas",
+      "place": "Indonesia (bakti sosial di daerah miskin); Hualien, Taiwan",
+      "era": "Tidak disebut",
+      "quotes": [],
+      "emotion": 2,
+      "visual": 3,
+      "clarity": 2,
+      "estSeconds": 35,
+      "notes": "Ini kisah tentang anak pendiri, bukan pendiri sendiri, dan minim kejadian; kandidat cadangan. Deskripsi tentang Tzu Chi adalah tuturan penulis dan tidak diverifikasi di teks.",
+      "chunk": "1-10",
+      "parts": 1,
+      "score": 2.3,
+      "status": "baru",
+      "id": "k001",
+      "pagesCheck": {
+        "how": "belum",
+        "shift": 0,
+        "at": "2026-11-09"
+      }
+    },
+    {
+      "title": "Anak 12 tahun yang menolak kelas satu",
+      "pages": [
+        2,
+        2
+      ],
+      "partial": false,
+      "summary": "Saat berumur 12 tahun, Eka diminta sekolah di sekolah Tionghoa Makassar, tetapi kemampuannya tertinggal sehingga harus mulai dari kelas satu. Ia menolak dan memohon agar langsung masuk kelas tiga, bahkan memegangi dan mencium kaki kepala sekolah. Kepala sekolah iba, tetapi guru berhitung jengkel karena Eka selalu memulai hitungan dari kali. Teks ini memuat adegan hukuman fisik oleh guru yang diceritakan sebagai anekdot.",
+      "arc": {
+        "pembuka": "Eka yang berumur 12 tahun bersikeras tidak mau masuk kelas satu di sekolah barunya.",
+        "konflik": "Kemampuannya tertinggal, sementara ia malu sekelas dengan anak berumur 7 tahun dan guru berhitung menolak caranya berhitung.",
+        "titikBalik": "Kepala sekolah iba dan memasukkannya ke kelas tiga, meski bahasa Mandarinnya belum bisa.",
+        "emosi": "Campuran rasa malu, nekat, dan lucu, dengan adegan yang tegang saat dihukum guru.",
+        "pelajaran": "Keberanian memohon dan kegigihan bisa membuka pintu, meski jalannya tidak mudah."
+      },
+      "figures": [
+        {
+          "name": "Eka Tjipta Widjaja"
+        },
+        {
+          "name": "Kepala sekolah (tidak disebut namanya)"
+        },
+        {
+          "name": "Guru berhitung (tidak disebut namanya)"
+        }
+      ],
+      "brand": "",
+      "place": "Sekolah Tionghoa Makassar",
+      "era": "Eka berumur 12 tahun (tahun tidak disebut)",
+      "quotes": [
+        {
+          "text": "Saya terus pegangi kaki kepala sekolah. Saya sembah. Saya ciumi kaki itu,\" ujar Eka.",
+          "who": "Eka Tjipta Widjaja",
+          "page": 2,
+          "verified": true
+        },
+        {
+          "text": "Kalau belum-belum sudah dikurangi dan dibagi mana cukup,\" katanya mengenang.",
+          "who": "Eka Tjipta Widjaja",
+          "page": 2,
+          "verified": true
+        },
+        {
+          "text": "Tidak bisa. Ampun,\" teriak Eka.",
+          "who": "Eka Tjipta Widjaja",
+          "page": 2,
+          "verified": true
+        }
+      ],
+      "emotion": 4,
+      "visual": 5,
+      "clarity": 4,
+      "estSeconds": 60,
+      "notes": "Ada adegan guru yang menjinjing kaki murid (hukuman fisik). Sebaiknya diceritakan sebagai kisah humor tentang keras kepala, bukan sebagai contoh cara mendidik. Kutipan Eka di teks dimulai dengan tanda kutip tetapi tidak ditutup di bagian pertama; teks persis tetap dipakai.",
+      "chunk": "1-10",
+      "parts": 1,
+      "score": 4.3,
+      "status": "dipakai",
+      "id": "k002",
+      "project": "eka-tjipta",
+      "pagesCheck": {
+        "how": "kutipan",
+        "shift": 0,
+        "at": "2026-11-09"
+      }
+    },
+    {
+      "title": "Truk tentara, warung kopi, dan ayam putih",
+      "pages": [
+        3,
+        3
+      ],
+      "partial": false,
+      "summary": "Di tepi pantai Losari, Eka melihat truk tentara membuang reruntuhan gudang yang terbakar dan ia melihat peluang uang di situ. Ia membuka warung kopi dengan meja kursi dari rumah, lalu ibunya membuatkan ayam rebus yang ternyata tidak laku. Dalam keadaan panik, ia nekat mendatangi komandan Jepang dan memberi sepotong ayam gratis, lalu pesanannya menjadi laris. Tujuannya sebenarnya mengumpulkan modal untuk mengangkut rongsokan.",
+      "arc": {
+        "pembuka": "Eka duduk di bebatuan pantai Losari dan melihat truk tentara membuang rongsokan gudang yang terbakar.",
+        "konflik": "Ia tidak punya modal untuk mengangkut rongsokan, dan ayam putih yang dibeli dengan modal terbesar justru tidak laku.",
+        "titikBalik": "Ia nekat menawari sang komandan Jepang sepotong ayam gratis, dan komandan itu menyukainya sehingga ayamnya habis setiap hari.",
+        "emosi": "Panik lalu lega, dengan sentuhan humor dari cara ia menawarkan ayam.",
+        "pelajaran": "Di tengah krisis, keberanian mengambil peluang dan menyusun langkah bertahap untuk tujuan yang lebih besar."
+      },
+      "figures": [
+        {
+          "name": "Eka Tjipta Widjaja"
+        },
+        {
+          "name": "Ibu Eka (tidak disebut namanya)"
+        },
+        {
+          "name": "Komandan Jepang (tidak disebut namanya)"
+        }
+      ],
+      "brand": "",
+      "place": "Pantai Losari, Makassar",
+      "era": "Masa pendudukan Jepang (teks menyebut tahun 1941 di bagian sebelumnya)",
+      "quotes": [
+        {
+          "text": "Saya beri sepotong saja. Tidak berani memberi banyak. Takut ayamnya habis tanpa mendapat uang,\" guraunya.",
+          "who": "Eka Tjipta Widjaja",
+          "page": 3,
+          "verified": true
+        }
+      ],
+      "emotion": 4,
+      "visual": 5,
+      "clarity": 3,
+      "estSeconds": 60,
+      "notes": "Latarnya pendudukan Jepang dan transaksi dengan komandan militer Jepang. Sebaiknya tidak dibingkai sebagai pujian pada penjajah; fokusnya pada keberanian dan kegigihan dagang.",
+      "chunk": "1-10",
+      "parts": 1,
+      "score": 4,
+      "status": "dipakai",
+      "id": "k003",
+      "project": "eka-tjipta",
+      "pagesCheck": {
+        "how": "kutipan",
+        "shift": 0,
+        "at": "2026-11-09"
+      }
+    },
+    {
+      "title": "Lempar roti dan pabrik roti yang dibangun dari dendam",
+      "pages": [
+        4,
+        5
+      ],
+      "partial": false,
+      "summary": "Saat roti sulit didapat dan dibatasi dua per orang, Eka ditolak ketika membeli dua roti dan melemparkan roti yang dipegangnya ke wajah penjual. Ia pulang dengan dendam dan bertekad membangun pabrik roti sendiri. Ia mencari juru masak pabrik roti itu, membawakan oleh-oleh, dan menawarkan gaji dua kali lipat, lalu membayar gaji sebulan penuh agar sang juru masak langsung pindah. Untuk mengatasi gula yang juga dijatah, ia menyewa tujuh pengantre dan membeli 10 ton gula per bulan.",
+      "arc": {
+        "pembuka": "Eka ngotot membeli dua roti saat antrean roti dibatasi, tetapi penjual hanya memberinya satu.",
+        "konflik": "Ia kalah di antrean, lalu dendam dan kesulitan gula menghadangnya saat mendirikan pabrik roti.",
+        "titikBalik": "Ia membajak juru masak pabrik lain dengan gaji dua kali lipat dan membayar gaji satu bulan agar langsung pindah, lalu menyewa pengantre gula.",
+        "emosi": "Amarah yang berubah menjadi tekad keras dan sedikit humor.",
+        "pelajaran": "Merekrut orang terbaik dengan menawarkan kompensasi lebih, dan mencari celah saat sumber daya dijatah."
+      },
+      "figures": [
+        {
+          "name": "Eka Tjipta Widjaja"
+        },
+        {
+          "name": "Juru masak pabrik roti (tidak disebut namanya)"
+        },
+        {
+          "name": "Tujuh pengantre bayaran (tidak disebut namanya)"
+        }
+      ],
+      "brand": "",
+      "place": "Makassar",
+      "era": "Masa sulit pendudukan Jepang (tahun tidak disebut)",
+      "quotes": [
+        {
+          "text": "Kalau saya tidak bawakan oleh-oleh bisa-bisa tidak boleh masuk rumahnya,\" katanya bergurau.",
+          "who": "Eka Tjipta Widjaja",
+          "page": 5,
+          "verified": true
+        }
+      ],
+      "emotion": 5,
+      "visual": 5,
+      "clarity": 4,
+      "estSeconds": 75,
+      "notes": "Ada adegan melempar roti ke wajah penjual (kekerasan ringan). Antre gula dengan pengantre bayaran mengakali pembatasan; sebaiknya tidak dijadikan contoh. Teks menyebut 'gaji 15 ribu menjadi 30 ribu' tanpa keterangan mata uang atau tahun.",
+      "chunk": "1-10",
+      "parts": 1,
+      "score": 4.7,
+      "status": "dipakai",
+      "id": "k004",
+      "project": "eka-tjipta",
+      "pagesCheck": {
+        "how": "kutipan",
+        "shift": 0,
+        "at": "2026-11-09"
+      }
+    },
+    {
+      "title": "Bangkrut keempat di Permesta, lalu bangkit dari kamar 2x3 meter",
+      "pages": [
+        6,
+        7
+      ],
+      "partial": false,
+      "summary": "Eka mengumpulkan 3.000 ton kopra di Manado dan mencarter kapal besar dari Jakarta, tetapi pemberontakan Permesta pecah saat kapal tiba. Ia menyelamatkan diri, meninggalkan kopranya, dan kapal kembali ke Surabaya hanya dengan dirinya. Ia pindah ke Surabaya dan ditampung di kamar temannya berukuran 2x3 meter, hanya membawa kepercayaan dan nama baik. Ia menghadap Pangdam Brawijaya, Mayjen Basuki Rahmat, dan diizinkan mengisi kapal tentara dengan barang dagangannya dengan bagi hasil 25 persen untuk tentara.",
+      "arc": {
+        "pembuka": "Eka mengumpulkan 3.000 ton kopra di Manado dan mencarter kapal besar untuk mengirimkannya.",
+        "konflik": "Pemberontakan Permesta pecah saat kapal tiba, dan ia harus meninggalkan kopranya dan melarikan diri.",
+        "titikBalik": "Ia pindah ke Surabaya dengan modal kepercayaan dan nama baik, lalu menghadap Pangdam untuk mendapat izin berdagang.",
+        "emosi": "Kehilangan besar yang dibalas dengan tekad memulai dari nol.",
+        "pelajaran": "Kepercayaan dan nama baik bisa menjadi modal ulang setelah semua harta hilang."
+      },
+      "figures": [
+        {
+          "name": "Eka Tjipta Widjaja"
+        },
+        {
+          "name": "Mayjen Basuki Rahmat (Pangdam Brawijaya)"
+        }
+      ],
+      "brand": "",
+      "place": "Manado, Surabaya",
+      "era": "Masa pemberontakan Permesta dan awal pindah ke Surabaya (tahun tidak disebut)",
+      "quotes": [],
+      "emotion": 5,
+      "visual": 4,
+      "clarity": 3,
+      "estSeconds": 70,
+      "notes": "Teks menyebut pemberontakan Permesta sebagai perang. Cerita soal izin militer dan bagi hasil 25 persen menyangkut hubungan dengan pejabat militer; sebaiknya disampaikan sebagai fakta, tanpa penilaian.",
+      "chunk": "1-10",
+      "parts": 1,
+      "score": 4,
+      "status": "dipakai",
+      "id": "k005",
+      "project": "eka-tjipta",
+      "pagesCheck": {
+        "how": "belum",
+        "shift": 0,
+        "at": "2026-11-09"
+      }
+    }
+  ]
+}

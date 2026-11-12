@@ -1,0 +1,58 @@
+<template>
+  <!-- register: footage (generated photoreal shot: assets/footage/hook.mp4, 768p, <=10 s, muted)  |  job: the theft  |  hero: Stolen. -->
+  <!-- Full-bleed clip under a thin HUD (grid + corner brackets + REC label), so footage belongs to the same world as the
+       graphics. For a clip *inside* a graphic beat use the monitor block from blocks.html instead. Short heroes (<= 10
+       characters) become League Gothic 360 px. Mark "slam" hits the key word (<em>, else the last) with the yellow box. -->
+  <style>
+    #root { position: absolute; inset: 0; background: #000; overflow: hidden; }
+    #hook-media { position: absolute; inset: 0; }
+    #hook-clip { width: 100%; height: 100%; object-fit: cover; }
+    #hook-placeholder { position: absolute; inset: 0; display: grid; place-items: center; font: 700 34px var(--font-mono); color: #666; background: linear-gradient(#1a1a1a, #050505); }
+    #hook-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 55%, rgba(0,0,0,.7) 100%); }
+    #hook-grid { opacity: .55; }
+    #hook-slam { position: absolute; left: 90px; right: 90px; top: 280px; text-align: center; }
+  </style>
+  <div id="root" data-composition-id="hook" data-width="1080" data-height="1920">
+    <div id="hook-media">
+      <!-- Replace the placeholder with: <video id="hook-clip" src="assets/footage/hook.mp4" data-start="0" data-duration="<beat seconds>" muted playsinline></video> -->
+      <video id="hook-clip" src="assets/footage/hook.mp4" data-start="0" data-duration="2.5" muted playsinline></video>
+    </div>
+    <div id="hook-scrim"></div>
+    <div id="hook-grid" class="hf-grid" data-layout-allow-overflow></div>
+    <div id="hook-slam" class="hf-head" data-safe="text" style="top:280px">Stolen.</div>
+    <div id="hook-corners" class="hf-layer hf-corners"><i></i><i></i><i></i><i></i><span class="rec">Rec</span><span>Cam A</span><span>Dramatisation</span><span>▮▮▮▯</span></div>
+  </div>
+  <script>
+    const C = /*@cues*/{"slam":1.2,"dur":2.5}/*@end*/;
+    const css = getComputedStyle(document.documentElement), ACC = css.getPropertyValue("--accent").trim() || "#FFD23F", ON = css.getPropertyValue("--on-accent").trim() || "#0B0B0F"; // the video's colour tone
+    function split(sel, autoBig) {
+      const el = document.querySelector(sel);
+      if (!el || el.dataset.split) return el;
+      el.dataset.split = "1";
+      if (autoBig && (el.textContent.trim().length <= 10 || /\d/.test(el.textContent))) el.classList.add("big");
+      const out = [];
+      for (const n of [...el.childNodes]) {
+        if (n.nodeType === 3) for (const w of n.textContent.split(/\s+/).filter(Boolean)) out.push(`<span class="w" data-layout-allow-overflow><b>${w}</b></span>`);
+        else if (n.nodeType === 1) out.push(`<span class="w${n.tagName === "EM" ? " k" : ""}" data-layout-allow-overflow><b>${n.innerHTML}</b></span>`);
+      }
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+      return el;
+    }
+    const head = split("#hook-slam", true);
+    const n = head ? head.querySelectorAll(".w").length : 1;
+    const slam = C.slam ?? Math.min(0.6, C.dur * 0.4);
+    // FIRST = true on the video's first beat: the hero is already on screen at frame 0 (thumbnail), the mark carries the motion
+    const FIRST = true;
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#hook-media", { scale: 1.12, x: 30 }, { scale: 1, x: 0, duration: C.dur, ease: "power1.out" }, 0);
+    tl.fromTo("#hook-grid", { y: 0 }, { y: -90, duration: C.dur, ease: "none" }, 0);
+    if (!FIRST) tl.fromTo("#hook-corners", { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" }, 0);
+    if (!FIRST) tl.fromTo("#hook-slam .w > b", { yPercent: 115, rotate: 6 }, { yPercent: 0, rotate: 0, duration: 0.36, ease: "power4.out", stagger: Math.min(0.05, 0.22 / Math.max(1, n - 1)) }, 0.04);
+    tl.fromTo("#hook-slam .k > b", { backgroundSize: "0% 84%", color: ACC }, { backgroundSize: "100% 84%", color: ON, duration: 0.3, ease: "power4.out", immediateRender: false }, slam);
+    // punch the clip box itself, so the scaled word is never cut by its own mask
+    tl.fromTo("#hook-slam .k", { scale: 1.25 }, { scale: 1, duration: 0.3, ease: "power4.out", immediateRender: false }, slam);
+    tl.fromTo("#hook-media", { filter: "brightness(1)" }, { filter: "brightness(1.6)", duration: 0.05, ease: "none", yoyo: true, repeat: 1 }, slam);
+    window.__timelines["hook"] = tl;
+  </script>
+</template>

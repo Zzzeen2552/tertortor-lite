@@ -1,0 +1,53 @@
+{
+  "id": "flashcut",
+  "type": "advertisement",
+  "label": "Flashcut",
+  "description": "Khusus Advertisement (bukan pilihan explainer): product reveal tanpa narasi, makro dan hero produk bergantian, potongan 0,1-0,4 s, kilatan B/W dan cincin bergerigi, label Arial kecil, end card. Dari acuan advertisement/flashcut/reference.",
+  "colors": {
+    "ground": "#DCDCDC",
+    "ink": "#111111",
+    "muted": "#5E5E5E",
+    "accent": "#FD7401",
+    "alert": "#FD7401",
+    "card": "#ECECEC",
+    "paper": "#FFFFFF",
+    "night": "#0A0A0A"
+  },
+  "fonts": {
+    "display": "Arial",
+    "body": "Arial",
+    "caption": "Arial",
+    "mono": "JetBrains Mono"
+  },
+  "fontFaces": [
+    {
+      "family": "Arial",
+      "src": "local('Arial')",
+      "weight": "normal"
+    },
+    {
+      "family": "Arial",
+      "src": "local('Arial Bold'), local('Arial-BoldMT')",
+      "weight": "bold"
+    }
+  ],
+  "captions": {
+    "y": 1180,
+    "size": 44,
+    "weight": 400,
+    "maxWords": 3,
+    "uppercase": false,
+    "color": "#111111",
+    "activeColor": "#111111",
+    "pill": "rgba(0,0,0,0)"
+  },
+  "css": ".fc-label { font: 400 30px/1.15 var(--font-body); color: var(--ink); letter-spacing: 0; text-transform: lowercase; white-space: nowrap; }\n.fc-label.on-dark { color: #fff; }\n.fc-name { font: 400 64px/1 var(--font-display); color: var(--ink); letter-spacing: -0.01em; text-transform: lowercase; }\n.fc-rule { position: absolute; background: currentColor; }",
+  "sfx": {
+    "cut": null,
+    "marks": {}
+  },
+  "loudness": {
+    "lufs": -20,
+    "tp": -1
+  }
+}

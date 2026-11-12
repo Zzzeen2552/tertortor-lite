@@ -1,0 +1,2 @@
+- 2026-11-07: 8 sampel suara, Gemini API gemini-3.8-flash-tts, 4167 token
+- 2026-11-07: 3 sampel suara, Gemini API gemini-3.8-flash-tts, 1438 token

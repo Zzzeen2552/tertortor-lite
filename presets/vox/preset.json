@@ -1,0 +1,47 @@
+{
+  "id": "vox",
+  "label": "VOX",
+  "description": "Kolase editorial dari referensi Vox: kertas kusut/grid, foto fotokopi B/W dipotong kasar bertepi warna, serif koran tebal dengan stabilo, label di selotip, coretan spidol, gerak stop-motion. Plus adegan berlapis gaya dokumenter (stub \"layered\"): latar + potongan green screen dengan parallax, grain, kata di dalam adegan.",
+  "colors": {
+    "ground": "#ECE9E2",
+    "ink": "#171614",
+    "muted": "#5F5B53",
+    "accent": "#F3D63B",
+    "alert": "#E1342B",
+    "card": "#F7F5F0",
+    "green": "#79B443",
+    "blue": "#2C9ED6",
+    "pink": "#E9577F",
+    "neon": "#E2F21F",
+    "shadow": "rgba(20,18,14,.28)"
+  },
+  "fonts": {
+    "display": "Playfair Display",
+    "body": "EB Garamond",
+    "caption": "Montserrat",
+    "mono": "IBM Plex Mono"
+  },
+  "captions": {
+    "y": 1180,
+    "size": 58,
+    "weight": 700,
+    "maxWords": 3,
+    "uppercase": false,
+    "color": "#FFFFFF",
+    "activeColor": "#171614",
+    "activeBg": "#F3D63B",
+    "pill": "rgba(23,22,20,0.86)",
+    "radius": 8,
+    "textShadow": "none"
+  },
+  "css": ":root { --tex-paper: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27260%27%20height%3D%27260%27%3E%3Cfilter%20id%3D%27n%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%27.9%27%20numOctaves%3D%273%27%20seed%3D%277%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20values%3D%270%200%200%200%20.1%20%200%200%200%200%20.09%20%200%200%200%200%20.08%20%200%200%200%20.16%200%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20filter%3D%27url(%23n)%27%2F%3E%3C%2Fsvg%3E\"); --tex-crumple: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271080%27%20height%3D%271920%27%3E%3Cfilter%20id%3D%27c%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%27.006%20.009%27%20numOctaves%3D%274%27%20seed%3D%273%27%2F%3E%3CfeDiffuseLighting%20lighting-color%3D%27%23fff%27%20surfaceScale%3D%272.2%27%3E%3CfeDistantLight%20azimuth%3D%27225%27%20elevation%3D%2758%27%2F%3E%3C%2FfeDiffuseLighting%3E%3CfeColorMatrix%20values%3D%270%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%20-0.9%200%200%200%20.9%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20filter%3D%27url(%23c)%27%20opacity%3D%27.22%27%2F%3E%3C%2Fsvg%3E\"); --tex-grid: linear-gradient(rgba(60,70,90,.13) 2px, transparent 2px) 0 0 / 72px 72px, linear-gradient(90deg, rgba(60,70,90,.13) 2px, transparent 2px) 0 0 / 72px 72px; --tex-halftone: radial-gradient(circle, rgba(0,0,0,.38) 1.2px, transparent 1.8px) 0 0 / 7px 7px; --rag: polygon(1% 3%, 9% 0%, 22% 2%, 37% 0%, 51% 2.5%, 66% .5%, 80% 2%, 93% 0%, 100% 4%, 98.5% 18%, 100% 33%, 98% 50%, 100% 66%, 98.5% 82%, 100% 96%, 88% 100%, 72% 97.5%, 57% 100%, 41% 98%, 26% 100%, 12% 98%, 0% 100%, 1.5% 84%, 0% 67%, 2% 50%, 0% 33%, 1.5% 17%); --font-label: \"League Gothic\", \"Oswald\", sans-serif; }\n.vox-paper { background: var(--tex-crumple), var(--tex-paper), var(--ground); }\n.vox-paper.grid { background: var(--tex-crumple), var(--tex-paper), var(--tex-grid), var(--ground); }\n.vox-copy { filter: grayscale(1) contrast(1.55) brightness(1.06); }\n.vox-dots { position: absolute; inset: 0; background: var(--tex-halftone); mix-blend-mode: multiply; opacity: .55; pointer-events: none; }\n.vox-cut { position: relative; padding: 16px; background: var(--edge, var(--alert)); clip-path: var(--rag); }\n.vox-cut > img, .vox-cut > video, .vox-cut > .vox-fill { display: block; width: 100%; height: 100%; object-fit: cover; clip-path: var(--rag); }\n.vox-marker { --hl-x: 1; padding: 0 0.08em; margin: 0 -0.08em; background: linear-gradient(-1.5deg, transparent 0 14%, var(--hl, var(--accent)) 14% 82%, transparent 82%) no-repeat 0 0 / calc(var(--hl-x) * 100%) 100%; box-decoration-break: clone; -webkit-box-decoration-break: clone; }\n.vox-tape { display: inline-block; padding: 10px 30px 6px; background: rgba(236,226,196,.86); box-shadow: 0 2px 0 rgba(0,0,0,.08); font: 400 64px/1 var(--font-label); letter-spacing: .04em; text-transform: uppercase; color: var(--ink); clip-path: polygon(0 6%, 4% 0, 9% 8%, 14% 1%, 100% 0, 97% 50%, 100% 100%, 8% 96%, 3% 100%, 0 92%, 2% 50%); }\n.vox-tag { display: inline-block; padding: 10px 22px 12px; background: var(--alert); color: #fff; font: italic 600 44px/1 var(--font-body); }\n.vox-world { position: absolute; inset: 0; isolation: isolate; }\n.vox-world::before { content: \"\"; position: absolute; left: -1080px; top: -1920px; width: 3240px; height: 5760px; z-index: -1; background: var(--tex-crumple), var(--tex-paper), var(--ground); }\n.vox-world.grid::before { background: var(--tex-crumple), var(--tex-paper), var(--tex-grid), var(--ground); }\n.vox-hand { position: absolute; inset: 0; }\n/* layered documentary scene (style.md § Adegan berlapis): photo layers with parallax, grain and words in the scene */\n:root { --font-word: \"Playfair Display\", serif; --tex-grain: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27300%27%20height%3D%27300%27%3E%3Cfilter%20id%3D%27g%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%27.95%27%20numOctaves%3D%272%27%20seed%3D%2711%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27saturate%27%20values%3D%270%27%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20filter%3D%27url(%23g)%27%2F%3E%3C%2Fsvg%3E\"); }\n.vox-scene { position: absolute; inset: 0; }\n.vox-layer { position: absolute; inset: 0; will-change: transform; }\n.vox-doc { filter: grayscale(1) sepia(.14) contrast(1.14) brightness(.95); }\n.vox-doc.warm { filter: grayscale(.55) sepia(.38) contrast(1.1) brightness(.95); }\n.vox-near { filter: grayscale(1) sepia(.14) contrast(1.1) brightness(.8) blur(3px); }\n.vox-grain { position: absolute; inset: -60px; background: var(--tex-grain) 0 0 / 300px 300px; mix-blend-mode: overlay; opacity: .42; pointer-events: none; }\n.vox-vignette { position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 45%, transparent 52%, rgba(0,0,0,.55) 100%); pointer-events: none; }\n.vox-word { display: inline-block; font: italic 400 64px/0.95 var(--font-word); letter-spacing: -0.01em; color: #F4F1EA; text-shadow: 0 2px 10px rgba(0,0,0,.55), 0 0 28px rgba(0,0,0,.6); white-space: nowrap; }\n.vox-word.big { font-size: 170px; letter-spacing: -0.025em; }\n.vox-word.dark { color: var(--ink); text-shadow: none; }\n.vox-scrawl { overflow: visible; fill: none; stroke: #F4F1EA; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; }\n.vox-scrawl.dark { stroke: var(--ink); }\n.vox-photo { position: absolute; padding: 18px 18px 54px; background: var(--tex-paper), #EFEBE3; box-shadow: 8px 12px 0 var(--shadow); }\n.vox-photo > img, .vox-photo > video { display: block; width: 100%; height: 100%; object-fit: cover; }",
+  "fontFaces": [],
+  "sfx": {
+    "cut": "whoosh",
+    "marks": {
+      "slam": "thump",
+      "tap": "tick",
+      "check": "pop"
+    }
+  }
+}

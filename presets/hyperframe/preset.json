@@ -1,0 +1,71 @@
+{
+  "id": "hyperframe",
+  "label": "Hyperframe",
+  "description": "Gelap, tegas, kaya lapisan: tiap beat punya dunia sendiri (HUD bergrid, lantai grid perspektif, dinding kata, kertas formulir, lampu sorot) dengan sudut HUD. Kalimat Outfit 800 masuk per kata, angka League Gothic raksasa, infografis (ring timer, bar, checklist, terminal, teks di garis lengkung), footage di monitor HUD, demo ponsel realistis (rekaman layar asli, menyelam ke layar, potongan layar terangkat). Aksen kuning.",
+  "colors": {
+    "ground": "#0B0B0F",
+    "ink": "#F5F3EE",
+    "muted": "#8A8A96",
+    "accent": "#FFD23F",
+    "alert": "#FF4D3A",
+    "card": "#17171F",
+    "paper": "#ECE8DF"
+  },
+  "fonts": {
+    "display": "Outfit",
+    "body": "Outfit",
+    "caption": "Outfit",
+    "mono": "JetBrains Mono"
+  },
+  "captions": {
+    "y": 1180,
+    "size": 66,
+    "weight": 800,
+    "maxWords": 3,
+    "uppercase": true,
+    "color": "#F5F3EE",
+    "activeColor": "#FFD23F",
+    "pill": "rgba(11,11,15,0.78)"
+  },
+  "css": ":root { --font-num: \"League Gothic\", \"Oswald\", sans-serif; --line: rgba(245,243,238,.07); --floor: color-mix(in srgb, var(--accent) 32%, transparent); }\n.hf-head { margin: 0; font: 800 124px/0.98 var(--font-display); letter-spacing: -0.035em; color: var(--ink); }\n.hf-head .w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.04em 0.03em 0.1em; margin: -0.04em -0.03em -0.1em; }\n.hf-head .w > b { display: inline-block; font-weight: inherit; transform-origin: 0 100%; }\n.hf-head .w.k { padding-left: 0.1em; padding-right: 0.1em; margin-left: -0.1em; margin-right: -0.1em; }\n.hf-head .w.k > b { color: var(--accent); padding: 0 0.06em; margin: 0 -0.06em; background: linear-gradient(var(--accent), var(--accent)) no-repeat 0 60% / 0% 84%; }\n.hf-head.big { font: 400 360px/0.86 var(--font-num); letter-spacing: -0.005em; text-transform: uppercase; }\n.hf-kicker { display: inline-flex; align-items: center; gap: 18px; font: 700 38px/1 var(--font-body); color: var(--accent); letter-spacing: .1em; text-transform: uppercase; }\n.hf-kicker::before { content: \"\"; width: 44px; height: 8px; background: var(--accent); }\n/* layers: every beat sits in a world (hud / floor / wall / paper / spot), never on a bare fill */\n.hf-layer { position: absolute; inset: 0; overflow: hidden; }\n.hf-hud { background: radial-gradient(90% 60% at 50% 42%, #17171f 0%, var(--ground) 72%); }\n.hf-grid { position: absolute; inset: -180px; background: linear-gradient(var(--line) 2px, transparent 2px) 0 0 / 90px 90px, linear-gradient(90deg, var(--line) 2px, transparent 2px) 0 0 / 90px 90px; -webkit-mask-image: radial-gradient(70% 55% at 50% 45%, #000 30%, transparent 100%); mask-image: radial-gradient(70% 55% at 50% 45%, #000 30%, transparent 100%); }\n.hf-floor { position: absolute; left: -60%; right: -60%; top: 1020px; height: 1400px; background: linear-gradient(var(--floor) 3px, transparent 3px) 0 0 / 120px 120px, linear-gradient(90deg, var(--floor) 3px, transparent 3px) 0 0 / 120px 120px; transform: perspective(700px) rotateX(66deg); transform-origin: 50% 0; -webkit-mask-image: linear-gradient(transparent 0%, #000 35%); mask-image: linear-gradient(transparent 0%, #000 35%); }\n.hf-wall { position: absolute; left: -200px; right: -200px; top: 120px; font: 400 170px/0.92 var(--font-num); color: rgba(245,243,238,.06); text-transform: uppercase; white-space: nowrap; }\n.hf-wall > div { display: block; }\n.hf-wall .on { color: var(--accent); opacity: .9; }\n.hf-spot { position: absolute; left: 50%; top: -120px; width: 1100px; height: 1500px; margin-left: -550px; background: radial-gradient(60% 100% at 50% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 75%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); }\n.hf-paper { background: var(--paper); }\n.hf-paper .hf-head { color: var(--ground); }\n.hf-paper .hf-head .w.k > b { color: var(--on-accent); background-image: linear-gradient(var(--accent), var(--accent)); }\n.hf-form { position: absolute; left: 60px; right: 60px; top: 190px; bottom: 590px; border: 3px solid rgba(11,11,15,.85); background: repeating-linear-gradient(transparent 0 118px, rgba(11,11,15,.12) 118px 120px); }\n.hf-form > header { display: flex; justify-content: space-between; padding: 22px 28px; border-bottom: 3px solid rgba(11,11,15,.85); font: 600 28px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: rgba(11,11,15,.7); }\n/* HUD corners: hairline brackets + small mono labels (no digits: every number on screen must be spoken) */\n.hf-corners i { position: absolute; width: 46px; height: 46px; border: 0 solid rgba(245,243,238,.35); }\n.hf-corners i:nth-of-type(1) { left: 50px; top: 180px; border-width: 3px 0 0 3px; }\n.hf-corners i:nth-of-type(2) { right: 50px; top: 180px; border-width: 3px 3px 0 0; }\n.hf-corners i:nth-of-type(3) { left: 50px; top: 1280px; border-width: 0 0 3px 3px; }\n.hf-corners i:nth-of-type(4) { right: 150px; top: 1280px; border-width: 0 3px 3px 0; }\n.hf-corners span { position: absolute; font: 500 28px/1 var(--font-mono); color: rgba(245,243,238,.66); text-shadow: 0 2px 10px rgba(0,0,0,.7); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }\n.hf-corners span:nth-of-type(1) { left: 112px; top: 190px; }\n.hf-corners span:nth-of-type(2) { right: 112px; top: 190px; }\n.hf-corners span:nth-of-type(3) { left: 112px; top: 1290px; }\n.hf-corners span:nth-of-type(4) { right: 212px; top: 1290px; }\n.hf-corners .rec::before { content: \"\"; display: inline-block; width: 18px; height: 18px; margin-right: 14px; border-radius: 50%; background: var(--alert); vertical-align: 1px; }\n.hf-paper .hf-corners i { border-color: rgba(11,11,15,.5); }\n.hf-paper .hf-corners span { color: rgba(11,11,15,.62); text-shadow: none; }\n/* components (snippets in presets/hyperframe/blocks.html) */\n.hf-monitor { position: absolute; border: 3px solid rgba(245,243,238,.28); background: #000; overflow: hidden; }\n.hf-monitor video, .hf-monitor img { display: block; width: 100%; height: 100%; object-fit: cover; }\n.hf-monitor > .tag { position: absolute; left: 0; top: 0; padding: 10px 18px; background: var(--accent); color: var(--on-accent); font: 700 28px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }\n.hf-ring { position: absolute; }\n.hf-ring circle { fill: none; stroke-width: 7; }\n.hf-ring .track { stroke: rgba(245,243,238,.14); }\n.hf-ring .fill { stroke: var(--accent); stroke-linecap: butt; }\n.hf-ring .num { position: absolute; inset: 0; display: grid; place-items: center; font: 400 210px/1 var(--font-num); color: var(--ink); }\n.hf-bars { position: absolute; display: grid; gap: 34px; }\n.hf-bars .row { display: grid; grid-template-columns: 260px 1fr; align-items: center; gap: 28px; font: 700 40px/1 var(--font-body); color: var(--ink); }\n.hf-bars .bar { height: 34px; background: rgba(245,243,238,.1); }\n.hf-bars .bar > i { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; }\n.hf-check { position: absolute; margin: 0; padding: 0; list-style: none; display: grid; gap: 30px; font: 700 52px/1.1 var(--font-body); color: var(--ground); }\n.hf-check li { position: relative; display: flex; align-items: center; gap: 30px; }\n.hf-check li > u { flex: none; width: 56px; height: 56px; border: 5px solid var(--ground); display: grid; place-items: center; text-decoration: none; }\n.hf-check li > u > b { width: 26px; height: 26px; background: var(--ground); }\n.hf-check li > s { position: absolute; left: 80px; right: -10px; top: 52%; height: 7px; background: var(--alert); transform-origin: 0 50%; }\n.hf-term { position: absolute; padding: 34px 40px; border: 3px solid rgba(245,243,238,.2); background: rgba(23,23,31,.92); font: 500 60px/1.2 var(--font-mono); color: var(--ink); }\n.hf-term .p { color: var(--accent); margin-right: .5em; }\n.hf-term .c { display: inline-block; opacity: 0; }\n.hf-term .caret { display: inline-block; width: .55em; height: 1em; margin-left: .06em; vertical-align: -.12em; background: var(--accent); }\n.hf-path { position: absolute; overflow: visible; }\n.hf-path text { font: 800 64px var(--font-display); fill: var(--ink); letter-spacing: -0.02em; }\n.hf-path text .k { fill: var(--accent); }\n.hf-path .curve { fill: none; stroke: var(--accent); stroke-width: 3; opacity: .6; }\n/* phone demo: a believable device around a REAL screenshot or screen recording (never a drawn UI) */\n.hf-phone { position: absolute; width: 500px; height: 1030px; padding: 16px; border-radius: 84px; background: linear-gradient(145deg, #3a3a42 0%, #16161b 38%, #2b2b32 62%, #0e0e12 100%); box-shadow: inset 0 0 0 2px rgba(255,255,255,.14), inset 0 0 0 6px #050507, 0 50px 120px rgba(0,0,0,.75); transform-origin: 50% 50%; }\n.hf-phone::before { content: \"\"; position: absolute; left: -6px; top: 230px; width: 6px; height: 110px; border-radius: 3px 0 0 3px; background: #2a2a31; box-shadow: 0 140px 0 #2a2a31; }\n.hf-phone::after { content: \"\"; position: absolute; right: -6px; top: 300px; width: 6px; height: 160px; border-radius: 0 3px 3px 0; background: #2a2a31; }\n.hf-phone .screen { position: relative; width: 100%; height: 100%; border-radius: 68px; overflow: hidden; background: #000; }\n.hf-phone .screen > img, .hf-phone .screen > video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }\n.hf-phone .island { position: absolute; left: 50%; top: 22px; width: 150px; height: 44px; margin-left: -75px; border-radius: 22px; background: #000; z-index: 2; }\n.hf-phone .glare { position: absolute; inset: 0; border-radius: 68px; background: linear-gradient(115deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 28%); pointer-events: none; z-index: 3; }\n/* callout: a crop of the SAME real screenshot lifted out of the phone (background-image + position = the row talked about) */\n.hf-callout { position: absolute; border-radius: 26px; background-repeat: no-repeat; box-shadow: 0 0 0 4px var(--accent), 0 30px 80px rgba(0,0,0,.7); }\n/* bento: feature cards around one idea (labels from the script, no invented claims) */\n.hf-bento { position: absolute; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }\n.hf-bento > div { padding: 30px 32px; border-radius: 28px; background: var(--card); border: 2px solid rgba(245,243,238,.08); font: 700 38px/1.15 var(--font-body); color: var(--ink); }\n.hf-bento > div small { display: block; margin-bottom: 14px; font: 500 28px/1 var(--font-mono); color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }\n.hf-bento > div.wide { grid-column: span 2; }\n.hf-bento > div.hot { background: var(--accent); color: var(--on-accent); }\n.hf-bento > div.hot small { color: var(--on-accent); opacity: .6; }",
+  "fontFaces": [],
+  "sfx": {
+    "marks": {
+      "dive": "whoosh"
+    }
+  },
+  "tones": [
+    {
+      "label": "Kuning",
+      "accent": "#FFD23F"
+    },
+    {
+      "label": "Oranye",
+      "accent": "#FF7A2F"
+    },
+    {
+      "label": "Koral",
+      "accent": "#FF5E5B"
+    },
+    {
+      "label": "Pink",
+      "accent": "#FF5FA2"
+    },
+    {
+      "label": "Ungu",
+      "accent": "#A879FF"
+    },
+    {
+      "label": "Biru",
+      "accent": "#4DA3FF"
+    },
+    {
+      "label": "Tosca",
+      "accent": "#2FD6C3"
+    },
+    {
+      "label": "Hijau",
+      "accent": "#5BE36B"
+    }
+  ]
+}

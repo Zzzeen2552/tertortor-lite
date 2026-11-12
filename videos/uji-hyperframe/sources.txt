@@ -1,0 +1,5 @@
+hook.mp4 | library 20261105-77b7de | google-flow (Omni 1.1 Flash) | AI-generated dramatisation, not a real incident | trim 0s+3.21
+clock-lib.mp4 | library 20261105-77b7de | google-flow (Omni 1.1 Flash) | AI-generated dramatisation, not a real incident | trim 3.29s+3.087
+clock-lib-2.mp4 | library 20261105-77b7de | google-flow (Omni 1.1 Flash) | AI-generated dramatisation, not a real incident | trim 6.457s+3.53
+fix.mp4 | google-flow (Omni 1.1 Flash), 2026-11-06, prompt 'iPhone screen recording, iOS Settings → Stolen Device Protection' | AI-GENERATED FAKE UI, labels garbled. Test only by explicit user request; never publish, not in library
+fix.png | google-flow (Omni 1.1 Flash), 2026-11-06, prompt 'iPhone screen recording, iOS Settings → Stolen Device Protection' | AI-GENERATED FAKE UI, labels garbled. Test only by explicit user request; never publish, not in library

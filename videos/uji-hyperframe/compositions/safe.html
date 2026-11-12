@@ -1,0 +1,50 @@
+<template>
+  <!-- register: drawn (paper form + checklist block)  |  job: the payoff  |  hero: Useless to anyone but you -->
+  <style>
+    #root { position: absolute; inset: 0; background: var(--paper); overflow: hidden; }
+    #safe-sheet { position: absolute; inset: 0; transform-origin: 50% 40%; }
+    #safe-label { position: absolute; left: 100px; right: 100px; top: 860px; text-align: center; font-size: 104px; }
+  </style>
+  <div id="root" data-composition-id="safe" data-width="1080" data-height="1920">
+    <div id="safe-world" class="hf-layer hf-paper">
+      <div id="safe-sheet">
+        <div id="safe-form" class="hf-form"><header><span>Checklist</span><span>Stolen phone</span></header></div>
+        <ul id="safe-list" class="hf-check" data-safe="text" style="left:130px; right:130px; top:360px">
+          <li><u><b id="safe-t1"></b></u>Find My</li>
+          <li><u><b id="safe-t2"></b></u>Stolen Device Protection</li>
+          <li><u><b id="safe-t3"></b></u>Switch off in seconds<s id="safe-s3"></s></li>
+        </ul>
+        <div id="safe-label" class="hf-head" data-safe="text" style="top:860px">Useless to <em>anyone</em> but you</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{"check":1.6,"dur":4.833333333333333}/*@end*/;
+    function split(sel) {
+      const el = document.querySelector(sel);
+      if (!el || el.dataset.split) return el;
+      el.dataset.split = "1";
+      const out = [];
+      for (const n of [...el.childNodes]) {
+        if (n.nodeType === 3) for (const w of n.textContent.split(/\s+/).filter(Boolean)) out.push(`<span class="w" data-layout-allow-overflow><b>${w}</b></span>`);
+        else if (n.nodeType === 1) out.push(`<span class="w${n.tagName === "EM" ? " k" : ""}" data-layout-allow-overflow><b>${n.innerHTML}</b></span>`);
+      }
+      el.innerHTML = out.join(" ");
+      return el;
+    }
+    split("#safe-label");
+    const check = C.check;
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#safe-sheet", { y: 120, rotate: -4, scale: 1.06 }, { y: 0, rotate: 0, scale: 1, duration: 0.45, ease: "back.out(1.4)" }, 0);
+    tl.fromTo("#safe-sheet", { scale: 1 }, { scale: 1.035, duration: C.dur - 0.45, ease: "none", immediateRender: false }, 0.45);
+    tl.fromTo("#safe-form", { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 0.4, ease: "power3.out" }, 0.02);
+    tl.fromTo("#safe-list li", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3, ease: "power3.out", stagger: 0.08 }, 0.1);
+    tl.fromTo("#safe-label .w > b", { yPercent: 115, rotate: 8 }, { yPercent: 0, rotate: 0, duration: 0.36, ease: "power4.out", stagger: 0.05 }, 0.12);
+    tl.fromTo("#safe-t1", { scale: 0 }, { scale: 1, duration: 0.2, ease: "back.out(3)" }, 0.6);
+    tl.fromTo("#safe-t2", { scale: 0 }, { scale: 1, duration: 0.2, ease: "back.out(3)" }, 0.9);
+    tl.fromTo("#safe-s3", { scaleX: 0 }, { scaleX: 1, duration: 0.25, ease: "power3.out" }, 1.25);
+    tl.fromTo("#safe-label .k > b", { backgroundSize: "0% 84%" }, { backgroundSize: "100% 84%", duration: 0.25, ease: "power4.out", immediateRender: false }, check);
+    tl.fromTo("#safe-label .k", { scale: 1.2 }, { scale: 1, duration: 0.3, ease: "power4.out", immediateRender: false }, check);
+    window.__timelines["safe"] = tl;
+  </script>
+</template>

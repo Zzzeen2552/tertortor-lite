@@ -1,0 +1,48 @@
+<template>
+  <!-- register: drawn (a feeling, a concept, an abstraction)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Swap the icon paths for the concept (line art: stroke ink 6, one blue detail). Mark "check" draws the blue stroke. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: var(--ground); }
+    #__ID__-page { position: absolute; inset: 0; }
+    #__ID__-dots { position: absolute; left: 60px; top: 200px; width: 960px; height: 1080px; }
+    #__ID__-dots .d { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--accent); }
+    #__ID__-card { position: absolute; left: 270px; top: 300px; width: 540px; height: 540px; display: grid; place-items: center; }
+    #__ID__-icon { width: 330px; height: 330px; }
+    #__ID__-label { position: absolute; left: 90px; right: 90px; top: 900px; text-align: center; font-size: 96px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-whip" class="snap-whip">
+    <div id="__ID__-page" class="snap-page">
+      <div id="__ID__-dots"></div>
+      <div id="__ID__-card" class="snap-card">
+        <svg id="__ID__-icon" viewBox="0 0 100 100">
+          <circle id="__ID__-c" cx="50" cy="50" r="38" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round" stroke-dasharray="239" stroke-dashoffset="239" transform="rotate(-90 50 50)" />
+          <path id="__ID__-p" d="M33 51 L45 63 L68 38" fill="none" style="stroke: var(--accent)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="56" stroke-dashoffset="56" />
+        </svg>
+      </div>
+      <div id="__ID__-label" class="snap-head" data-safe="text" style="top:900px">__HERO__</div>
+    </div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    // dot field behind the card: a fixed 12 x 13 grid, built once (deterministic), blooms out from the card's centre
+    const field = document.querySelector("#__ID__-dots");
+    if (field && !field.children.length) {
+      let h = "";
+      for (let r = 0; r < 13; r++) for (let c = 0; c < 12; c++) h += `<span class="d" style="left:${40 + c * 80}px;top:${40 + r * 80}px"></span>`;
+      field.innerHTML = h;
+    }
+    // DIR = 1 / -1: the side the scene whips in from (alternate it between beats)
+    const DIR = 1;
+    const tl = gsap.timeline({ paused: true });
+    if (typeof FIRST === "undefined" || !FIRST) tl.fromTo("#__ID__-whip", { x: 300 * DIR, filter: "blur(18px)" }, { x: 0, filter: "blur(0px)", duration: 0.32, ease: "expo.out" }, 0);
+    tl.fromTo("#__ID__-dots .d", { opacity: 0, scale: 0 }, { opacity: 0.16, scale: 1, duration: 0.5, ease: "expo.out", stagger: { grid: [13, 12], from: [4, 6], each: 0.025 } }, 0);
+    tl.fromTo("#__ID__-card", { opacity: 0, y: 60, scale: 0.92, filter: "blur(10px)" }, { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.6, ease: "expo.out" }, 0);
+    tl.fromTo("#__ID__-label", { opacity: 0, y: 24, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, ease: "expo.out" }, 0.08);
+    tl.fromTo("#__ID__-c", { strokeDashoffset: 239 }, { strokeDashoffset: 0, duration: 0.6, ease: "expo.out" }, 0.15);
+    tl.fromTo("#__ID__-p", { strokeDashoffset: 56 }, { strokeDashoffset: 0, duration: 0.4, ease: "expo.out" }, C.check ?? 0.5);
+    tl.fromTo("#__ID__-card", { rotate: 0 }, { rotate: 0, scale: 1.03, duration: Math.max(0.6, C.dur - 0.6), ease: "none" }, 0.6);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

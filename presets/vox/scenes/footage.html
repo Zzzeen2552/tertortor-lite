@@ -1,0 +1,48 @@
+<template>
+  <!-- register: footage (preset vox: generated shot as a photocopied cut-out; assets/footage/__ID__.mp4, muted)  |  job: __JOB__  |  hero: __HERO__ -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: var(--ground); }
+    #__ID__-stage { position: absolute; inset: 0; }
+    #__ID__-cutwrap { position: absolute; left: 60px; top: 380px; width: 960px; height: 740px; transform: rotate(-1.5deg); filter: drop-shadow(10px 14px 0 var(--shadow)); }
+    #__ID__-cut { width: 100%; height: 100%; box-sizing: border-box; }
+    #__ID__-placeholder { display: grid; place-items: center; font: 600 34px var(--font-mono); color: #3a3834; background: linear-gradient(#c9c6bf, #a19e98); }
+    #__ID__-tapewrap { position: absolute; left: 90px; top: 230px; transform: rotate(-3deg); transform-origin: left center; }
+    #__ID__-slam { font-size: 96px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-hand" class="vox-hand" data-layout-allow-overflow><div id="__ID__-world" class="vox-world">
+    <div id="__ID__-stage">
+      <div id="__ID__-cutwrap">
+        <div id="__ID__-cut" class="vox-cut">
+          <!-- Replace the placeholder with: <video id="__ID__-clip" class="vox-copy" src="assets/footage/__ID__.mp4" muted playsinline></video> -->
+          <div id="__ID__-placeholder" class="vox-fill vox-copy">FOOTAGE</div>
+          <div class="vox-dots"></div>
+        </div>
+      </div>
+      <div id="__ID__-tapewrap"><span id="__ID__-slam" class="vox-tape" data-safe="text" style="top:230px">__HERO__</span></div>
+    </div>
+    </div></div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#__ID__-cutwrap", { y: 80, rotate: 3 }, { y: 0, rotate: -1.5, duration: 0.24, ease: "steps(4)" }, 0);
+    tl.fromTo("#__ID__-tapewrap", { y: -40, rotate: -9 }, { y: 0, rotate: -3, duration: 0.2, ease: "steps(4)" }, C.slam ?? 0);
+    // Camera: world point (fx, fy) lands at screen (540, 760), the middle of the safe band; [t, 540, 760, 1, 0] = layout as drawn.
+    // Keys [t, fx, fy, scale, rotateDeg, ease] ease into each other with no holds: pan between elements, push in at the mark, pull out to reveal.
+    const cam = (W, keys) => {
+      const st = ([, fx, fy, s = 1, r = 0]) => { const a = r * Math.PI / 180, c = Math.cos(a), n = Math.sin(a); return { x: 540 - s * (c * fx - n * fy), y: 760 - s * (n * fx + c * fy), scale: s, rotate: r }; };
+      tl.set(W, { transformOrigin: "0 0", ...st(keys[0]) }, 0);
+      for (let i = 1, t0 = 0; i < keys.length; i++) {
+        const t1 = Math.min(C.dur, Math.max(t0 + 0.1, keys[i][0]));
+        tl.fromTo(W, st(keys[i - 1]), { ...st(keys[i]), duration: t1 - t0, ease: keys[i][5] || "sine.inOut", immediateRender: false }, t0);
+        t0 = t1;
+      }
+    };
+    cam("#__ID__-world", [[0, 540, 700, 1.1, -1], [0.5, 540, 740, 1.03, 0, "power2.out"], [C.dur, 560, 800, 1.06, 0.5]]);
+    // Hand-held: stepped wobble at 6 fps (fixed table, deterministic).
+    const HH = [[0, 0, 0], [3, -2, 0.12], [-2, 3, -0.1], [2, 2, 0.06], [-3, -1, -0.12], [1, -3, 0.1], [-1, 2, -0.05], [3, 1, 0.08]];
+    for (let t = 0, k = 0; t < C.dur; t += 1 / 6, k++) tl.set("#__ID__-hand", { x: HH[k % 8][0], y: HH[k % 8][1], rotate: HH[k % 8][2] }, t);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

@@ -1,0 +1,15 @@
+{
+  "tail": 0.6,
+  "cutLead": 0.07,
+  "beats": [
+    {
+      "id": "hook",
+      "job": "taruh penonton di dalam masalah",
+      "hero": "satu gambar/kalimat",
+      "register": "type",
+      "framing": "full-bleed",
+      "character": false,
+      "marks": {}
+    }
+  ]
+}

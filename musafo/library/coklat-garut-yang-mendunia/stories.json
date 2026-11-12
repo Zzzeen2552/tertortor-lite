@@ -1,0 +1,72 @@
+{
+  "book": {
+    "id": "coklat-garut-yang-mendunia",
+    "title": "COKLAT GARUT YANG MENDUNIA",
+    "author": "",
+    "channel": "berakitkehulu",
+    "kind": "teks",
+    "file": "",
+    "pages": 1,
+    "chars": 1528,
+    "project": "coklat-garut-yang-mendunia"
+  },
+  "chunks": {
+    "1-1": {
+      "at": "2026-11-09T22:13:20.251Z",
+      "found": 1,
+      "by": "gemini gemini-3.8-flash"
+    }
+  },
+  "stories": [
+    {
+      "title": "Kisah Ming Chee Chuang Melahirkan Silver Queen",
+      "pages": [
+        1,
+        1
+      ],
+      "partial": false,
+      "summary": "Ming Chee Chuang, imigran Burma yang bekerja serabutan di Bandung, nekat membeli pabrik NV Ceres saat ditinggal kabur orang Belanda. Menghadapi larangan impor cokelat setelah kemerdekaan, ia berinovasi menggunakan bahan lokal, susu sapi Garut, serta mencampur cokelat dengan kacang mede agar tidak gampang leleh di iklim tropis hingga lahirlah Silver Queen pada 1950. Merek ini meledak setelah mengirim 10 boks ke Konferensi Asia Afrika dan dipotret bersama Bung Karno, lalu kelak mendunia di bawah bendera Petra Foods dan Delfi.",
+      "arc": {
+        "pembuka": "Ming Chee Chuang, imigran asal Burma yang lari dari perang saudara dan tiba di Indonesia yang juga sedang perang kemerdekaan, bertahan hidup dengan kerja serabutan di Bandung.",
+        "konflik": "Setelah nekat membeli pabrik NV Ceres yang dijual murah, Chuang terbentur larangan impor cokelat, lalu menghadapi kakao lokal yang pahit dan gampang retak, serta cokelat batangan yang mudah leleh di iklim tropis.",
+        "titikBalik": "Chuang mengganti cocoa butter dengan lemak nabati lokal, membina petani kakao, memakai susu sapi Garut, dan mencampur kacang mede panggang sebagai penahan lumer hingga lahirlah Silver Queen pada 1950.",
+        "emosi": "Kagum atas kegigihan dan kecerdikan bertahan hidup di tengah perang hingga berhasil menciptakan inovasi dari bahan lokal.",
+        "pelajaran": "Keterbatasan bahan baku dan tantangan lingkungan tropis justru memicu lahirnya formula inovatif yang menjadikannya produk legendaris dunia."
+      },
+      "figures": [
+        {
+          "name": "Ming Chee Chuang"
+        },
+        {
+          "name": "Bung Karno"
+        },
+        {
+          "name": "John Chuang"
+        },
+        {
+          "name": "Joseph Chuang"
+        }
+      ],
+      "brand": "Silver Queen",
+      "place": "Bandung, Garut",
+      "era": "1950",
+      "quotes": [],
+      "emotion": 4,
+      "visual": 4,
+      "clarity": 5,
+      "estSeconds": 115,
+      "notes": "Teks menyebutkan transformasi nama pabrik dari NV Ceres, Petra Foods, hingga Delfi, serta keterlibatan acara Konferensi Asia Afrika di Gedung Merdeka.",
+      "pagesCheck": {
+        "how": "belum",
+        "shift": 0,
+        "at": "2026-11-09"
+      },
+      "chunk": "1-1",
+      "status": "dipakai",
+      "project": "coklat-garut-yang-mendunia",
+      "parts": 1,
+      "score": 4.3,
+      "id": "k001"
+    }
+  ]
+}

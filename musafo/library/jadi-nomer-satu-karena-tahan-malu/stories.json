@@ -1,0 +1,88 @@
+{
+  "book": {
+    "id": "jadi-nomer-satu-karena-tahan-malu",
+    "title": "JADI NOMER SATU KARENA TAHAN MALU",
+    "author": "",
+    "channel": "berakitkehulu",
+    "kind": "teks",
+    "file": "",
+    "pages": 2,
+    "chars": 2769,
+    "project": "jadi-nomer-satu-karena-tahan-malu"
+  },
+  "chunks": {
+    "1-2": {
+      "at": "2026-11-10T02:59:22.454Z",
+      "found": 1,
+      "by": "gemini gemini-3.8-flash"
+    }
+  },
+  "stories": [
+    {
+      "title": "Keputusan Gila Domo Membeli Mesin Jerman Demi Kapal Api",
+      "pages": [
+        1,
+        2
+      ],
+      "partial": false,
+      "summary": "Domo mewarisi bisnis kopi Kapal Api dari bapaknya yang penjualannya stagnan akibat persaingan ketat. Domo bertekad membeli mesin canggih dari Jerman seharga 137 juta rupiah, namun ditentang keras oleh ayahnya karena nilainya setara hasil kerja 10 tahun. Meski ditolak bank, Domo gigih mendatangi distributor hingga mendapatkan persetujuan cicilan. Dalam satu tahun, penjualan Kapal Api meledak hingga menjadi raja pasar dan memenangkan kembali restu sang ayah.",
+      "arc": {
+        "pembuka": "Domo dan ayahnya menjalankan dapur produksi kopi Kapal Api yang sederhana, namun penjualan mentok dan terjebak cara lama.",
+        "konflik": "Domo ingin membeli mesin canggih dari Jerman seharga 137 Juta, memicu pertengkaran hebat dengan ayahnya yang menganggap keputusan itu gila tanpa jaminan sukses.",
+        "titikBalik": "Ditolak bank, Domo nekat bolak-balik ke distributor mesin Jerman sampai sales distributor luluh dan memberikan skema cicilan.",
+        "emosi": "Tegang saat perdebatan sengit dengan ayah, lalu haru saat penjualan meledak dan ayah tersenyum bangga merestui usahanya.",
+        "pelajaran": "Keberanian mengambil risiko dan kegigihan memperjuangkan inovasi dapat mengubah bisnis biasa menjadi legenda."
+      },
+      "figures": [
+        {
+          "name": "Domo"
+        },
+        {
+          "name": "Ayah"
+        },
+        {
+          "name": "Ibu"
+        }
+      ],
+      "brand": "Kapal Api",
+      "place": "",
+      "era": "",
+      "quotes": [
+        {
+          "text": "Kamu GILA, Dom? 137 Juta?! Itu uang 10 tahun kita kerja!",
+          "who": "Sang Ayah",
+          "page": 1,
+          "verified": true
+        },
+        {
+          "text": "Tapi, Pak! Ini satu-satunya cara kita bisa menang! Kita harus berubah!",
+          "who": "Domo",
+          "page": 1,
+          "verified": true
+        },
+        {
+          "text": "Itu harga gila-gilaan! Nggak ada jaminan sukses!",
+          "who": "Bapaknya",
+          "page": 1,
+          "verified": true
+        }
+      ],
+      "emotion": 4,
+      "visual": 5,
+      "clarity": 5,
+      "estSeconds": 90,
+      "notes": "",
+      "pagesCheck": {
+        "how": "kutipan",
+        "shift": 0,
+        "at": "2026-11-10"
+      },
+      "chunk": "1-2",
+      "status": "dipakai",
+      "project": "jadi-nomer-satu-karena-tahan-malu",
+      "parts": 1,
+      "score": 4.7,
+      "id": "k001"
+    }
+  ]
+}

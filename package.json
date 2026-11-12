@@ -1,0 +1,34 @@
+{
+  "name": "tertortor-lite",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "new": "node tools/new.mjs",
+    "voice": "node tools/voice.mjs",
+    "cues": "node tools/cues.mjs",
+    "lint:video": "node tools/lint-video.mjs",
+    "check": "node tools/check.mjs",
+    "preview": "node tools/preview.mjs",
+    "finish": "node tools/finish.mjs",
+    "studio": "node --watch tools/studio/server.mjs",
+    "library": "node tools/library.mjs",
+    "swap": "node tools/swap.mjs",
+    "flow": "node tools/flow.mjs",
+    "tertortor": "node --watch tools/studio/server.mjs",
+    "stories": "node tools/stories.mjs",
+    "commons": "node tools/commons.mjs",
+    "ref": "node tools/ref.mjs",
+    "events": "node tools/wait-event.mjs",
+    "stock": "node tools/stock.mjs",
+    "relay": "node tools/relay.mjs",
+    "worker": "node tools/worker.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "hyperframes": "0.9.15"
+  },
+  "private": true
+}

@@ -1,0 +1,19 @@
+[
+  {
+    "id": "flashcut",
+    "label": "Flashcut",
+    "description": "Product reveal ±11 s tanpa narasi: makro dan hero produk bergantian, potongan 0,1-0,4 s, kilatan dari logo produk, end card nama + CTA."
+  },
+  {
+    "id": "bri",
+    "label": "BRI",
+    "form": "kv",
+    "description": "Iklan promo BRI ±13 s tanpa narasi: key visual digerakkan (Flow), judul kinetik di belakang orang, angka promo odometer, lalu end frame persis KV dengan logo asli dan logo partner."
+  },
+  {
+    "id": "appdemo",
+    "label": "App Demo",
+    "form": "appdemo",
+    "description": "Demo aplikasi ±20-30 s tanpa narasi dari screenshot UI asli: headline serif diketik dengan kata miring beraksen, ponsel, potongan UI melayang keluar, kartu bertumpuk, daftar manfaat, ikon penutup. Shade biru BRI, musik dari kode, $0."
+  }
+]

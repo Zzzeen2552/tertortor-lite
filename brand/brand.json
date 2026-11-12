@@ -1,0 +1,321 @@
+{
+  "name": "MOTION",
+  "safe": {
+    "top": 168,
+    "bottom": 1330,
+    "side": 90,
+    "rightRail": 140
+  },
+  "horizontal": {
+    "safe": {
+      "top": 60,
+      "bottom": 1020,
+      "side": 96,
+      "rightRail": 0
+    },
+    "watermark": {
+      "left": 56,
+      "top": 48,
+      "width": 130
+    }
+  },
+  "voice": {
+    "languageCode": "id",
+    "elevenlabsVoiceId": "TX3LPaxmHKxFdv7VOQHJ",
+    "elevenlabsModel": "eleven_v3",
+    "voiceSettings": {
+      "stability": 0.5,
+      "similarity_boost": 0.75
+    },
+    "kokoroVoice": "am_michael",
+    "maxPause": 0.24,
+    "stepPause": 0.42,
+    "stepWords": [
+      "langkah",
+      "step"
+    ],
+    "seed": 7,
+    "gemini": {
+      "page": "https://aistudio.google.com/generate-speech?model=gemini-3.8-flash-tts",
+      "model": "gemini-3.8-flash-tts",
+      "speaker": "Kira",
+      "style": "seperti pendongeng sejarah: hangat, penuh semangat, ada jeda dramatis",
+      "voices": [
+        {
+          "name": "Koda",
+          "desc": "Lugas & membantu · sedang-rendah"
+        },
+        {
+          "name": "Rami",
+          "desc": "Hangat & bersahabat · rendah"
+        },
+        {
+          "name": "Nika",
+          "desc": "Hangat & bersahabat · sedang"
+        },
+        {
+          "name": "Lumi",
+          "desc": "Hangat & bersahabat · rendah"
+        },
+        {
+          "name": "Bodi",
+          "desc": "Tenang & intim · rendah"
+        },
+        {
+          "name": "Tavi",
+          "desc": "Tenang & intim · sedang-tinggi"
+        },
+        {
+          "name": "Kira",
+          "desc": "Kalem & percaya diri · sedang"
+        },
+        {
+          "name": "Ludo",
+          "desc": "Percaya diri & jelas · rendah"
+        },
+        {
+          "name": "Mako",
+          "desc": "Energik & berwarna · rendah"
+        },
+        {
+          "name": "Brio",
+          "desc": "Tenang & intim · sedang-rendah"
+        },
+        {
+          "name": "Jori",
+          "desc": "Hangat & bersahabat · sedang-rendah"
+        },
+        {
+          "name": "Sola",
+          "desc": "Lembut & santai · sangat tinggi"
+        },
+        {
+          "name": "Fola",
+          "desc": "Jelas & ramah · sedang"
+        }
+      ]
+    }
+  },
+  "loudness": {
+    "lufs": -14,
+    "tp": -1
+  },
+  "limits": {
+    "maxSeconds": 179,
+    "minSeconds": 30,
+    "maxBeatSeconds": 7,
+    "minBeatSeconds": 0.6,
+    "maxDeadAir": 1.2,
+    "noCharacterBefore": 2,
+    "maxFootageSeconds": 20
+  },
+  "sfx": {
+    "enabled": true,
+    "lead": 0.08,
+    "cut": "whoosh",
+    "marks": {
+      "slam": "hit",
+      "zero": "hit",
+      "flip": "thump",
+      "block": "thump",
+      "cross": "hit",
+      "key": "pop",
+      "tap": "tick",
+      "off": "tick",
+      "lock": "tick",
+      "check": "pop",
+      "mute": "thump",
+      "bounce": "whoosh",
+      "send": "pop",
+      "fill": "tick",
+      "otp": "pop",
+      "leak": "pop",
+      "c1": "tick",
+      "c2": "tick",
+      "c3": "tick"
+    },
+    "volume": {
+      "whoosh": 0.18,
+      "hit": 0.32,
+      "thump": 0.35,
+      "tick": 0.22,
+      "pop": 0.25,
+      "riser": 0.2
+    }
+  },
+  "flow": {
+    "maxClipSeconds": 10,
+    "model": "Omni 1.1 Flash",
+    "resolution": "720p",
+    "aspect": "9:16"
+  },
+  "defaultPreset": "hyperframe",
+  "gemini": {
+    "model": "gemini-3.8-flash",
+    "note": "Teks rutin timelapse (spot, prompt, metadata) lewat npm run gemini; key di .env GEMINI_API_KEY",
+    "fallback": [
+      "gemini-3.7-flash",
+      "gemini-3.5-flash",
+      "gemini-2.5-flash"
+    ],
+    "claudeFallback": {
+      "cli": "claude",
+      "model": "haiku",
+      "note": "User 2026-11-04: bila Gemini gagal (tanpa key, semua model 429/503), permintaan yang sama dikirim ke Claude Haiku lewat Claude Code CLI (claude -p, login langganan user). enabled: false untuk mematikan"
+    }
+  },
+  "musafo": {
+    "note": "Proyek Musafo (user 2026-11-03): cerita -> narasi Gemini TTS -> satu klip image-to-video per shot -> caption ID+EN. Referensi gaya: musafo/reference/",
+    "accent": "#21A35A",
+    "styleAnchor": "Stylized cinematic 3D render with a painterly, matte, clay-like finish — smooth simplified forms, no hyper-detailed skin or fabric pores. Teal-blue and warm amber-orange color palette, golden-hour backlight with soft rim light, gentle volumetric haze and floating dust, fine film grain, soft gradient sky. Serene, contemplative, spiritual mood.",
+    "refs": "musafo/reference/gambar",
+    "image": {
+      "tool": "Meta Muse (muse4ai)",
+      "script": "node tools/muse.mjs image <out> --prompt-file <txt> --ref <musafo/reference/gambar …>",
+      "ratio": "9:16",
+      "outputs": 1,
+      "note": "Default (user 2026-11-11): gambar Musafo di Meta Muse lewat muse4ai, 1 akun, 2-3 gambar dari musafo/reference/gambar sebagai acuan gaya (lebih baik daripada KV proyek). Cadangan: Google Flow (flow), lalu RunningHub Qwen Image 2.1 / zimage3.0 (fallback).",
+      "flow": {
+        "tool": "Google Flow",
+        "page": "https://labs.google/fx/tools/flow",
+        "mode": "image",
+        "model": "Nano Banana",
+        "ratio": "9:16",
+        "outputs": 1
+      },
+      "fallback": [
+        "https://www.runninghub.ai/ai-detail/2117411725430489089",
+        "https://www.runninghub.ai/ai-detail/2047494615414083586"
+      ]
+    },
+    "video": {
+      "page": "https://www.runninghub.ai/ai-detail/2117109484389048322",
+      "app": "Plaiful Pika × MiniMaxH3 (AI App pribadi user)",
+      "seconds": 15,
+      "megapixel": 2,
+      "ratio": "9:16",
+      "note": "User 2026-11-03: satu generate H3 maks 15 s memuat 2-4 shot berurutan ([Shot 1], [Shot 2], ... dengan waktu cut dari durasi beat), disusun oleh node tools/musafo.mjs clips setelah suara ada; DURASI di app = clips[].seconds. Run langsung tanpa izin koin (user 2026-11-04); laporkan koin per batch"
+    },
+    "maxSeconds": 179,
+    "maxShots": 10,
+    "maxShotSeconds": 15,
+    "shotsNote": "Maksimal 10 shot per video apa pun ceritanya (user 2026-11-07); satu shot = satu gambar = satu klip H3, narasi maks 15 s",
+    "wordsPerMinute": 140,
+    "seriesNote": "Satu video utuh (user 2026-11-07): semua kejadian dari sumber masuk, sampai 179 s; user memendekkannya sendiri lewat Edit naskah. Series (node tools/musafo.mjs series <slug> <jumlah>) hanya bila user memintanya",
+    "clipLook": "Stylized cinematic 3D render with a painterly, matte, clay-like finish, smooth simplified forms, teal-blue and warm amber-orange palette, golden-hour backlight with soft rim light",
+    "clipKeep": "Every shot keeps the same stylized cinematic 3D render with a matte painterly finish, teal-and-amber golden-hour light, gentle haze and fine film grain; all faces stay smooth and featureless or turned away, and the glowing sphere of light stays a plain sphere of light. No text, no letters, no logos, no dialogue.",
+    "peopleNote": "Ikuti skill musafo-prompt: wajah tokoh utama dari belakang/siluet/menunduk/terpotong, kerumunan berkepala oval polos, tangan elegan berbentuk baik. Rasulullah tidak pernah digambar: di gambar hanya 'a soft sphere of warm white light' (pusat cahaya kosong), nama beliau ditempel scene (shots[].orb, kaligrafi user).",
+    "prophetNote": "User 2026-11-07: Rasulullah = orb cahaya putih tanpa tulisan di gambar/klip; tulisan مُحَمَّد ﷺ ditempel di scene (shots[].orb) dengan font Arab, seperti medali kaligrafi di komik sirah.",
+    "grain": {
+      "opacity": 0.22,
+      "fps": 12,
+      "note": "User 2026-11-07: efek grainy. Lapisan noise di scene tiap shot (tools/musafo.mjs scene), karena klip AI menghaluskan grain dari gambar awal."
+    },
+    "promptSkill": "musafo-prompt (.claude/skills/musafo-prompt, dari user 2026-11-07): tiap image = 'Create a vertical 9:16 image of …' 80-140 kata, kalimat naratif, styleAnchor di akhir verbatim; wajah dan pakaian ditulis di adegan (mode Hajj / mode sirah)",
+    "orb": {
+      "color": "#5d6b70",
+      "note": "User 2026-11-07: kaligrafi jangan hitam pekat; abu-abu kebiruan yang menyatu dengan bayangan teal (PNG dipakai sebagai mask)."
+    }
+  },
+  "berakitkehulu": {
+    "note": "Proyek Berakit ke Hulu (user 2026-11-05, disingkat BKH): jenis proyek sendiri dengan alur Musafo (engine tools/musafo.mjs, skill /berakit-ke-hulu); kisah asal-usul merek dan pendiri usaha Indonesia. Beda dari Musafo: gaya gambar dan wajah tokoh terlihat. Referensi gaya: berakitkehulu/reference/",
+    "styleAnchor": "Cinematic stylized 3D render with heightened realism: Pixar-like expressive faces with slightly enlarged eyes and softly exaggerated proportions, set against tactile real-world materials (burlap, wicker, worn linen, rusted steel, cracked plaster, wet cobblestones). Muted warm earth palette of sepia brown, dusty ochre and faded teal-blue sky, with one or two saturated accents. Soft atmospheric haze, shallow depth of field with a gently blurred background, subtle film grain. Gritty but hopeful mood.",
+    "peopleNote": "Ikuti skill berakitkehulu-prompt: semua orang Indonesia dengan asal suku ditulis di kalimat subjek (Jawa, Minang, Peranakan Tionghoa, ...), ekspresi dan mata disebut, pakaian zaman dengan bahan dan bekas pakainya; tokoh nyata ditulis sebagai arketipe (umur, peran, rupa), tidak pernah nama atau kemiripan wajah aslinya; deskripsi tokoh utama per usia dipakai persis sama di semua shot.",
+    "promptSkill": "berakitkehulu-prompt (skill user, 2026-11-07): tiap image = \"Create a vertical 9:16 image of …\" 90-150 kata, kalimat naratif subjek → aksi → tempat + era → komposisi → cahaya, satu warna aksen, lalu styleAnchor di akhir verbatim. Skill itu default 16:9; di MOTION selalu 9:16: tumpuk kedalaman vertikal, subjek di dua pertiga bawah, konteks era di atas, tanpa teks di sepertiga bawah (caption).",
+    "prophetNote": "Tidak berlaku (BKH bukan kisah islami).",
+    "logoNote": "Logo dan kemasan merek nyata tidak pernah di-generate (skill: kemasan ditulis generik). Bila ada di bahan, file logo asli ditempel di shot penutup saja, dengan baris di sources.txt.",
+    "refs": "berakitkehulu/reference/gambar",
+    "defaultLook": "preset2",
+    "looks": {
+      "preset1": {
+        "label": "PRESET1 · 3D sinematik",
+        "description": "Film animasi 3D ala Pixar dengan material nyata yang kasar, palet tanah sepia-oker-teal yang pudar, kabut, grain. Gaya awal BKH (Kapal Api, Liem/BCA, Sosro).",
+        "styleAnchor": "Cinematic stylized 3D render with heightened realism: Pixar-like expressive faces with slightly enlarged eyes and softly exaggerated proportions, set against tactile real-world materials (burlap, wicker, worn linen, rusted steel, cracked plaster, wet cobblestones). Muted warm earth palette of sepia brown, dusty ochre and faded teal-blue sky, with one or two saturated accents. Soft atmospheric haze, shallow depth of field with a gently blurred background, subtle film grain. Gritty but hopeful mood.",
+        "clipLook": "Cinematic stylized 3D render with heightened realism, Pixar-like expressive faces, tactile vintage Indonesian materials, muted sepia, ochre and faded teal palette with one saturated accent",
+        "clipKeep": "Every shot keeps the same cinematic stylized 3D look, muted earth palette, soft haze and subtle film grain, the same tropical Indonesian period setting; each character keeps the same face, hair and clothing from shot to shot. No text, no letters, no logos, no dialogue.",
+        "grain": {
+          "opacity": 0
+        },
+        "refs": "berakitkehulu/reference/gambar",
+        "promptSkill": "berakitkehulu-prompt"
+      },
+      "preset2": {
+        "label": "PRESET2 · 3D cerah",
+        "description": "Render 3D bersih seperti tanah liat pahat (tanpa garis tinta), cahaya volumetrik sore keemasan, oker-terakota-hijau jenuh di bawah langit biru, suasana hangat dan penuh harapan.",
+        "styleAnchor": "Clean 3D digital rendering with soft subsurface scattering on skin, zero black outline, zero ink lines, soft clay-like sculpted forms, rich tactile fabric and terracotta textures, volumetric lighting, long soft shadows, glowing rim light and dappled light through leaves, saturated palette of golden ochre, terracotta orange and leafy green under a clear blue sky with soft white clouds, gentle depth haze. Nostalgic, warm and hopeful mood. Shop signs, labels and packaging are blank or softly blurred, with no readable lettering. Image 1, 2 and 3 as visual style reference only.",
+        "clipLook": "Clean 3D digital animation with soft clay-like sculpted forms and soft subsurface scattering on skin, no outlines, rich tactile fabric and terracotta textures, volumetric golden late-afternoon light with long soft shadows, saturated golden ochre, terracotta and leafy green palette under a clear blue sky, dense tropical Indonesian period streets",
+        "clipKeep": "Every shot keeps the same clean clay-like 3D look without outlines, bright golden late-afternoon volumetric light and saturated warm palette, the same tropical Indonesian period setting; each character keeps the same face, hair and clothing from shot to shot. Camera moves are smooth and gliding (slow crane, dolly and tracking moves); birds, leaves or fabric may drift through the frame. No text, no letters, no logos, no flags of other countries, no dialogue.",
+        "grain": {
+          "opacity": 0
+        },
+        "refs": "berakitkehulu/reference/gambar/PRESET 2",
+        "promptSkill": "berakitkehulu-prompt (aturan orang, era, dan komposisi tetap; style block diganti styleAnchor PRESET2, cahaya selalu matahari terang, kecuali adegan malam/sedih: tetap lukisan cerah tapi cahaya lampu minyak hangat)",
+        "note": "Acuan user 2026-11-08 (gambar/PRESET 2, video/PRESET2): kota tua Vietnam dengan bendera Vietnam. Di BKH diterjemahkan ke Indonesia tempo dulu: ruko dan kampung Indonesia, tidak ada bendera Vietnam atau bendera lain; merah putih hanya bila ceritanya menyebut.",
+        "image": {
+          "tool": "GPT Image",
+          "note": "User 2026-11-08: PRESET2 dibuat dengan GPT Image, sementara manual oleh user satu per satu. Image 1-3 = gambar acuan gaya dari refs (hanya gaya, bukan isi). Claude menulis prompt dan menunjukkannya di chat untuk disalin."
+        }
+      }
+    },
+    "image": {
+      "tool": "Google Flow",
+      "page": "https://labs.google/fx/tools/flow",
+      "mode": "image",
+      "model": "Nano Banana",
+      "ratio": "9:16",
+      "outputs": 1,
+      "note": "Default: gambar di Google Flow (gratis), 1-3 adegan dari berakitkehulu/reference/gambar (bukan thumbnail ber-teks) sebagai ingredients; tokoh yang sama di shot lain: gambar shot sebelumnya ikut sebagai ingredient. Cadangan bila Flow tidak bisa dibuka: RunningHub Qwen Image 2.1, lalu zimage3.0",
+      "fallback": [
+        "https://www.runninghub.ai/ai-detail/2117411725430489089",
+        "https://www.runninghub.ai/ai-detail/2047494615414083586"
+      ]
+    },
+    "video": {
+      "page": "https://www.runninghub.ai/ai-detail/2117109484389048322",
+      "app": "Plaiful Pika × MiniMaxH3 (AI App pribadi user)",
+      "seconds": 15,
+      "megapixel": 1,
+      "ratio": "9:16",
+      "note": "User 2026-11-03: satu generate H3 maks 15 s memuat 2-4 shot berurutan ([Shot 1], [Shot 2], ... dengan waktu cut dari durasi beat), disusun oleh node tools/musafo.mjs clips setelah suara ada; DURASI di app = clips[].seconds. Run langsung tanpa izin koin (user 2026-11-04); laporkan koin per batch User 2026-11-07: cukup 1 MP (Plaiful Pika, ≈24 R per detik di 2 MP)."
+    },
+    "maxSeconds": 120,
+    "maxShots": 10,
+    "maxShotSeconds": 15,
+    "shotsNote": "Maksimal 10 shot per video apa pun ceritanya (user 2026-11-07); satu shot = satu gambar = satu klip H3, narasi maks 15 s",
+    "wordsPerMinute": 140,
+    "seriesNote": "User 2026-11-07 (Eka Tjipta): cerita lebih dari 2 menit dijadikan series, tiap bagian < 120 s dan berakhir di titik tegang (node tools/musafo.mjs series <slug> <jumlah>). Beda dari Musafo (satu video sampai 179 s).",
+    "analysis": "berakitkehulu/reference/analysis.md",
+    "clipLook": "Cinematic stylized 3D render with heightened realism, Pixar-like expressive faces, tactile vintage Indonesian materials, muted sepia, ochre and faded teal palette with one saturated accent",
+    "clipKeep": "Every shot keeps the same cinematic stylized 3D look, muted earth palette, soft haze and subtle film grain, the same tropical Indonesian period setting; each character keeps the same face, hair and clothing from shot to shot. No text, no letters, no logos, no dialogue.",
+    "grain": {
+      "opacity": 0
+    },
+    "lookNote": "User 2026-11-08: BKH punya dua gaya visual. PRESET1 = 3D Pixar (gaya awal), PRESET2 = lukisan cerah. Dipilih per proyek di formulir Buat video atau editor (meta.json → look; node tools/musafo.mjs look <slug> <id>). Field di looks.<id> menimpa styleAnchor/clipLook/clipKeep/grain/refs di atas (yang di atas = PRESET1, cadangan)."
+  },
+  "bumidipijak": {
+    "note": "Channel Storytelling BumiDiPijak (sumber: Babad Tanah Jawa) (user 2026-11-07): jenis proyek sendiri sejak 2026-11-08 (type bumidipijak, channel bumidipijak, preset presets/bumidipijak, skill /bumidipijak), engine tools/musafo.mjs; lebih dari 2 menit = series (maxSeconds 120); gaya gambar sejak 2026-11-08: lukisan minyak gelap dari grid acuan user (reference/Screenshot 2026-11-08 060132.png), menggantikan arang-pastel di kertas.",
+    "maxSeconds": 120,
+    "styleAnchor": "Dark atmospheric oil painting with loose broad brush and palette-knife strokes, ink-wash blacks, a muted palette of charcoal grey, smoky slate blue and olive ochre, sparse flecks of gold leaf catching the light, heavy storm clouds and drifting smoke, soft fog dissolving the edges, visible paint texture, moody cinematic chiaroscuro, quiet melancholic mood. Hand-painted artwork, not a photograph, not 3D.",
+    "promptSkill": "Isi adegan, era, busana, dan aturan tokoh dari skill babad-tanah-jawa-prompt; GAYA dari grid acuan user (2026-11-08), bukan medium arang-pastel skill itu. Tiap image = \"Create a vertical 9:16 dark oil painting of …\": subjek → aksi → tempat → komposisi (sepertiga bawah tenang untuk caption) → kalimat era (\"The world is the mythic prelude of old Java: weathered stone and brick gates, tiered meru roofs, banyan trees and palms, volcanoes in mist.\") → styleAnchor persis. Di Flow: grid acuan sebagai ingredient + awali prompt dengan \"Match the painting style, palette and mood of the reference image (do not copy its subjects or layout).\"",
+    "peopleNote": "Ikuti skill babad-tanah-jawa-prompt: tokoh kecil, tenang, bagian dari arsitektur; wajah kecil, lembut, menunduk atau berpaling, tidak pernah potret. Pakaian tertutup (kemben/kain/selendang, pria dengan kain bahu dan iket). Raja dan tokoh bernama ditulis sebagai arketipe peran dan busana, tanpa nama. Wali dan guru agama hanya dari belakang, jauh, atau dalam bayangan.",
+    "prophetNote": "Nabi dan malaikat tidak pernah digambar (orb Musafo tidak dipakai di channel ini). Adegan legenda (Nyai Roro Kidul, keris sakti, silsilah mitis) lebih berkabut dan pudar; adegan sejarah digambar dengan detail arsitektur. Narasi menyebut \"menurut Babad…\" untuk klaim sejarah.",
+    "refs": "musafo/channels/bumidipijak/reference/Screenshot 2026-11-08 060132.png",
+    "clipLook": "Dark atmospheric oil painting with loose broad brush strokes, ink-wash blacks, charcoal grey, smoky slate blue and olive ochre with sparse gold-leaf flecks, heavy clouds, drifting fog and smoke",
+    "clipKeep": "Every shot stays the same dark hand-painted oil painting with visible brush texture, ink-wash blacks and drifting fog; only gentle drifting motion of mist, smoke, cloth and leaves, the painting never turns photographic or 3D; faces stay small, soft and turned away. No text, no letters, no signature, no logos, no dialogue.",
+    "grain": {
+      "opacity": 0,
+      "note": "Tekstur cat sudah ada di gambar."
+    },
+    "styleAnchorOld": {
+      "until": "2026-11-08",
+      "note": "arang-pastel di kertas cokelat muda (dua-perempuan-gapura.jpg, gerbang-bata.jpg)",
+      "styleAnchor": "Hand-drawn mixed-media artwork on warm buff toned paper: soft charcoal and graphite hatching, smudged tonal shading, colored pastel and chalk, a light transparent watercolor wash. Mostly muted grey-sepia, with terracotta-red brick, dusty-rose sky and sage-green moss, and one small warm accent at the focal point. Visible paper grain, loose sketchy edges that fade into bare paper, no hard outlines. Diffuse tropical overcast light, quiet, contemplative, timeless mood. Scanned artwork, not a photograph, not 3D."
+    },
+    "era": "The world is the mythic prelude of old Java: weathered stone and brick gates, tiered meru roofs, banyan trees and palms, volcanoes in mist.",
+    "voice": {
+      "speaker": "Kira",
+      "style": "seperti dalang bercerita: tenang, berwibawa, ada jeda",
+      "note": "Default suara BDP (user 2026-11-08); menimpa voice.gemini untuk proyek type bumidipijak."
+    }
+  }
+}

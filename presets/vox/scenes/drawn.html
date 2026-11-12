@@ -1,0 +1,54 @@
+<template>
+  <!-- register: drawn (preset vox: paper cut-out object + marker)  |  job: __JOB__  |  hero: __HERO__ -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: var(--ground); }
+    #__ID__-stage { position: absolute; inset: 0; }
+    #__ID__-sun { position: absolute; left: 230px; top: 300px; width: 620px; height: 620px; border-radius: 50%; background: var(--accent); }
+    #__ID__-sun .vox-dots { border-radius: 50%; opacity: .35; }
+    #__ID__-obj { position: absolute; left: 290px; top: 330px; width: 500px; height: 500px; overflow: visible; filter: drop-shadow(8px 10px 0 var(--shadow)); }
+    #__ID__-arrow { position: absolute; left: 640px; top: 760px; width: 260px; height: 200px; overflow: visible; }
+    #__ID__-label { position: absolute; left: 90px; right: 90px; top: 900px; margin: 0; text-align: center; font: 900 104px/0.98 var(--font-display); color: var(--ink); letter-spacing: -0.02em; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-hand" class="vox-hand" data-layout-allow-overflow><div id="__ID__-world" class="vox-world">
+    <div id="__ID__-stage">
+      <div id="__ID__-sun"><div class="vox-dots"></div></div>
+      <svg id="__ID__-obj" viewBox="0 0 100 100">
+        <!-- Replace with the beat's object, drawn as a flat paper cut-out: fill + 2.5 ink outline. -->
+        <path d="M50 8 L86 22 L86 50 C86 72 70 86 50 94 C30 86 14 72 14 50 L14 22 Z" fill="var(--card)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round" />
+        <path id="__ID__-check" d="M33 52 L45 64 L68 38" fill="none" stroke="var(--alert)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100 110" stroke-dashoffset="102" />
+      </svg>
+      <svg id="__ID__-arrow" viewBox="0 0 260 200" fill="none" stroke="var(--ink)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+        <path id="__ID__-arrowp" d="M240 180 C 220 90, 150 40, 40 40 M40 40 L 80 12 M40 40 L 78 72" pathLength="100" stroke-dasharray="100 110" stroke-dashoffset="102" />
+      </svg>
+      <h2 id="__ID__-label" data-safe="text" style="top:900px">__HERO__</h2>
+    </div>
+    </div></div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#__ID__-sun", { scale: 0.92 }, { scale: 1, duration: 0.15, ease: "steps(3)" }, 0);
+    tl.fromTo("#__ID__-obj", { y: 60, rotate: -8 }, { y: 0, rotate: 0, duration: 0.24, ease: "steps(4)" }, 0);
+    tl.fromTo("#__ID__-label", { y: 40 }, { y: 0, duration: 0.18, ease: "steps(3)" }, 0);
+    tl.fromTo("#__ID__-arrowp", { strokeDashoffset: 102 }, { strokeDashoffset: 0, duration: 0.4, ease: "steps(8)" }, 0.35);
+    tl.fromTo("#__ID__-check", { strokeDashoffset: 102 }, { strokeDashoffset: 0, duration: 0.3, ease: "steps(6)" }, C.check ?? 0.6);
+    for (let t = 0.5, k = 0; t < C.dur - 0.2; t += 0.25, k++) tl.set("#__ID__-obj", { rotate: k % 2 ? 0 : -0.8 }, t); // boil
+    // Camera: world point (fx, fy) lands at screen (540, 760), the middle of the safe band; [t, 540, 760, 1, 0] = layout as drawn.
+    // Keys [t, fx, fy, scale, rotateDeg, ease] ease into each other with no holds: pan between elements, push in at the mark, pull out to reveal.
+    const cam = (W, keys) => {
+      const st = ([, fx, fy, s = 1, r = 0]) => { const a = r * Math.PI / 180, c = Math.cos(a), n = Math.sin(a); return { x: 540 - s * (c * fx - n * fy), y: 760 - s * (n * fx + c * fy), scale: s, rotate: r }; };
+      tl.set(W, { transformOrigin: "0 0", ...st(keys[0]) }, 0);
+      for (let i = 1, t0 = 0; i < keys.length; i++) {
+        const t1 = Math.min(C.dur, Math.max(t0 + 0.1, keys[i][0]));
+        tl.fromTo(W, st(keys[i - 1]), { ...st(keys[i]), duration: t1 - t0, ease: keys[i][5] || "sine.inOut", immediateRender: false }, t0);
+        t0 = t1;
+      }
+    };
+    cam("#__ID__-world", [[0, 540, 600, 0.96], [0.45, 540, 660, 1, 0, "power2.out"], [C.dur * 0.6, 540, 720, 1.02], [C.dur, 540, 800, 1.06]]);
+    // Hand-held: stepped wobble at 6 fps (fixed table, deterministic).
+    const HH = [[0, 0, 0], [3, -2, 0.12], [-2, 3, -0.1], [2, 2, 0.06], [-3, -1, -0.12], [1, -3, 0.1], [-1, 2, -0.05], [3, 1, 0.08]];
+    for (let t = 0, k = 0; t < C.dur; t += 1 / 6, k++) tl.set("#__ID__-hand", { x: HH[k % 8][0], y: HH[k % 8][1], rotate: HH[k % 8][2] }, t);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

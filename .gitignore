@@ -1,0 +1,83 @@
+# dependencies and local binaries
+node_modules/
+tools/bin/
+.env
+
+# generated per video (rebuildable, large, or private)
+videos/*/out/
+videos/*/build/
+videos/*/renders/
+videos/*/voice/
+videos/*/.hyperframes/
+videos/*/assets/voice.wav
+videos/*/assets/music.wav
+videos/*/assets/sfx/
+videos/*/assets/footage/
+videos/*/assets/screens/
+videos/*/assets/reference/
+videos/*/assets/keyvisuals/
+videos/*/assets/spots/
+videos/*/assets/frames/
+videos/*/assets/cutout/
+
+# media library: metadata is tracked, the clips are not (they live on disk / in Flow)
+library/footage/
+library/sfx/
+library/audio/
+library/stock-export.csv
+# Qur'an text cache from equran.id (node tools/ayat.mjs get all rebuilds it)
+library/quran/
+
+# misc
+*.log
+.DS_Store
+Thumbs.db
+
+# preset reference videos (third-party, study only)
+presets/*/reference/
+videos/*/.thumbnails/
+videos/*/.waveform-cache/
+
+# Studio -> Claude event queue (local)
+.events.jsonl
+.events.seen
+
+# Musafo source books/articles (copyrighted, large): stay local
+musafo/sumber/*
+!musafo/sumber/README.md
+musafo/library/*/pages.json
+musafo/library/*/book.txt
+musafo/library/.job.json
+
+# Berakit ke Hulu reference videos (third-party, study only; large)
+berakitkehulu/reference/video/*
+!berakitkehulu/reference/video/.gitkeep
+!berakitkehulu/reference/video/links.txt
+
+# Advertisement / new sub reference media (third-party, study only); brief.md, analysis.md and style.md stay tracked
+advertisement/*/reference/*
+!advertisement/*/reference/analysis.md
+musafo/channels/*/reference/*
+advertisement/*/products/
+
+# TERTORTOR web relay: local test data and worker video previews (rebuildable)
+.relay/
+.preview/
+
+# TERTORTOR Cloudflare Tunnel token
+deploy/studio/cf.env
+
+# Studio progress: Claude session heartbeat and measured process times (tools/progress.mjs)
+.waiting
+.process-times.json
+videos/*/share.json
+library/voices/*.mp3
+
+# backups and derived copies kept beside the live folders (rebuildable / private)
+videos/*/assets/footage-*/
+videos/*/voice-*/
+.cache/
+
+# Buffer API keys pasted in Studio (tools/buffer.mjs), and deleted videos (Studio "Hapus video", restorable)
+.buffer-keys.json
+videos/.trash/

@@ -1,0 +1,51 @@
+# docker compose -p tertortor up -d --build   (in ~/tertortor, separate from REDACTOR's compose project)
+# Fully separate from REDACTOR (user 2026-11-07): reached through a Cloudflare Tunnel (no port, REDACTOR keeps 80/443),
+# own network and volume. Deploying, rebuilding, or breaking one never touches the other.
+name: tertortor
+services:
+  relay:
+    build: .
+    container_name: tertortor-relay
+    restart: unless-stopped
+    env_file: .env            # STUDIO_PASSWORD_HASH, RELAY_WORKER_TOKEN (optional CACHE_MAX_MB, MAX_UPLOAD_MB, VAPID_*, ADMIN_EMAIL, RESEND_API_KEY, MAIL_FROM, INVITE_HOURS)
+    networks: [tertortor]
+    volumes:
+      - tertortor-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 100
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+  tunnel:
+    # Cloudflare Tunnel (user 2026-11-07): an outbound connection to Cloudflare, so no port on the VPS and nothing of
+    # REDACTOR (its Caddy keeps 80/443). Public hostname tertortor.redactor.my.id → http://relay:4330 is set in the
+    # Cloudflare dashboard (Zero Trust → Networks → Tunnels). Cloudflare limits a request body to 100 MB on the free plan.
+    image: cloudflare/cloudflared:2026.10.7
+    container_name: tertortor-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    env_file: cf.env          # TUNNEL_TOKEN only
+    networks: [tertortor]
+    depends_on: [relay]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 100
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+networks:
+  # this project's own network (REDACTOR's Caddy is no longer attached to anything here)
+  tertortor: {}
+volumes:
+  tertortor-data: {}

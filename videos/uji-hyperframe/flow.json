@@ -1,0 +1,42 @@
+{
+  "scriptHash": "9690f04aaac9",
+  "model": "Omni 1.1 Flash (Flow)",
+  "shots": [
+    {
+      "id": "hook-seq",
+      "purpose": "satu generate 10 s, tiga hard cut pencurian HP di kafe malam. Cut 1 untuk beat hook; cut 2-3 masuk library untuk video HP dicuri berikutnya (beat clock di video uji ini register type).",
+      "seconds": 10,
+      "mode": "text",
+      "motion": "Vertical 9:16 video, documentary realism, looks like real security-camera and phone footage. One continuous night at a small open-air cafe, same person in a dark hoodie, same warm orange streetlight and the same low-light sensor noise and grain in every cut. Faces indistinct and not identifiable in every cut. The phone screen is completely black, dead and switched off for the entire clip; no clock, icons, text, lock screen or interface ever appears on it. No text, no watermark, no captions.\n[0-3.3s] High fixed security-camera view, wide lens with slight barrel distortion, static camera, completely locked off, never pans or zooms: a phone lies on a cafe table next to an iced coffee; a hooded figure walking past slides it off the table into a pocket without stopping.\n[3.3-6.4s] Hard cut to a close-up of gloved hands in a dim doorway, slight handheld shake: the thumb holds the side button of the phone; the black screen stays black.\n[6.4-10s] Hard cut to a narrow wet alley, static camera, completely locked off: the hooded figure seen from behind walks away into the dark and turns the corner.",
+      "cuts": [
+        {
+          "from": 0,
+          "to": 3.3,
+          "beat": "hook",
+          "cue": "stolen",
+          "desc": "CCTV: HP diambil dari meja kafe",
+          "asset": "hook"
+        },
+        {
+          "from": 3.3,
+          "to": 6.4,
+          "beat": "clock",
+          "cue": "switches",
+          "desc": "tangan bersarung menahan tombol daya (library)",
+          "asset": "clock-lib"
+        },
+        {
+          "from": 6.4,
+          "to": 10,
+          "beat": "clock",
+          "cue": "seconds",
+          "desc": "gang basah, pelaku pergi (library)",
+          "asset": "clock-lib-2"
+        }
+      ],
+      "status": "library",
+      "clipId": "20261105-77b7de",
+      "clip": "20261105-77b7de"
+    }
+  ]
+}
