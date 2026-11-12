@@ -18,6 +18,8 @@ Lalu di Claude Code (folder kerja `TERTORTOR-LITE`) jalankan skill yang ditunjuk
 
 ## Pasang di komputer lain (Windows)
 
+Prompt siap tempel untuk Claude Code ada di [SETUP.md](SETUP.md). Ringkasnya:
+
 1. Pasang Git, Node.js 22+, dan ffmpeg (mis. `winget install Git.Git OpenJS.NodeJS Gyan.FFmpeg`), plus Claude desktop app.
 2. Clone repo ini ke `Documents\TERTORTOR-LITE`, lalu `npm install` dan `npx hyperframes skills` (skill HyperFrames ke `~/.claude/skills`).
 3. `node tools/sfx.mjs`.
