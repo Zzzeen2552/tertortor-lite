@@ -147,6 +147,11 @@ textarea{resize:vertical;min-height:180px;line-height:1.5}
 .linkrow #linkBox{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .linkrow #linkBox[hidden]{display:none}
 .linkrow input{flex:1;min-width:0;font-size:12.5px}
+.fmtbox{margin-top:6px} .fmtbox > .btn{width:100%;justify-content:center}
+#fmtBody{margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel-2);display:flex;flex-direction:column;gap:6px;font-size:13px}
+#fmtBody[hidden]{display:none}
+.fmtrow{display:flex;align-items:center;gap:8px;min-height:30px} .fmtrow label{flex:1;display:flex;gap:8px;align-items:center;cursor:pointer}
+.fmtrow small{color:var(--muted)} .fmtrow a.btn{padding:4px 10px}
 .stage.ph{display:grid;place-items:center;color:#777;font-size:13px;text-align:center;padding:30px}
 .vnav{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px;font-size:12px;color:var(--muted)}
 .tline{display:flex;gap:3px;margin-top:12px;height:64px}
@@ -1337,6 +1342,7 @@ async function viewEditor(slug, startTab) {
         ${v.video ? `<video class="stage" id="stage" src="${v.video}"${v.cinematic && v.cover ? ` poster="${v.cover}"` : ""} controls playsinline preload="metadata"></video>
           <div class="linkrow"><button class="btn sm" id="linkBtn">${v.share ? "Lihat link video" : "Buat link video"}</button>
             <div id="linkBox" hidden>${v.share ? `<input readonly value="${esc(v.share.url)}"><button class="btn sm" data-copy>Salin</button><a class="btn sm" href="${esc(v.share.url)}" target="_blank" rel="noopener">Buka</a>${v.share.stale ? `<span class="muted" style="font-size:12px;width:100%">Link ini masih memutar render lama. Perbarui lewat tombol "Link: render lama" di atas.</span>` : ""}` : ""}</div></div>` : `<div class="stage ph">Belum ada render.<br>Tempel perintah di atas ke Claude Code.</div>`}
+        ${v.video ? `<div class="fmtbox" id="fmtBox"><button class="btn sm" id="fmtBtn" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="6" width="11" height="12" rx="2"/><rect x="16" y="3" width="5" height="9" rx="1.5"/></svg>Ubah format</button><div id="fmtBody" hidden></div></div>` : ""}
         ${me?.role === "viewer" ? "" : `<div class="linkrow" style="margin-top:6px"><button class="btn sm" id="delBtn" title="Pindahkan proyek ini ke Sampah (bisa dipulihkan)" aria-label="Hapus video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Hapus video</button></div>`}
         ${v.beats.length ? `<div class="tline" id="tline">${v.beats.map((b, i) => `<button class="tb" data-i="${i}" title="${esc(b.id)} · ${b.duration.toFixed(1)}s" style="--w:${b.duration / total * 100};--rc:${REG[b.register]?.[0]}">${thumb(b) ? `<img src="${thumb(b)}" alt="" loading="lazy">` : ""}</button>`).join("")}</div>
           <div class="legend">${Object.values(REG).map(([c, n]) => `<span><i style="--rc:${c}"></i>${n}</span>`).join("")}</div>` : ""}
@@ -1916,6 +1922,64 @@ async function viewEditor(slug, startTab) {
     if (!b.caption) writeCap();
     if (b.key && b.channels.length) { try { chans = (await (await fetch(`/api/buffer/channels?sub=${encodeURIComponent(v.sub)}`)).json()).channels ?? []; draw(); } catch {} }
   };
+  // Ubah format (user 2026-11-13): other ratios and file types from the finished render (tools/formats.mjs)
+  if ($("#fmtBtn")) {
+    const body = $("#fmtBody"), canEdit = me?.role !== "viewer";
+    const mb = (b) => (b / 1e6 >= 10 ? Math.round(b / 1e6) : (b / 1e6).toFixed(1)) + " MB";
+    let poll = null;
+    const draw = (st) => {
+      const cur = st.busy ? st.job?.current : null;
+      const queued = st.busy ? new Set((st.job?.kinds ?? []).filter((k) => !(st.job?.done ?? []).some((x) => x.kind === k))) : new Set();
+      const err = Object.fromEntries((st.job?.errors ?? []).map((e) => [e.kind, e.error]));
+      const vOf = (k) => st.variants.find((x) => x.kind === k);
+      const ratioRows = st.ratios.map((k) => {
+        const made = vOf(k.kind), mv = made && videos.find((x) => x.slug === made.slug);
+        const status = made ? '<small>' + esc(mv ? (mv.next === "Selesai" ? "selesai" : "Claude: " + mv.next.toLowerCase()) : "dibuat") + '</small><a class="btn sm" href="#/v/' + made.slug + '">Buka</a>' : "";
+        return '<div class="fmtrow"><label>' + (canEdit && !made ? '<input type="checkbox" data-ratio="' + k.kind + '">' : "") + esc(k.label) + "</label>" + status + "</div>";
+      }).join("");
+      const fileRows = st.kinds.map((k) => {
+        const f = st.formats.find((x) => x.kind === k.kind);
+        const status = k.kind === cur ? "<small>membuat…</small>" : queued.has(k.kind) ? "<small>antre</small>"
+          : err[k.kind] ? '<small style="color:var(--bad)" title="' + esc(err[k.kind]) + '">gagal</small>'
+          : f?.file ? (f.stale ? '<small title="Video sudah dirender ulang setelah file ini dibuat">render lama</small>' : "") + '<a class="btn sm" href="/files/videos/' + slug + "/" + f.file + '" download>Unduh · ' + mb(f.bytes) + "</a>" : "";
+        return '<div class="fmtrow"><label>' + (canEdit ? '<input type="checkbox" data-file="' + k.kind + '" ' + (st.busy ? "disabled" : "") + ">" : "") + esc(k.label) + "</label>" + status + "</div>";
+      }).join("");
+      body.innerHTML =
+        (st.variantOf ? '<div class="muted" style="font-size:12px">Ini versi rasio lain dari <a href="#/v/' + st.variantOf + '">video aslinya</a>. Rasio lain dibuat dari video asli.</div>'
+          : '<div class="eyebrow">Rasio lain · dibuat ulang</div><div class="muted" style="font-size:12px;line-height:1.45">Gambar dibuat ulang untuk rasio itu (latar tenang di tempat logo dan footer), lalu klip dan tata letak tiap scene disusun ulang di HyperFrames. Tidak dipotong, tanpa latar blur. Hanya rasio yang kamu centang yang dibuat; tiap rasio jadi proyek sendiri.</div>' + ratioRows +
+            (canEdit && st.ratios.some((k) => !vOf(k.kind)) ? '<div class="meta-row" style="justify-content:flex-end;margin-top:4px"><button class="btn pri sm" id="fmtRatioGo">Buat versi terpilih</button></div>' : "")) +
+        '<div class="eyebrow" style="margin-top:10px">Konversi file · dari render ini</div>' + fileRows +
+        (canEdit ? '<div class="meta-row" style="justify-content:flex-end;margin-top:4px"><button class="btn sm" id="fmtGo" ' + (st.busy ? "disabled" : "") + ">" + (st.busy ? "Sedang membuat…" : "Konversi terpilih") + "</button></div>" : "") +
+        (st.job?.interrupted ? '<small class="muted">Konversi sebelumnya terhenti karena Studio dimulai ulang.</small>' : "");
+      const post = async (data) => {
+        const r = await fetch("/api/videos/" + slug + "/formats", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(data) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok && r.status !== 202) { toast(j.error || "Gagal memulai"); load(); return null; }
+        return j;
+      };
+      if ($("#fmtRatioGo")) $("#fmtRatioGo").onclick = async () => {
+        const ratios = [...body.querySelectorAll("input[data-ratio]:checked")].map((x) => x.dataset.ratio);
+        if (!ratios.length) return toast("Centang rasio yang dibutuhkan");
+        $("#fmtRatioGo").disabled = true;
+        const j = await post({ ratios });
+        if (!j) return;
+        toast((j.made.length > 1 ? j.made.length + " versi dibuat" : "Versi dibuat") + ": Claude membuat ulang gambar dan tata letaknya" + (j.errors.length ? " · " + j.errors.join(" ") : ""));
+        try { videos = await (await fetch("/api/videos")).json(); } catch {}
+        draw(j);
+      };
+      if ($("#fmtGo")) $("#fmtGo").onclick = async () => {
+        const kinds = [...body.querySelectorAll("input[data-file]:checked")].map((x) => x.dataset.file);
+        if (!kinds.length) return toast("Centang file yang dibutuhkan");
+        $("#fmtGo").disabled = true;
+        const j = await post({ kinds });
+        if (!j) return;
+        toast("Konversi dimulai"); draw(j); schedule(j);
+      };
+    };
+    const schedule = (st) => { clearTimeout(poll); if (st.busy && document.body.contains(body)) poll = setTimeout(load, 3000); };
+    const load = async () => { try { const st = await (await fetch(`/api/videos/${slug}/formats`)).json(); draw(st); schedule(st); } catch {} };
+    $("#fmtBtn").onclick = () => { const open = body.hidden; body.hidden = !open; $("#fmtBtn").setAttribute("aria-expanded", String(open)); if (open) load(); };
+  }
   // delete (user 2026-11-12): the folder moves to videos/.trash (restorable from "Sampah"); the user types the slug
   if ($("#delBtn")) $("#delBtn").onclick = () => {
     const box = document.createElement("div");

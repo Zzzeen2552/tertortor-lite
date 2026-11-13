@@ -35,6 +35,21 @@ versi baru.
    promo menghentak dengan garis ledakan, kartu putih naik, garis grid terbuka, logo partner pop satu per satu (70 ms).
    Diam sampai akhir; satu hentakan kecil di kotak promo (11,35 s).
 
+## Aturan tetap (user 2026-11-13, menimpa bagian lain resep ini)
+
+- **Logo di scene terakhir saja.** Logo Danantara, logo HUT (131), dan logo BRI **tidak tampil di keyframe** (adegan
+  teks kinetik, angka promo, end frame 1, end frame 2). Ketiganya pindah ke **scene penutup** sendiri setelah end frame 2:
+  latar putih polos, tiga logo dalam satu baris di tengah tinggi layar (Danantara kiri, 131 tengah, BRI dengan "Bank Rakyat
+  Indonesia" kanan), dan satu baris disclaimer biru di bawah: "BRI merupakan peserta penjaminan LPS, serta berizin dan
+  diawasi Otoritas Jasa Keuangan & Bank Indonesia". Tidak ada teks atau gambar lain di scene itu. Acuan:
+  `reference/endcard.png`. Footer klien (URL promo, periode, tagline, kontak) dan kartu QR BRImo tetap di end frame.
+- **Rounded square tidak pernah berubah bentuk.** Bingkai putih bersudut bulat di sekitar subjek (end frame 1, ciri KV
+  BRI di semua materi klien) selalu persegi dengan sudut yang sama (836×834, rx 60, garis putih 8 px di 1080×1920). Di rasio
+  lain (Ubah format) bentuk dan proporsinya tetap persegi, tidak boleh dilebarkan, dipanjangkan, atau dipipihkan. Yang
+  boleh menyesuaikan: letaknya, dan ukurannya **mengecil secara proporsional** bila kanvas tidak muat (user 2026-11-13):
+  sisi, jari-jari sudut, dan tebal garis diskalakan dengan faktor yang sama (rx = 7,2% sisi, garis ≈ 1% sisi, min. 5 px).
+  Tata letak lain yang menyesuaikan diri di sekitarnya.
+
 ## Aturan
 
 - **Format judul** di semua teks animasi (huruf pertama tiap kata kapital, singkatan tetap: BRI, VISA). Teks di dalam

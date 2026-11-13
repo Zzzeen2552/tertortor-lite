@@ -28,6 +28,8 @@ export const PROCESSES = {
   "miracleofhajj-new": { label: "Claude menyusun storyline: sebab yang dicari + dalil Al-Qur'an", eta: [3, 8], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
   // photos of the main character added to a project later (tab Tokoh)
   characters: { label: "Claude membuat character sheet per usia dari foto tokoh", eta: [5, 15], out: () => "musafo.json", next: "character sheet siap dilihat di tab Tokoh" },
+  // Ubah format (user 2026-11-13): a ticked ratio → its own project; pictures, clips and layout are remade, then rendered
+  "format-new": { label: "Claude membuat ulang gambar, klip, dan tata letak untuk rasio baru, lalu merender", eta: [30, 90], done: (d, at) => { const s = d.split(/[\\/]/).pop(), f = join(d, "out", `${s}.mp4`); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; }, next: "versi rasio baru siap ditonton" },
   "draft-approved": { label: "Claude menulis storyline dari draftmu", eta: [3, 6], out: () => "storyline.md", next: "storyline siap disetujui" },
   "storyline-approved": { label: "Claude menulis naskah per shot", eta: [5, 12], out: () => "script.md", next: "naskah siap disetujui" },
   "docucine-new": { label: "Claude menulis naskah dari sumber dan idemu", eta: [4, 10], out: () => "script.md", next: "naskah siap kamu edit dan setujui" },

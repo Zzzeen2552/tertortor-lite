@@ -71,10 +71,14 @@
     /* client artwork (static once in: logo slots) */
     #kv-logos { position: absolute; inset: 0; z-index: 5; }
     #kv-logos img { position: absolute; display: block; }
-    #lg-dan { left: 52px; top: 48px; width: 266px; opacity: 0; }
-    #lg-131 { left: 716px; top: 34px; width: 112px; opacity: 0; }
-    #lg-div { position: absolute; left: 846px; top: 66px; width: 3px; height: 72px; background: #0B5AC4; opacity: 0; }
-    #lg-bri { left: 869px; top: 62px; width: 163px; opacity: 0; }
+    /* closing scene (user 2026-11-13): the Danantara, 131 and BRI logos appear ONLY here, on white, with the LPS line,
+       placed as in the client's end card (advertisement/bri/reference/endcard.png) */
+    #kv-end { position: absolute; inset: 0; z-index: 30; background: #fff; opacity: 0; }
+    #kv-end img { position: absolute; display: block; }
+    #lg-dan { left: 88px; top: 842px; width: 266px; }
+    #lg-131 { left: 502px; top: 832px; width: 118px; }
+    #lg-bri { left: 804px; top: 834px; width: 192px; }
+    #kv-legal { position: absolute; left: 40px; right: 40px; top: 1676px; text-align: center; font: 500 19px/1.3 var(--font-body); color: var(--accent); letter-spacing: -0.005em; white-space: nowrap; }
     #lg-foot { left: 54px; top: 1620px; width: 700px; opacity: 0; }
     #lg-qrcard { position: absolute; left: 818px; top: 1766px; width: 262px; height: 110px; background: #fff; border-radius: 14px 0 0 14px; opacity: 0; }
     #lg-qr { left: 818px; top: 1765px; width: 256px; opacity: 0; }
@@ -164,13 +168,16 @@
     </div>
 
     <div id="kv-logos">
-      <img id="lg-dan" src="assets/logos/danantara.png" alt="" />
-      <img id="lg-131" src="assets/logos/131.png" alt="" />
-      <div id="lg-div"></div>
-      <img id="lg-bri" src="assets/logos/bri.png" alt="" />
       <img id="lg-foot" src="assets/logos/footer-kiri.png" alt="" />
       <div id="lg-qrcard"></div>
       <img id="lg-qr" src="assets/logos/brimo-qr.png" alt="" />
+    </div>
+
+    <div id="kv-end">
+      <img id="lg-dan" src="assets/logos/danantara.png" alt="" />
+      <img id="lg-131" src="assets/logos/131.png" alt="" />
+      <img id="lg-bri" src="assets/logos/bri.png" alt="" />
+      <div id="kv-legal" data-safe="text" data-layout-ignore>BRI merupakan peserta penjaminan LPS, serta berizin dan diawasi Otoritas Jasa Keuangan &amp; Bank Indonesia</div>
     </div>
 
     <div id="kv-g" data-layout-allow-overflow>
@@ -223,7 +230,7 @@
     // ---- times (s) ----
     // on a 100 BPM grid (beat = 0.6 s, beats at 0.55 + 0.6 n): cuts on beats, hits on beats or half beats
     const T = { b: 0.55, c: 1.15, strike: 1.45, d: 1.75, g: 2.65, k: 2.75, odo: 2.95, slam: 3.55, fly: 3.85,
-      end1: 3.95, shine: 5.95, toB: 7.45, card: 7.75, box: 7.75, grid: 8.35, hit: 11.35, end: 13 };
+      end1: 3.95, shine: 5.95, toB: 7.45, card: 7.75, box: 7.75, grid: 8.35, hit: 10.75, close: 11.35, end: 13 };
     const ACC = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#1F5BC6";
     const tl = gsap.timeline({ paused: true });
     const punch = (sel, t, k = 1.06, d = 0.4) => {
@@ -295,7 +302,6 @@
     tl.fromTo("#kv-frame-r", { strokeDasharray: "0 4000" }, { strokeDasharray: "3400 4000", duration: 0.8, ease: "expo.out" }, T.end1);
     tl.fromTo("#kv-promo-t .w", { opacity: 0, x: -40, filter: "blur(8px)" }, { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.42, ease: "expo.out", stagger: 0.04 }, T.end1 + 0.2);
     // logos and the client's footer artwork: simple fade + rise, then still
-    tl.fromTo("#lg-dan, #lg-131, #lg-div, #lg-bri", { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out", stagger: 0.06 }, T.end1 + 0.1);
     tl.fromTo("#lg-foot", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, T.end1 + 0.3);
     tl.fromTo("#lg-qrcard, #lg-qr", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, T.end1 + 0.4);
     // second hit while end frame 1 holds: a shine over the 25%
@@ -327,6 +333,11 @@
     fire("#kv-bb", T.box + 0.75);
     tl.fromTo("#kv-photo", { scale: 1.45 }, { scale: 1.52, duration: T.end - T.toB - 0.7, ease: "none", immediateRender: false }, T.toB + 0.7);
     punch("#kv-box", T.hit, 1.08);
+
+    // ---- 11.35 s: closing scene, white, the three logos + the LPS/OJK/BI line, held to the end ----
+    tl.fromTo("#kv-end", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, T.close);
+    tl.fromTo("#lg-dan, #lg-131, #lg-bri", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.08 }, T.close + 0.15);
+    tl.fromTo("#kv-legal", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, T.close + 0.4);
 
     const cuts = document.querySelectorAll("#kv-cut img");
     let lastCut = -2;

@@ -97,9 +97,11 @@ export function loadBrand(dir) {
   if (p.loudness && !(ad && existsSync(ad) && readJSON(ad).music)) merged.loudness = { ...brand.loudness, ...p.loudness };
   // frame (9:16 / 16:9): horizontal swaps in its own safe band and watermark spot (brand.json "horizontal")
   merged.frame = frameOf(dir);
-  if (merged.frame.format === "horizontal") {
-    merged.safe = { ...brand.safe, ...(brand.horizontal?.safe ?? {}) };
-    merged.watermark = { ...(brand.watermark ?? {}), ...(brand.horizontal?.watermark ?? {}) };
+  if (merged.frame.format !== "vertical") {
+    // feed 4:5 and square 1:1 (Ubah format, user 2026-11-13): a feed post has no app UI over it, so a plain margin band
+    const own = brand[merged.frame.format] ?? {}, m = Math.round(merged.frame.h * 0.05);
+    merged.safe = { ...brand.safe, ...(merged.frame.format === "horizontal" ? {} : { top: m, bottom: merged.frame.h - m, side: 72, rightRail: 0 }), ...(own.safe ?? {}) };
+    merged.watermark = { ...(brand.watermark ?? {}), ...(merged.frame.format === "horizontal" ? {} : { top: m }), ...(own.watermark ?? {}) };
   }
   merged.formats = p.formats ?? ["vertical"];
   // one continuous camera over one world (Docucine): cues builds a single compositions/world.html, no cuts
@@ -112,7 +114,11 @@ export function loadBrand(dir) {
 export const FRAMES = {
   vertical: { format: "vertical", w: 1080, h: 1920, resolution: "portrait" },
   horizontal: { format: "horizontal", w: 1920, h: 1080, resolution: "landscape" },
+  feed: { format: "feed", w: 1080, h: 1350, resolution: "portrait" },
+  square: { format: "square", w: 1080, h: 1080, resolution: "square" },
 };
+// "Ubah format" kinds (Studio checkbox) → frame id
+export const VARIANT_KINDS = { "4x5": "feed", "1x1": "square", "16x9": "horizontal", "9x16": "vertical" };
 export function frameOf(dir) {
   const meta = dir && existsSync(join(dir, "meta.json")) ? readJSON(join(dir, "meta.json")) : {};
   return FRAMES[meta.format] ?? FRAMES.vertical;

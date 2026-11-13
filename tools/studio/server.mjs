@@ -14,6 +14,10 @@ import { isMusafo, checkMusafo, createMusafo, STORY_TYPES, storyType, storylineA
 import { editScriptMd, scriptParagraphs, pendingEdits } from "../script-edit.mjs";
 import { working, finished, claudeWaiting } from "../progress.mjs";
 import { state as chatState, send as chatSend, stop as chatStop, reset as chatReset } from "../studio-chat.mjs";
+import { KINDS as FORMAT_KINDS, listFormats, sourceOf as formatSource } from "../formats.mjs";
+import { createVariant, variantsOf } from "../variant.mjs";
+import { VARIANT_KINDS } from "../lib.mjs";
+const formatJobs = new Map(); // slug -> running tools/formats.mjs child
 import { share, revoke, shareInfo } from "../share.mjs";
 import { listBooks, loadBook, useStory, readJob, listChannels, addChannel, channelOf, fetchArticle, sourceToLibrary } from "../stories.mjs";
 import { structure, placeOf, clipPlaces, addSub, subDir, listProducts } from "../categories.mjs";
@@ -961,6 +965,45 @@ createServer(async (req, res) => {
       return send(res, 200, { ok: true, thumbnail: thumbInfo(d, thb[1]), watermark: watermarkInfo(d) });
     }
     // share by link (tools/share.mjs): compress the render, upload it to the relay, return the public /v/<token> link
+    // Ubah format (user 2026-11-13): the finished render → 4:5, 1:1, 16:9 (9:16 for wide videos), ProRes, WebM, GIF, 720p
+    // (tools/formats.mjs, ffmpeg only, $0). POST starts one background run per video; the panel under the video polls GET.
+    const fmtM = p.match(/^\/api\/videos\/([a-z0-9-]+)\/formats$/);
+    if (fmtM && ["GET", "POST"].includes(req.method)) {
+      const slug = fmtM[1], d = join(VIDEOS, slug);
+      if (!existsSync(d)) return send(res, 404, { error: "video not found" });
+      const jf = join(d, "out", "formats", "job.json");
+      const info = () => {
+        let job = null; try { job = JSON.parse(readFileSync(jf, "utf8")); } catch {}
+        const busy = formatJobs.has(slug);
+        if (job && job.running && !busy) { job.running = false; job.interrupted = true; } // Studio restarted mid-run
+        const own = metaOf(d).format ?? "vertical";
+        // other ratios = remakes (tools/variant.mjs + event format-new), made only for the boxes the user ticks
+        const ratios = Object.entries(VARIANT_KINDS).filter(([, f]) => f !== own).map(([k]) => ({ kind: k, label: { "4x5": "4:5 feed", "1x1": "1:1 kotak", "16x9": "16:9 YouTube", "9x16": "9:16 vertikal" }[k] }));
+        return { busy, job, formats: listFormats(d, slug), kinds: Object.entries(FORMAT_KINDS).map(([k, x]) => ({ kind: k, label: x.label })), ratios: metaOf(d).variantOf ? [] : ratios, variants: variantsOf(slug), variantOf: metaOf(d).variantOf ?? null };
+      };
+      if (req.method === "GET") return send(res, 200, info());
+      const body = JSON.parse((await readBody(req)).toString() || "{}");
+      // ratio remakes: one project per ticked ratio, then Claude is woken to remake pictures, clips and layout
+      const want = (Array.isArray(body.ratios) ? body.ratios : []).filter((k) => VARIANT_KINDS[k]);
+      if (want.length) {
+        const made = [], errors = [];
+        for (const k of want) {
+          try { const r = createVariant(slug, k); made.push(r.slug); emit("format-new", r.slug, { of: slug, kind: k }); }
+          catch (e) { errors.push(e.message); }
+        }
+        if (!made.length) return send(res, 400, { error: errors.join(" ") });
+        return send(res, 200, { ...info(), made, errors });
+      }
+      if (formatJobs.has(slug)) return send(res, 409, { error: "Masih membuat format lain untuk video ini." });
+      if (!existsSync(formatSource(d, slug))) return send(res, 400, { error: "Belum ada render untuk diubah formatnya." });
+      const kinds = (Array.isArray(body.kinds) ? body.kinds : []).filter((k) => FORMAT_KINDS[k]);
+      if (!kinds.length) return send(res, 400, { error: "Pilih minimal satu format." });
+      const child = spawn("node", [join(ROOT, "tools", "formats.mjs"), slug, "--only", kinds.join(",")], { cwd: ROOT, windowsHide: true, stdio: "ignore" });
+      formatJobs.set(slug, child);
+      child.on("close", () => formatJobs.delete(slug));
+      child.on("error", () => formatJobs.delete(slug));
+      return send(res, 202, { ...info(), busy: true });
+    }
     // The upload takes 1-3 min, longer than Cloudflare keeps a web request open (±100 s → an HTML 524 page in the
     // browser), so POST only starts it and the dialog polls GET until the link is there (user 2026-11-09).
     const shr = p.match(/^\/api\/videos\/([a-z0-9-]+)\/share$/);

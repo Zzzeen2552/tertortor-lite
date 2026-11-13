@@ -47,6 +47,11 @@ di `concepts.json`; user memilih di tab "Konsep" sebelum naskah. Alurnya di `.cl
   menyetujui thumbnail lewat tombol **Setujui & render video** di tab Thumbnail.
 - **Cover gaya**: `<subDir>/cover.jpg`, `node tools/sub-covers.mjs [--force|<sub>]`, tidak pernah dari media acuan pihak ketiga.
 - **Hapus video**: dipindah ke `videos/.trash/`, dipulihkan dari menu **Sampah**. Claude tidak menghapus video user tanpa izin.
+- **Ubah format** (user 2026-11-13): tombol "Ubah format" di bawah video editor. **Tidak pernah otomatis**: hanya rasio yang
+  user centang yang dibuat (4:5 1080×1350, 1:1 1080×1080, 16:9; 9:16 untuk video lebar), **dibuat ulang di HyperFrames,
+  tidak pernah dipotong dari render lama atau diberi latar blur**. `tools/variant.mjs` menyalin proyek ke
+  `videos/<slug>-<kind>/` (`meta.json → format` feed/square/horizontal/vertical, `variantOf`, `FORMAT.md`), lalu event
+  `format-new`. Konversi file dari render (ProRes, WebM, GIF, 720p): `node tools/formats.mjs <slug> --only …`.
 - **Bagikan, Buffer, undangan user, Web Push** butuh relay web, yang tidak dipakai di LITE. Kodenya masih ada; jangan
   menyiapkan relay tanpa permintaan user. Claude tidak pernah mengisi key dan tidak mengirim/memublikasikan tanpa izin.
 
@@ -66,6 +71,7 @@ lagi penunggunya. Timeout (4 jam, exit 2) = jalankan lagi bila masih menunggu.
 | `storyline-approved` (BKH/BDP) | BKH: character sheet per usia bila ada foto tokoh; `series` bila perlu; `musafo.json` (naskah per shot) → build → minta persetujuan naskah |
 | `script-approved` (BKH/BDP) | `node tools/script-edit.mjs list <slug>`, lalu berhenti: suara dan gambar menunggu tombol Production |
 | `production` (BKH/BDP) | 1. suara Gemini TTS satu take, 2. key visual per shot, lalu laporkan; klip menunggu keputusan user |
+| `format-new` (versi rasio lain, `of`, `kind`) | **master plate dulu**: satu gambar lebar 16:9 (subjek di tengah, area tenang di semua sisi), satu klip 16:9 (Flow, unduh upscale 1080p; upscale lagi di RunningHub bila jendela 9:16/4:5 butuh lebih tajam) di `videos/<asli>/assets/master/`; tiap rasio = jendela potong dari master itu (Flow video hanya 16:9 dan 9:16). Area tenang di tempat judul dan footer, potongan orang/penutup per frame bila dipakai, tata letak tiap scene disusun ulang → `check` → still → `finish` → contact sheet → laporkan |
 | `characters` (BKH) | foto tokoh baru di tab Tokoh: buat/ulang character sheet usia yang terdampak, laporkan |
 | `channel-new` (sub baru, `category` + `dir`) | baca `<dir>/brief.md` + `<dir>/reference/`, tanya user yang belum jelas, desain sub itu, hapus `draft` |
 | `ad-new` (advertisement) | `flashcut`: skill `/flashcut <slug>` (`ad.json` → `node tools/ad.mjs check` → `finish`). `bri`: `advertisement/bri/style.md`. `appdemo`: `advertisement/appdemo/style.md` (`node tools/appdemo.mjs info|check`, `finish --no-thumbnail`). Selalu baca contact sheet, kirim MP4, minta persetujuan |
@@ -110,7 +116,9 @@ ditolak. Butuh Claude Code CLI terpasang dan sudah login di PC ini (`claude --ve
     produk sendiri. Aturan: ≤ 15 s, produk utuh sebelum 2 s, end card ≥ 1,8 s, semua aset di `sources.txt`. Produk tidak
     boleh digambar ulang AI; klaim hanya yang terlihat di foto atau dari user.
   - **BRI** (`advertisement/bri/style.md`, preset `presets/bri`): iklan promo ±13 s dari KV klien, judul kinetik di belakang
-    orang, angka promo odometer, end frame persis KV dengan logo asli (`advertisement/bri/kit/`).
+    orang, angka promo odometer, end frame persis KV, lalu **scene penutup putih**: logo Danantara, 131, BRI + disclaimer
+    LPS/OJK/BI (logo itu tidak tampil di keyframe; rounded square selalu persegi di semua rasio, boleh mengecil
+    proporsional; `style.md § Aturan tetap`, user 2026-11-13).
   - **App Demo** (`advertisement/appdemo/style.md`, `tools/appdemo.mjs`, preset `presets/appdemo`): demo aplikasi dari
     **screenshot UI asli** (crop, tidak pernah digambar ulang), headline Lora, shade biru BRI, musik + SFX dari kode, $0.
 - Agen `runninghub-operator` dan `frame-checker` (`.claude/agents/`) menghemat token untuk RunningHub dan pengecekan frame.
