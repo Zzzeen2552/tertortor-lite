@@ -54,7 +54,16 @@ export function looksOf(type) {
   const b = loadBrand()[type] ?? {};
   return { looks: Object.entries(b.looks ?? {}).map(([id, l]) => ({ id, label: l.label ?? id, description: l.description ?? "" })), defaultLook: b.defaultLook ?? null };
 }
+// conf() runs many times per check (per shot); cached until brand.json or the video's meta.json changes (Studio loads
+// the whole video list on every page, user 2026-11-14 "loadingnya lambat"). Callers only read the result.
+const confCache = new Map();
+const mtime = (f) => (existsSync(f) ? statSync(f).mtimeMs : 0);
 const conf = (dir) => {
+  const key = `${dir ?? ""}|${mtime(join(ROOT, "brand", "brand.json"))}|${dir ? mtime(join(dir, "meta.json")) : 0}`;
+  if (!confCache.has(key)) confCache.set(key, confOf(dir));
+  return confCache.get(key);
+};
+const confOf = (dir) => {
   const b = loadBrand(), t = storyType(dir), ch = channelOfDir(dir);
   const c = { ...(b.musafo ?? {}), ...(STORY_TYPES[t] && t !== "musafo" ? b[t] ?? {} : {}), ...(ch && ch !== t && ch !== "musafo" ? b[ch] ?? {} : {}) };
   const look = c.looks?.[lookOfDir(dir) ?? c.defaultLook];

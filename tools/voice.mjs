@@ -72,15 +72,39 @@ if (args.includes("--from-take")) {
 // ---------- 2. cap pauses (never speed the voice up) ----------
 const raw = readJSON(TAKE_WORDS);
 const lead = 0.12;
+// user 2026-11-14 "eps 3 Vo seperti patah2": whisper's word times are not where the voice stops, so cutting every
+// "gap" between them chopped 10-60 ms out of running speech. A pause is now only shortened where the take is really
+// quiet (10 ms frames below SILENCE_DB), and every join gets a short fade so no cut clicks.
+const SILENCE_DB = -42, FRAME = 0.01, FADE = 0.008;
+const pcm = run("ffmpeg", ["-v", "error", "-i", TAKE, "-ac", "1", "-ar", "16000", "-f", "s16le", "-"], { encoding: "buffer", maxBuffer: 1 << 30 }).stdout;
+const samples = new Int16Array(pcm.buffer, pcm.byteOffset, pcm.length >> 1);
+const per = Math.round(16000 * FRAME);
+const quiet = [];
+for (let i = 0; i + per <= samples.length; i += per) {
+  let s = 0;
+  for (let j = i; j < i + per; j++) s += samples[j] * samples[j];
+  quiet.push(10 * Math.log10(s / per / 32768 / 32768 + 1e-12) < SILENCE_DB);
+}
+// the longest quiet stretch inside [a, b] (take seconds), or null
+const quietRun = (a, b) => {
+  let best = null, start = null;
+  const from = Math.max(0, Math.floor(a / FRAME)), to = Math.min(quiet.length, Math.ceil(b / FRAME));
+  for (let f = from; f <= to; f++) {
+    if (f < to && quiet[f]) { if (start === null) start = f; continue; }
+    if (start !== null && (!best || f - start > best[1] - best[0])) best = [start, f];
+    start = null;
+  }
+  return best && [best[0] * FRAME, best[1] * FRAME];
+};
 const keep = []; // [from, to] ranges in take time
 let cursor = Math.max(0, raw[0].start - lead);
 for (let i = 0; i < raw.length - 1; i++) {
   const cap = stepWords.includes(norm(raw[i + 1].text)) ? stepPause : maxPause;
-  const g = raw[i + 1].start - raw[i].end;
-  if (g > cap) {
-    keep.push([cursor, raw[i].end + cap / 2]);
-    cursor = raw[i + 1].start - cap / 2;
-  }
+  if (raw[i + 1].start - raw[i].end <= cap) continue;
+  const q = quietRun(raw[i].end - 0.05, raw[i + 1].start + 0.05);
+  if (!q || q[1] - q[0] <= cap + 0.02) continue; // the voice is still sounding: leave it whole
+  keep.push([cursor, q[0] + cap / 2]);
+  cursor = q[1] - cap / 2;
 }
 keep.push([cursor, raw.at(-1).end + 0.35]);
 const shift = (t) => {
@@ -93,7 +117,9 @@ const shift = (t) => {
 };
 const words = raw.map((w, i) => ({ id: `w${i}`, text: w.text, start: +shift(w.start).toFixed(3), end: +shift(w.end).toFixed(3) }));
 const filter =
-  keep.map(([a, b], i) => `[0:a]atrim=${a.toFixed(4)}:${b.toFixed(4)},asetpts=PTS-STARTPTS[s${i}]`).join(";") +
+  keep.map(([a, b], i) => `[0:a]atrim=${a.toFixed(4)}:${b.toFixed(4)},asetpts=PTS-STARTPTS` +
+    (i > 0 ? `,afade=t=in:d=${FADE}` : "") +
+    (i < keep.length - 1 ? `,afade=t=out:st=${Math.max(0, b - a - FADE).toFixed(4)}:d=${FADE}` : "") + `[s${i}]`).join(";") +
   ";" + keep.map((_, i) => `[s${i}]`).join("") + `concat=n=${keep.length}:v=0:a=1[out]`;
 const filterFile = join(work, "_filter.txt");
 writeFileSync(filterFile, filter);
