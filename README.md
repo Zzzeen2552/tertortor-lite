@@ -26,7 +26,7 @@ Prompt siap tempel untuk Claude Code ada di [SETUP.md](SETUP.md). Ringkasnya:
 4. whisper.cpp untuk transkripsi suara: unduh `whisper-bin-x64.zip` dari github.com/ggml-org/whisper.cpp/releases, ekstrak
    sehingga ada `tools/bin/whisper/Release/whisper-cli.exe` (tidak ikut git).
 5. Buat `.env` sendiri (tidak ikut git): `GEMINI_API_KEY` untuk thumbnail, caption, dan Library Cerita; opsional
-   `ELEVENLABS_API_KEY`. Kunci Buffer ditempel sendiri di panel Buffer halaman sub.
+   `ELEVENLABS_API_KEY` (suara ElevenLabs dan clone suara). Kunci Tebar ditempel sendiri di panel Tebar halaman sub.
 6. Opsional shortcut Desktop: `powershell -NoProfile -ExecutionPolicy Bypass -File tools\install-shortcut.ps1`.
 7. `npm run studio` → http://localhost:4331.
 
@@ -35,12 +35,12 @@ Di Chrome, login sendiri ke Google Flow, Google AI Studio, dan RunningHub; Claud
 ## Yang tidak ikut git
 
 Proyek `videos/` (render, suara, footage, key visual), klip `library/footage/`, audio stok `library/audio/`, kit
-`library/sfx/`, video acuan pihak ketiga, `tools/bin/`, `.env`, `.buffer-keys.json`, dan token apa pun. Bila butuh proyek
+`library/sfx/`, video acuan pihak ketiga, `tools/bin/`, `.env`, `.tebar-keys.json`, clone suara (`library/voices/clones*`), dan token apa pun. Bila butuh proyek
 lama, salin folder `videos/<slug>/` secara manual.
 
 ## Fitur yang butuh web (tidak aktif di LITE)
 
-Buka Studio dari HP, tombol "Bagikan" (`/v/<token>`), kirim ke Buffer (video dikirim sebagai link relay), undangan user,
+Buka Studio dari HP, tombol "Bagikan" (`/v/<token>`), undangan user,
 dan Web Push butuh relay (`tools/relay.mjs` + `npm run worker`). Kodenya masih ada, tapi LITE sengaja tidak memakainya.
 Bila suatu hari dibutuhkan: relay sendiri (bukan relay MOTION), `.env` dengan `RELAY_URL` + `RELAY_WORKER_TOKEN`, contoh
 deploy di `deploy/studio/`, rincian di [docs/hybrid-plan.md](docs/hybrid-plan.md).

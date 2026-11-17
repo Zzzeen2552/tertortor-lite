@@ -13,6 +13,7 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { videoDir, readJSON, writeJSON, die, run, probeDuration, loadBrand, ROOT, norm, spokenText, takeKey } from "./lib.mjs";
 import { makeTts, SR, alignToScript } from "./tts.mjs";
+import { applyClone } from "./voice-clone.mjs";
 
 const args = process.argv.slice(2);
 const opt = (n) => { const i = args.indexOf(`--${n}`); return i >= 0 ? args[i + 1] : undefined; };
@@ -21,6 +22,7 @@ const FIND = opt("find"), REPL = opt("replace"), OWN = opt("audio"), DRY = args.
 if (!FIND || (!REPL && !OWN)) die('Usage: npm run swap -- <slug> --find "kalimat lama" --replace "kalimat baru" [--audio baris-baru.wav] [--dry-run]');
 
 const brand = loadBrand(dir);
+applyClone(dir, brand); // a cloned voice remakes the sentence in the same voice
 const vdir = join(dir, "voice");
 const work = join(vdir, "work");
 const tts = makeTts({ brand, work });

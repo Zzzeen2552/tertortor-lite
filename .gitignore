@@ -72,14 +72,17 @@ deploy/studio/cf.env
 .process-times.json
 videos/*/share.json
 library/voices/*.mp3
+library/voices/clones.json
+library/voices/clones/
 
 # backups and derived copies kept beside the live folders (rebuildable / private)
 videos/*/assets/footage-*/
 videos/*/voice-*/
 .cache/
 
-# Buffer API keys pasted in Studio (tools/buffer.mjs), and deleted videos (Studio "Hapus video", restorable)
+# Tebar API keys pasted in Studio (tools/tebar.mjs; .buffer-keys.json from before Buffer was removed), and deleted videos (Studio "Hapus video", restorable)
 .buffer-keys.json
+.tebar-keys.json
 videos/.trash/
 .studio-chat.json
 .studio-chat.json.tmp

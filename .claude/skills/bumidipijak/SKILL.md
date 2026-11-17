@@ -27,6 +27,8 @@ gayanya milik BDP. Bahasa jawaban: Indonesia santai.
    persetujuan naskah, tombol Production (suara satu take → key visual di Flow), klip, render. Detail teknis: skill `/musafo` § 2-6.
 
 ## Cerita
+- **Struktur cerita: skill `/struktur-babad`** (user 2026-11-16): hanya dari babad, pelan jadi series, dan tabel
+  `## Celah yang diisi` untuk setiap tempat babad meloncat. Wajib dipakai di storyline dan naskah.
 - Sumbernya babad: campuran silsilah, legenda, dan sejarah. **Tidak ada nama, tahun, tembang, sengkalan, atau kejadian yang
   dikarang.** Klaim sejarah di narasi memakai "menurut Babad…" / "konon"; legenda diceritakan sebagai legenda.
 - Ejaan nama mengikuti buku (Bathara Guru, Dèwi Sinta, Gilingwesi, Suralaya); caption Inggris memakai ejaan yang sama.

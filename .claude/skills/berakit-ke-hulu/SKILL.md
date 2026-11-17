@@ -138,8 +138,19 @@ dicek manual dulu.
 - Naskah: maks 10 shot, tiap shot ≤ `clipSeconds` narasi (diperlambat maks ×1,8), multi-scene `scenes` per kalimat,
   `framing` bergantian, `node tools/musafo.mjs build|check` (skill `/musafo` § 2), lewat `/humanizer`.
 - `script-approved`: `node tools/script-edit.mjs list <slug>` lalu berhenti. Tombol **Production** (event `production`):
-  suara satu take Gemini TTS (style dari `request.json → voiceStyle`) → build → key visual semua shot di Flow (gratis; akun
-  Chrome kedua `flow.google.com/?authuser=1` di PC graef), lalu laporkan. Klip menunggu keputusan user (skill `/musafo` § 3b, 5).
+  suara satu take Gemini TTS (style dari `request.json → voiceStyle`) → build → key visual semua shot di **ChatGPT (GPT
+  Image)**, lalu laporkan. Klip menunggu keputusan user (skill `/musafo` § 3b, 5).
+- **Default alat BKH (user 2026-11-14):** gambar (key visual + character sheet) dibuat di **ChatGPT**, video (klip per shot)
+  di **Meta Muse** (`node tools/muse.mjs video` / MCP `muse4ai`, image-to-video dari key visual, satu akun, kuota dicatat di
+  `costs.md`). Flow dan RunningHub H3 jadi cadangan. Aturan Muse lain di CLAUDE.md tetap (`muse_status` dulu, `request_id`
+  unik, job `running`/`needs_review` tidak dikirim ulang). Klip Muse keluar 16:9 1280×720 di uji 2026-11-11: cek rasio
+  hasil pertama, dan bila bukan 9:16 laporkan ke user sebelum lanjut.
+- **Prompt Muse = `node tools/musafo.mjs muse <slug> [s01,s02]`** (user 2026-11-15 "wajahnya terus berubah"): jangan
+  menulis prompt Muse sendiri. Satu generate = satu adegan tanpa cut kecuali adegan tanpa orang; gaya tidak ditulis ulang
+  (gambarnya yang membawa gaya); identitas tokoh disebut persis; kamera tidak mendekat ke close-up wajah; satu aksi yang
+  berhenti. Adegan berorang sesudah cut = gambar sendiri `assets/frames/<shot>-b.png` + generate sendiri, lalu
+  `node tools/musafo.mjs join <slug> <shot> a.mp4 b.mp4` (mengisi `clipAt`). Wajah masih berubah → buat klip itu di Flow;
+  adegan kena sensor/review Muse → RunningHub H3.
 - Caption ID + EN, `npm run check`, contact sheet lewat `frame-checker` sebelum menyerahkan.
 - Event dari TERTORTOR: `berakitkehulu-new` (proyek baru → storyline), `characters` (foto tokoh baru), `storyline-approved`
   (character sheet bila ada foto, lalu `series` bila perlu, lalu naskah), `script-approved`, `production`.

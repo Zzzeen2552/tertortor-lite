@@ -35,6 +35,13 @@ Cinematic, Cinema Clone, Animation, dan City timelapse/stok Adobe (STOKER). Bila
 dan menampilkan perintah untuk Claude. Ruang Produksi dan sidebar mengelompokkan video per kategori. Pohon kategori dari
 `tools/categories.mjs` (`/api/structure`). Halaman `#/s/<kategori>/<sub>` punya tab Video, Library footage, dan
 (Storytelling) Library cerita. Footage: `npm run library -- add … --for <kategori>/<sub>` (selalu isi `--for`).
+**Tampilan** (ikut MOTION 2026-11-17/18): Swiss/editorial, aksen oranye-kuning `#FFA114` (juga `theme-color`), panel abu
+terang + hairline hitam, Inter tebal rapat, sudut tajam tanpa bayangan, tombol utama hitam dengan panah garis. Sidebar gaya
+"IMMERSIVE FACTORY": blok wordmark **TERTORTOR LITE®** oranye-kuning dengan subjudul + garis bertitik, panel terang, judul
+bagian = kotak hitam + garis, item besar dengan kotak warna. Token di `:root`, override di blok "Gaya Swiss" dan blok sidebar
+di akhir `<style>` `tools/studio/index.html`; komponen baru ikut token itu. Kartu video mengikuti rasio videonya (`ratio`
+dari server → `--ar`), kartu tanpa thumbnail memakai `poster.jpg` kecil (bukan `<video preload>`). `/api/videos` di-cache
+per folder (berubah = dihitung ulang) dan pindah menu menggambar dari daftar yang sudah dimuat lalu menyegarkan di belakang.
 
 **Video referensi** dianalisis `npm run ref` (yt-dlp, shot, gerak, transkrip). Claude menulis `analysis.md` dan 2-3 konsep
 di `concepts.json`; user memilih di tab "Konsep" sebelum naskah. Alurnya di `.claude/skills/video-vertikal/reference.md`.
@@ -42,9 +49,17 @@ di `concepts.json`; user memilih di tab "Konsep" sebelum naskah. Alurnya di `.cl
 **Watermark, thumbnail** (semua kategori):
 - **Watermark**: `<subDir>/logo.png` per channel/preset/product, kiri atas tiap video (`tools/brandmark.mjs`, `brand.json → watermark`).
   Matikan per video: `meta.json → watermark: false`.
-- **Thumbnail**: `node tools/thumbnail.mjs options|render|auto <slug>`, `out/thumbnail.png`, 0,3 s di depan video
-  (`thumbnail.json → cover: false` mematikannya). Judul tiap kata huruf kapital. Jangan render video sebelum user
-  menyetujui thumbnail lewat tombol **Setujui & render video** di tab Thumbnail.
+- **Thumbnail**: `node tools/thumbnail.mjs options|render|auto|sync <slug>`, `out/thumbnail.png`, di depan video
+  **default 1 s** (0,3 s terlalu singkat; per video 0,5-3 s di tab Thumbnail → `thumbnail.json → seconds`;
+  "Di depan video" dimatikan = `cover: false` + `coverOff`). Judul tiap kata huruf kapital. **Headline + sub headline dibuat
+  bersamaan dengan naskah**: `musafo.mjs build` dan simpan "Edit naskah" menjalankan `sync` (5 opsi baru bila isi naskah
+  berubah, `optionsFor`; headline yang diketik user tetap); explainer: `node tools/thumbnail.mjs sync <slug>` setiap selesai
+  menulis `script.md`. Saklar **teks** dan **bayangan** (`text`/`shade`; iklan key visual seperti BRI default keduanya mati).
+  Latar: key visual, **frame dari video** (penggeser → `assets/thumbs/frame.jpg`, `bgTime`), atau **gambar upload user**
+  (`assets/thumbs/upload-N.*`). **Warna**: picker/kode hex di tab Thumbnail → `accent` (`*kata*` + label episode) dan
+  `subColor`; kosong = aksen preset. Dalam series warnanya berlaku untuk semua bagian (centang default; bagian lain dirender
+  ulang di latar), `""` = bagian itu sengaja default. Label episode melanjutkan label bagian sebelumnya. Jangan render video
+  sebelum user menyetujui thumbnail lewat tombol **Setujui & render video** di tab Thumbnail.
 - **Cover gaya**: `<subDir>/cover.jpg`, `node tools/sub-covers.mjs [--force|<sub>]`, tidak pernah dari media acuan pihak ketiga.
 - **Hapus video**: dipindah ke `videos/.trash/`, dipulihkan dari menu **Sampah**. Claude tidak menghapus video user tanpa izin.
 - **Ubah format** (user 2026-11-13): tombol "Ubah format" di bawah video editor. **Tidak pernah otomatis**: hanya rasio yang
@@ -52,8 +67,21 @@ di `concepts.json`; user memilih di tab "Konsep" sebelum naskah. Alurnya di `.cl
   tidak pernah dipotong dari render lama atau diberi latar blur**. `tools/variant.mjs` menyalin proyek ke
   `videos/<slug>-<kind>/` (`meta.json → format` feed/square/horizontal/vertical, `variantOf`, `FORMAT.md`), lalu event
   `format-new`. Konversi file dari render (ProRes, WebM, GIF, 720p): `node tools/formats.mjs <slug> --only …`.
-- **Bagikan, Buffer, undangan user, Web Push** butuh relay web, yang tidak dipakai di LITE. Kodenya masih ada; jangan
-  menyiapkan relay tanpa permintaan user. Claude tidak pernah mengisi key dan tidak mengirim/memublikasikan tanpa izin.
+- **Tebar = satu-satunya jalur kirim** (ikut MOTION: Tebar 2026-11-14, Buffer dihapus 2026-11-16; tebar.app, REST
+  `api.tebar.app/v1`): `node tools/tebar.mjs keys|accounts <sub>|send <slug> [--at ISO]|status <slug>`. Render
+  `out/<slug>.mp4` **diunggah langsung** (bertahap, maks 300 MB), tanpa relay. Kunci per sub di `.tebar-keys.json`
+  (gitignored, ditempel user di panel Tebar halaman sub) atau `.env TEBAR_API_KEY_<SUB>`; akun tujuan + label AI per sub di
+  `<subDir>/tebar.json` (belum disimpan = semua akun dicentang); daftar akun diingat 5 menit. Tombol "Kirim ke Tebar" di
+  editor: caption, judul YouTube, sekarang/jadwal, "untuk anak", label konten AI (default nyala); kirim berjalan sebagai job
+  di laptop dengan progres unggah, log `videos/<slug>/tebar.json` (badge PUBLISHED di kartu). Claude tidak pernah mengisi
+  key dan tidak mengirim tanpa izin eksplisit per video.
+- **Caption posting** (`tools/caption.mjs`, `node tools/caption.mjs <slug>`): saat naskah disetujui (di latar) dan saat
+  dialog Tebar dibuka tanpa caption, agen menulis caption + judul YouTube ke `caption.md` (Gemini, cadangan Claude haiku;
+  100-220 karakter, hook dari 6 mekanisme, dua baris ajakan: follow + "Colek temanmu…", 3-5 hashtag, tanpa baris "dibuat
+  dengan AI"); `credits.md` ditempel di bawahnya. Caption yang disimpan user tidak ditimpa. `videos/<slug>/buffer.json` lama
+  hanya dibaca untuk badge PUBLISHED.
+- **Bagikan, undangan user, Web Push** butuh relay web, yang tidak dipakai di LITE. Kodenya masih ada; jangan menyiapkan
+  relay tanpa permintaan user. Claude tidak pernah mengisi key dan tidak mengirim/memublikasikan tanpa izin.
 
 **Pop-up proses**: klik setujui memunculkan apa yang Claude kerjakan dan perkiraan waktunya (`tools/progress.mjs`,
 `.process-times.json`). Langkah baru yang dipicu klik → tambahkan ke `PROCESSES` di `tools/progress.mjs`.
@@ -65,7 +93,7 @@ lagi penunggunya. Timeout (4 jam, exit 2) = jalankan lagi bila masih menunggu.
 | Event | Lanjutkan |
 | --- | --- |
 | `concept` (explainer) | isi brief dari konsep → naskah → `/humanizer` → minta persetujuan |
-| `script-approved` (explainer) | `flow.json` (langkah 2b) |
+| `script-approved` (explainer) | `flow.json` (langkah 2b); `node tools/thumbnail.mjs sync <slug>` bila `script.md` berubah |
 | `berakitkehulu-new` | skill `/berakit-ke-hulu <slug>`: tanpa draft, langsung `storyline.md` (series bila > 2 menit) → user mengedit dan menyetujui storyline |
 | `bumidipijak-new` | skill `/bumidipijak <slug>`: tanpa draft, langsung `storyline.md` series → user mengedit dan menyetujui storyline |
 | `storyline-approved` (BKH/BDP) | BKH: character sheet per usia bila ada foto tokoh; `series` bila perlu; `musafo.json` (naskah per shot) → build → minta persetujuan naskah |
@@ -89,7 +117,7 @@ berlisensi lewat `npm run stock` (lisensi non-komersial ditolak, kredit ke `cred
 headless di folder ini (`tools/studio-chat.mjs`: `claude -p --output-format stream-json`, lanjut dengan `--resume`, satu
 proses sekaligus, pesan berikutnya antre), riwayat di `.studio-chat.json` (gitignored; "Baru" mengarsipkan ke `.studio-chat/`).
 Konteks halaman (slug video, tab) ikut di awal pesan. Tanpa jendela izin, jadi alatnya dibatasi: edit file (acceptEdits),
-baca/cari, `npm run`, `node tools/`, `npx hyperframes`, git hanya baca; commit/push/`buffer.mjs send`/publish/`wait-event`
+baca/cari, `npm run`, `node tools/`, `npx hyperframes`, git hanya baca; commit/push/`tebar.mjs send`/publish/`wait-event`
 ditolak. Butuh Claude Code CLI terpasang dan sudah login di PC ini (`claude --version`). Route `/api/chat*` hanya dari localhost.
 
 ## Jenis proyek
@@ -105,11 +133,21 @@ ditolak. Butuh Claude Code CLI terpasang dan sudah login di PC ini (`claude --ve
   <slug> <id>`): PRESET1 3D Pixar, **PRESET2 3D cerah ala tanah liat (default)**, blok gaya di `brand.json → berakitkehulu.looks`.
   Formulir menerima link artikel (`assets/reference/bahan.md`) dan foto tokoh (`assets/reference/tokoh/`) → character sheet
   per usia (`musafo.json → characters`). Prompt gambar: skill `/berakitkehulu-prompt` (selalu 9:16). Tidak ada fakta, angka,
-  atau tahun yang dikarang; logo merek asli hanya ditempel di shot penutup. Skill `/berakit-ke-hulu`.
+  atau tahun yang dikarang; logo merek asli hanya ditempel di shot penutup. Skill `/berakit-ke-hulu`. Default alat BKH:
+  gambar di ChatGPT, klip di Meta Muse (Flow/RunningHub cadangan). **Prompt Muse = `node tools/musafo.mjs muse <slug>
+  [s01,s02]`** (satu adegan per generate, identitas tokoh disebut persis, tanpa close-up wajah); adegan berorang sesudah cut =
+  gambar `assets/frames/<shot>-b.png` + generate sendiri, disambung `node tools/musafo.mjs join <slug> <shot> a.mp4 b.mp4`
+  (mengisi `scenes[].clipAt`). Tokoh yang berulang ganti baju per shot/episode: `characters[].desc` hanya wajah.
 - **BumiDiPijak** (BDP, `type: "bumidipijak"`): sejarah dan legenda Jawa dari Babad Tanah Jawa (Library Cerita BDP).
   Engine Musafo, **lebih dari 2 menit = series**, preset `presets/bumidipijak` (Merriweather, Inggris italic terakota), suara
   default **Kira**, gaya lukisan minyak gelap (`brand.json → bumidipijak`), isi adegan dari `/babad-tanah-jawa-prompt`
-  (selalu 9:16). Skill `/bumidipijak`.
+  (selalu 9:16). Skill `/bumidipijak`; struktur cerita dari skill `/struktur-babad` (hanya dari babad, pelan jadi series,
+  tabel `## Celah yang diisi` untuk tiap loncatan babad).
+- **Aturan engine Storytelling (BKH/BDP)**: maks ±10 s narasi per shot (batas kata = 10 s × kecepatan suara; `check` dan tab
+  Naskah menandai shot yang lewat, Edit naskah punya penghitung), panjang shot dibuat rata. Klip yang lebih pendek dari
+  shot-nya **diperlambat** sampai pas (maks ×1,8, `<shot>.slow.mp4`), bukan dibekukan; klip multi-adegan di-retime per
+  adegan (`scenes[].clipAt` untuk klip di luar `clips[]`). `musafo.mjs build` membuat musik latar otomatis begitu suara ada
+  (`tools/story-music.mjs`, `music.json → mode: "story"`; `mode: "off"` = dimatikan user).
 - Library Cerita (`npm run stories`): PDF/link/teks → Gemini mencatat tiap kisah → "Jadikan video".
 - **Advertisement** (`type: "advertisement"`, tanpa narasi, timing per shot dalam detik di `ad.json`):
   - **Flashcut** (`/flashcut`, `tools/ad.mjs`): foto produk ≥ 2 angle, logo, model/CTA opsional → ±11 s, kilatan dari logo
@@ -118,7 +156,10 @@ ditolak. Butuh Claude Code CLI terpasang dan sudah login di PC ini (`claude --ve
   - **BRI** (`advertisement/bri/style.md`, preset `presets/bri`): iklan promo ±13 s dari KV klien, judul kinetik di belakang
     orang, angka promo odometer, end frame persis KV, lalu **scene penutup putih**: logo Danantara, 131, BRI + disclaimer
     LPS/OJK/BI (logo itu tidak tampil di keyframe; rounded square selalu persegi di semua rasio, boleh mengecil
-    proporsional; `style.md § Aturan tetap`, user 2026-11-13).
+    proporsional; `style.md § Aturan tetap`, user 2026-11-13). **Durasi 8 beat** diatur di tab Beat Studio → `beats.json`
+    (`kv: true`) → `node advertisement/bri/scripts/retime.mjs <slug>` (waktu, potongan orang, celah bingkai, SFX, musik,
+    `build/timeline.json`; cut di ketukan 0,3 s). File After Effects untuk klien: `node advertisement/bri/scripts/ae-export.mjs
+    <slug>` (`style.md` langkah 6). Thumbnail default gambar KV saja, tidak di depan video.
   - **App Demo** (`advertisement/appdemo/style.md`, `tools/appdemo.mjs`, preset `presets/appdemo`): demo aplikasi dari
     **screenshot UI asli** (crop, tidak pernah digambar ulang), headline Lora, shade biru BRI, musik + SFX dari kode, $0.
 - Agen `runninghub-operator` dan `frame-checker` (`.claude/agents/`) menghemat token untuk RunningHub dan pengecekan frame.
@@ -181,6 +222,14 @@ Biaya di `costs.md`. Footage dinormalkan lewat `node tools/prep-footage.mjs` (ot
   cadangan `brand.json → voice.gemini.speaker`). Sampel: `node tools/voice-samples.mjs` (`library/voices/`).
 - Alternatif ElevenLabs (`ELEVENLABS_API_KEY`), atau rekaman sendiri `npm run voice -- <slug> --audio rekaman.wav`.
   Transkripsi lokal memakai whisper.cpp di `tools/bin/whisper/` (tidak ikut git).
+- **Clone suara** (ikut MOTION 2026-11-17): panel "Clone suara" di tab Suara (atau `node tools/voice-clone.mjs add "<Nama>"
+  <file…> --consent`) membuat suara dari 1-3 menit rekaman bersih lewat ElevenLabs Instant Voice Cloning; daftar di
+  `library/voices/clones.json` (gitignored), sampel `library/voices/clone-<id>.mp3`. Dipilih per video seperti speaker
+  (`request.json → voiceSpeaker "clone:<id>"`, juga di pilihan suara formulir Buat video). **Bila speaker berawalan
+  `clone:`**, take tidak dibuat di AI Studio: `npm run voice -- <slug> --force` (satu take eleven_v3 dengan waktu kata), dan
+  `npm run swap` membuat ulang satu kalimat dengan suara yang sama. Hanya suara user sendiri atau dengan izin pemiliknya
+  (centang persetujuan wajib); `ELEVENLABS_API_KEY` diisi user sendiri (paket Starter ke atas); biaya karakter di `costs.md`.
+  Default brand tetap speaker Gemini.
 - SFX otomatis dari `library/sfx/` (dibuat dari matematika: `node tools/sfx.mjs`).
 - Musik di ketukan: `node tools/music.mjs <slug>` setelah `cues` (skor otomatis, `--track <file>`, `--off`).
 
@@ -200,6 +249,10 @@ Biaya di `costs.md`. Footage dinormalkan lewat `node tools/prep-footage.mjs` (ot
 - Satu timeline paused per scene di `window.__timelines["<id>"]`. `fromTo`, bukan `from`.
 - Tidak ada `Date.now()`, `Math.random()`, fetch, timer, `repeat: -1`; jangan tween `display`/`visibility`.
 - `index.html` dan `captions.html` dikelola tool. Warna/font hanya lewat variabel CSS preset.
+- Gerak (timing, easing, koreografi, stagger, prinsip Disney): skill `/motion-design` (LottieFiles, MIT,
+  `.claude/skills/motion-design/`) sebagai acuan saat menulis timeline GSAP scene; batas durasi dan bagian Hindari di
+  `style.md` preset tetap menang. Hook `UserPromptSubmit` (`.claude/settings.json` → `tools/hooks/motion-graphic.mjs`)
+  mengingatkan Claude memuat skill itu setiap kali prompt menyebut "motion graphic".
 
 ## Gerbang
 
@@ -212,4 +265,4 @@ Render sukses tidak membuktikan apa-apa.
 - Jangan menampilkan identitas orang lain di screenshot.
 - Jangan mempercepat suara. Jangan menyerahkan video tanpa melihat contact sheet.
 - Jangan mem-publish atau mengunggah ke platform tanpa izin eksplisit.
-- Jangan memasukkan rahasia (API key, token, password) ke repo; `.env` dan `.buffer-keys.json` gitignored.
+- Jangan memasukkan rahasia (API key, token, password) ke repo; `.env`, `.tebar-keys.json`, dan `library/voices/clones*` gitignored.

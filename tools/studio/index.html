@@ -7,36 +7,39 @@
 <link rel="icon" href="/favicon.ico" sizes="any" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png" />
-<meta name="theme-color" content="#0F1012" />
+<meta name="theme-color" content="#FFA114" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="TERTORTOR" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
 <script>try { const t = localStorage.getItem("motion_theme"); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
 <style>
-/* Bahasa visual REDACTOR: kanvas abu hangat, panel putih membulat, aksen kuning, Outfit + JetBrains Mono. */
+/* Bahasa visual TERTORTOR (user 2026-11-17, acuan "LIQUID ACADEMY"): Swiss/editorial. Blok oranye penuh, hairline hitam,
+   panel abu sangat terang, grotesk tebal rapat (Inter), sudut tajam, tanpa bayangan lembut. Override komponen di akhir <style>. */
 :root{
-  --bg:#ECEDEF; --panel:#FFFFFF; --panel-2:#F4F5F7; --line:#E8E9EC; --line-2:#DADCE0;
-  --fg:#17181B; --muted:#6B6F77; --dim:#9EA2A9;
-  --accent:#FCBA03; --accent-ink:#17181B; --accent-text:#8A5A00; --accent-soft:rgba(252,186,3,.18);
+  --bg:#EDEDEA; --panel:#F7F7F5; --panel-2:#E4E4E1; --line:#D6D6D2; --line-2:#B9B9B4; --rule:#111111;
+  --fg:#111111; --muted:#5E5E5A; --dim:#8E8E89;
+  --accent:#FFA114; --accent-ink:#111111; --accent-text:#A85A00; --accent-soft:rgba(255,161,20,.15);
+  --sel:#111111; --sel-ink:#FFFFFF;
   --ok:#15803d; --warn:#b45309; --bad:#dc2626; --info:#2563eb; --violet:#7c3aed;
-  --glow:rgba(252,186,3,.20);
-  --f-display:"Outfit","Inter","Helvetica Neue",Arial,sans-serif;
+  --glow:transparent;
+  --f-display:"Inter","Helvetica Neue",Arial,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
-  --r:24px; --r-sm:16px; color-scheme:light;
+  --r:0px; --r-sm:0px; color-scheme:light;
 }
 :root[data-theme="dark"]{
-  --bg:#0F1012; --panel:#18191C; --panel-2:#212226; --line:#26282C; --line-2:#34363B;
-  --fg:#F2F2F3; --muted:#9A9DA4; --dim:#6B6E75;
-  --accent-text:#FCBA03; --accent-soft:rgba(252,186,3,.14);
+  --bg:#111111; --panel:#191919; --panel-2:#232322; --line:#2C2C2A; --line-2:#454542; --rule:#EDEDEA;
+  --fg:#EDEDEA; --muted:#A3A39E; --dim:#73736F;
+  --accent-text:#FFB547; --accent-soft:rgba(255,161,20,.16);
+  --sel:#FFA114; --sel-ink:#111111;
   --ok:#5fe39a; --warn:#f6b54c; --bad:#ff6b6b; --info:#6aa8ff; --violet:#a78bfa;
-  --glow:rgba(252,186,3,.07); color-scheme:dark;
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--fg)}
 body{font-family:var(--f-display);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
-  background:radial-gradient(1100px 700px at 100% 100%,var(--glow),transparent 62%),radial-gradient(900px 520px at 0% 0%,color-mix(in srgb,var(--panel) 55%,transparent),transparent 65%),var(--bg);background-attachment:fixed}
+  background:var(--bg)}
 a{color:inherit} button,input,textarea{font:inherit;color:inherit} button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .mono{font-family:var(--f-mono)} .muted{color:var(--muted)}
@@ -102,14 +105,15 @@ a{color:inherit} button,input,textarea{font:inherit;color:inherit} button{cursor
 .stat .big{font-family:var(--f-display);font-size:46px;line-height:1.05;margin:6px 0 2px;font-variant-numeric:tabular-nums}
 .stat small{color:var(--muted);font-size:12px}
 .stat.hot{border-color:color-mix(in srgb,var(--accent) 45%,transparent)} .stat.hot .big{color:var(--accent-text)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;align-items:start}
 .card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s,transform .15s;text-decoration:none}
 .card:hover{border-color:var(--line-2);transform:translateY(-2px)}
-.cover{display:block;width:100%;aspect-ratio:9/16;object-fit:cover;background:#0b0b0f}
+.cover{display:block;width:100%;aspect-ratio:var(--ar,9/16);object-fit:cover;background:#0b0b0f}
 .cover-wip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:repeating-linear-gradient(135deg,#101015 0 14px,#15151c 14px 28px);color:#fff;text-align:center;padding:16px}
 .cover-wip span{background:var(--accent);color:#000;font-family:var(--f-mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:99px}
 .cover-wip small{color:rgba(255,255,255,.55);font-size:11.5px}
 .cv{position:relative}
+.buffered{position:absolute;right:10px;bottom:10px;background:#16a34a;color:#fff;font-family:var(--f-mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;padding:3px 8px;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,.4)}
 .wip{position:absolute;left:10px;bottom:10px;background:var(--accent);color:#000;font-family:var(--f-mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;padding:3px 8px;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,.4)}
 .cnt{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.72);color:#fff;font-family:var(--f-mono);font-size:10.5px;padding:2px 7px;border-radius:5px}
 .card-b{padding:11px 13px 13px;display:flex;flex-direction:column;gap:6px}
@@ -141,7 +145,7 @@ textarea{resize:vertical;min-height:180px;line-height:1.5}
 .ed.wide{grid-template-columns:minmax(0,1fr)} .ed.wide > .viewer{display:none} /* tab Draft: book | draft side by side need the width */
 .viewer{position:sticky;top:20px}
 /* Cinematic (16:9, tools/cinematic.mjs): wide player above the panel */
-.ed.cine{grid-template-columns:minmax(0,1fr)} .ed.cine .stage{aspect-ratio:16/9} .ed.cine .blist .bt{aspect-ratio:16/9;width:96px}
+.ed.cine{grid-template-columns:minmax(0,1fr)} .ed.cine > .viewer{position:static} .ed.cine .stage{aspect-ratio:16/9} .ed.cine .blist .bt{aspect-ratio:16/9;width:96px}
 .stage{width:100%;aspect-ratio:9/16;border-radius:18px;background:#0b0b0f;display:block;object-fit:contain;border:1px solid var(--line)}
 .linkrow{margin-top:10px;display:flex;flex-direction:column;gap:8px}
 .linkrow #linkBox{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -195,6 +199,7 @@ textarea{resize:vertical;min-height:180px;line-height:1.5}
 .lrow input[data-k=en]{font-size:12.5px;color:var(--muted)} .lrow textarea{min-height:80px}
 .sline{display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 12px;padding:10px 0;border-bottom:1px solid var(--line);max-width:80ch}
 .sline small{font-size:12.5px}
+.sline small.over,.wc.over{color:var(--bad,#d33);font-weight:600} .wc{margin-left:auto;font-size:12.5px;color:var(--muted)}
 .prompt{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 70px 10px 12px;font-family:var(--f-mono);font-size:12px;line-height:1.55;white-space:pre-wrap}
 .prompt .btn{position:absolute;top:6px;right:6px}
 .prompt .lb{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
@@ -277,7 +282,199 @@ select.sel,input[list]{width:100%;background:var(--panel);border:1px solid var(-
 .chat-work{font-size:12px;color:var(--muted);padding:0 16px 6px;min-height:18px}
 .chat-f{display:flex;gap:8px;padding:10px 12px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
 .chat-f textarea{flex:1;resize:none;min-height:44px;max-height:160px;font:14px/1.45 inherit;padding:10px 12px;border-radius:14px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--fg)}
+/* ===== Gaya Swiss/editorial (user 2026-11-17): menimpa komponen di atas. Fungsi tidak berubah. ===== */
+*:not(.tone):not(.live):not(.chat-fab):not(.chat-fab .dot):not([style*="50%"]){border-radius:0!important}
+body{letter-spacing:-.005em}
+::selection{background:var(--accent);color:#111}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.eyebrow,.sec-h,.fld label,.fld .lb,.kv dt,.prompt .lb{letter-spacing:.08em;font-size:10.5px}
+.eyebrow{color:var(--fg)}
+
+/* sidebar = blok oranye penuh dengan hairline hitam */
+.side{background:var(--accent);color:#111;border-right:1px solid #111;padding:0;gap:0;scrollbar-color:#111 transparent}
+.side > *{padding-left:18px;padding-right:18px}
+.side > div{padding-top:14px;padding-bottom:12px;border-top:1px solid #111}
+.brand{position:relative;padding-top:22px;padding-bottom:20px;align-items:flex-end;gap:12px}
+.brand::after{content:"+";position:absolute;right:12px;top:10px;font:300 18px/1 var(--f-display);color:#111}
+.brand .mark{width:34px;height:34px;background:#111;color:var(--accent)}
+.brand b{font-size:23px;font-weight:800;letter-spacing:-.055em;line-height:.9;color:#111}
+.brand small{color:#111;opacity:.75;font-size:11px;margin-top:5px;letter-spacing:0}
+.side .nav{padding-top:12px;padding-bottom:12px;border-top:1px solid #111}
+.sec-h{color:#111;opacity:.7;padding:0 8px}
+.nav a,.mchip{color:#111;border:0;padding:7px 8px;font-weight:500}
+.nav a:hover,.mchip:hover{background:rgba(0,0,0,.09);color:#111}
+.nav a.on,.mchip.on{background:#111;color:#fff;border:0}
+.nav a.on svg{color:var(--accent);opacity:1}
+.mchip b{color:rgba(0,0,0,.55)} .mchip.on b{color:var(--accent)}
+.mdot{border:1px solid rgba(0,0,0,.35)}
+.side .mchip:not(.on) .mdot[style*="accent"]{background:#111} .side .muted{color:#111;opacity:.62}
+.side a:not(.brand):not(.mchip):not([data-nav]){color:#111}
+.vgrp{color:#111;opacity:.65;letter-spacing:.08em}
+.badge{background:#111;color:#fff}
+.nav a.on .badge{background:var(--accent);color:#111}
+.side-foot{margin-top:auto;border:0;border-top:1px solid #111;background:transparent;color:#111;padding:14px 18px 18px}
+.side-foot small{color:#111;opacity:.7}
+.side .icon-btn{border-color:#111;color:#111} .side .icon-btn:hover{background:#111;color:var(--accent)}
+.live{box-shadow:0 0 0 2px #111}
+.icon-btn{border-color:var(--rule)}
+
+/* kepala halaman: judul grotesk besar, garis hitam, tanda + di sudut */
+.vh{position:relative;padding-bottom:20px;border-bottom:1px solid var(--rule);margin-bottom:26px}
+.vh::before,.vh::after{content:"+";position:absolute;bottom:-11px;font:300 20px/20px var(--f-display);color:var(--fg);background:var(--bg);padding:0 2px}
+.vh::before{left:-8px} .vh::after{right:-8px}
+.vh h1{font-weight:800;text-transform:none;letter-spacing:-.05em;line-height:.9;font-size:clamp(40px,6.4vw,84px);margin:10px 0 12px}
+.vh p{color:var(--fg);opacity:.75;font-size:13px;line-height:1.45}
+.grp-h{border-top:1px solid var(--rule);padding-top:12px;margin:32px 0 14px}
+.grp-h h2{font-size:clamp(22px,2.6vw,30px);font-weight:800;letter-spacing:-.04em;line-height:1}
+.grp-h h2::before{content:"";display:inline-block;width:8px;height:8px;background:var(--accent);margin-right:10px;vertical-align:.2em}
+.sub{font-weight:700;letter-spacing:-.02em}
+.crumb a{color:var(--accent-text);text-decoration:underline;text-underline-offset:3px}
+
+/* tombol: hitam tajam + panah garis */
+.btn{border:1px solid var(--rule);background:transparent;color:var(--fg);font-weight:600;padding:8px 14px}
+.btn:hover{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn.pri{background:var(--sel);color:var(--sel-ink);border-color:var(--sel)}
+.btn.pri::after{content:"";flex:none;width:20px;height:5px;background:linear-gradient(currentColor,currentColor) 0 50%/16px 1px no-repeat,radial-gradient(circle,currentColor 1.7px,transparent 2.2px) 100% 50%/5px 5px no-repeat}
+.btn.pri:hover{background:var(--accent);color:#111;border-color:var(--accent);filter:none}
+.btn.sm{padding:5px 10px}
+.btn.sm.pri::after{width:14px;background-size:10px 1px,5px 5px}
+.cmd{border-color:var(--rule);background:var(--panel)}
+
+/* panel, kartu, statistik */
+.panel{border:1px solid var(--line);background:var(--panel)}
+.panel-h{border-bottom:1px solid var(--rule);font-weight:700;letter-spacing:-.01em}
+.stats{gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:28px}
+.stats .stat{border:0;background:var(--panel)}
+.stat .big{font-weight:700;letter-spacing:-.05em;font-size:58px;line-height:1}
+.stat.hot{border-color:transparent} .stat.hot .big{color:var(--accent-text)}
+.grid{gap:18px 14px}
+.card{border:1px solid var(--line);background:var(--panel);transition:border-color .15s}
+.card:hover{border-color:var(--rule);transform:none}
+.card-b{padding:12px 12px 14px;border-top:1px solid var(--rule)}
+.card-t{font-weight:700;letter-spacing:-.015em;font-size:14px}
+.prog{height:3px;background:var(--line)} .prog i{background:var(--accent)}
+.wip,.buffered{box-shadow:none} .wip{color:#111}
+.cover-wip span{color:#111}
+.empty{border:1px solid var(--rule);background:var(--panel)}
+.pill{border-color:var(--line-2);font-size:11px;font-weight:500;padding:2px 8px}
+.pill.acc{background:var(--accent-soft)}
+.chip{border-style:solid;border-color:var(--line-2)} .chip:hover{border-color:var(--rule)}
+.notice{border:1px solid var(--line);border-left:3px solid var(--warn);background:var(--panel)}
+.notice.ok{border-color:var(--line);border-left-color:var(--ok);background:var(--panel)}
+.notice.work{border-color:var(--line);border-left-color:var(--accent);background:var(--panel)} .notice.work.idle{border-left-color:var(--bad)}
+
+/* formulir */
+textarea,input[type=text],select.sel,input[list]{border:1px solid var(--line-2);background:var(--panel)}
+textarea:focus,input[type=text]:focus,select.sel:focus,input[list]:focus{border-color:var(--rule);outline:none}
+.drop{border:1px dashed var(--rule);background:var(--panel-2);color:var(--fg)}
+.drop:hover,.drop.over{border-style:solid;border-color:var(--accent);background:var(--accent-soft)}
+.seg{border:1px solid var(--rule);background:var(--panel);gap:0;align-self:flex-start}
+.seg label{font-weight:500;color:var(--fg)} .seg label + label{border-left:1px solid var(--rule)}
+.seg label:has(input:checked){background:var(--sel);color:var(--sel-ink)}
+.preset{border:1px solid transparent;background:var(--panel-2)}
+.preset:has(input:checked){border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+a.preset:hover{border-color:var(--rule)}
+.preset b{text-transform:uppercase;font-weight:700;letter-spacing:-.005em;font-size:14px}
+.preset em{color:var(--fg);letter-spacing:.04em}
+.preset .cov{margin:-12px -12px 10px}
+.preset.draft{border-color:var(--line-2)}
+.tone:has(input[type=radio]:checked){box-shadow:0 0 0 2px var(--panel),0 0 0 3px var(--fg)}
+.thumbs img,.thumbs video,.gal img,.gal video,.shot-b img{border-color:var(--line)}
+
+/* editor */
+.stage{border:1px solid var(--rule)}
+.tabs{border-bottom:1px solid var(--rule);gap:0}
+.tabs button,.tabs a{color:var(--muted);font-weight:500;border-bottom-width:3px;margin-bottom:-1px}
+.tabs button.on,.tabs a.on{color:var(--fg);font-weight:700;border-bottom-color:var(--accent)}
+.tb{border-width:2px} .tb.on{border-color:var(--accent)}
+.btab th{text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;color:var(--fg);border-bottom:1px solid var(--rule);font-family:var(--f-mono);font-weight:500}
+.btab td{border-bottom:1px solid var(--line)}
+.blist li{border-bottom:1px solid var(--line)}
+.blist li.on{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)} .ed.cine .blist li{grid-template-columns:96px minmax(0,1fr) auto}
+.kv{gap:0 14px} .kv dt,.kv dd{border-bottom:1px solid var(--line);padding:7px 0}
+.kv dt{color:var(--fg)}
+.shot{border:1px solid var(--line)} .shot-h{background:var(--panel-2);border-bottom:1px solid var(--rule)}
+.prompt{border:1px solid var(--line);background:var(--panel-2)}
+.cut{border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+#fmtBody{border:1px solid var(--line)}
+
+/* lapisan: popup, toast, chat */
+.modal,.pop{background:rgba(17,17,17,.55)}
+.pop .box{border:1px solid var(--rule);box-shadow:none}
+.pop h3{font-size:22px;font-weight:800;letter-spacing:-.04em}
+.toast{background:#111;color:#fff;border-left:3px solid var(--accent)}
+.donebox{background:#111;color:#fff;box-shadow:none;border-left:3px solid var(--accent)}
+.chat-fab{box-shadow:none;border:1px solid #111}
+.chat-fab .dot{border-color:var(--accent)}
+.chat{border-left:1px solid var(--rule);box-shadow:none;background:var(--bg)}
+.chat-h{border-bottom:1px solid var(--rule);background:var(--accent);color:#111}
+.chat-h b{font-weight:800;letter-spacing:-.03em;font-size:18px} .chat-h small{color:#111;opacity:.75}
+.chat-h .btn,.chat-h .icon-btn{border-color:#111;color:#111} .chat-h .btn:hover,.chat-h .icon-btn:hover{background:#111;color:var(--accent)}
+.chat-m.user{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+.chat-m.assistant{background:var(--panel);border:1px solid var(--line)}
+.chat-f{border-top:1px solid var(--rule)}
+.chat-f textarea{background:var(--panel);border-color:var(--line-2)}
+@media (max-width:900px){
+  .side{border-right:0;border-bottom:1px solid #111;padding:0;gap:0}
+  .side > div{padding-top:10px;padding-bottom:10px}
+  .brand{padding-top:14px;padding-bottom:12px}
+  .side .nav{padding-top:8px;padding-bottom:8px}
+  .mchip{border:1px solid rgba(0,0,0,.25);flex:none}
+  .side .vgrp{flex:none;white-space:nowrap;align-self:center;padding:0 4px 0 10px}
+  .side-foot{padding:10px 18px}
+  .vh h1{font-size:clamp(34px,10vw,52px)}
+  .stat .big{font-size:40px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ===== Sidebar gaya "IMMERSIVE FACTORY" (user 2026-11-17): blok judul oranye-kuning di atas, panel terang di bawah,
+   judul bagian = kotak hitam + label + garis hitam, item besar dengan kotak warna dan garis tipis di antaranya. ===== */
+.app{grid-template-columns:300px minmax(0,1fr)}
+.side{background:var(--panel);color:var(--fg);border-right:1px solid var(--rule);overflow-x:hidden;scrollbar-color:var(--line-2) transparent}
+.side > div{border-top:0;padding-top:22px;padding-bottom:6px}
+.brand{background:var(--accent);color:#111;display:block;padding:44px 22px 22px;border-bottom:1px solid var(--rule)}
+.brand::after{content:"+   +";white-space:pre;right:18px;top:14px;font:400 20px/1 var(--f-display);color:#111}
+.brand .mark{display:none}
+.brand b{font-size:28px;font-weight:900;letter-spacing:-.06em;line-height:.86;color:#111;white-space:nowrap}
+.brand sup{font-size:13px;font-weight:700;vertical-align:top;position:relative;top:2px;margin-left:1px;letter-spacing:0}
+.brand small{display:flex;align-items:center;gap:12px;white-space:nowrap;color:#111;opacity:1;font-size:14px;font-weight:600;margin-top:18px;letter-spacing:-.01em}
+.brand-rule{display:block;flex:1 1 40px;max-width:90px;min-width:30px;height:1px;background:#111;position:relative}
+.brand-rule::after{content:"";position:absolute;right:-3px;top:-3px;width:7px;height:7px;border-radius:50%!important;background:#111}
+.side .nav{border-top:0;padding-top:22px;padding-bottom:6px}
+.side .sec-h{display:flex;align-items:center;gap:12px;font-family:var(--f-display);font-size:16px;font-weight:600;letter-spacing:-.01em;text-transform:none;color:var(--fg);opacity:1;padding:0 0 12px;margin:0 0 2px;border-bottom:1px solid var(--rule)}
+.side .sec-h::before{content:"";width:11px;height:11px;background:var(--fg);flex:none}
+.nav a,.mchip{gap:14px;padding:13px 4px 13px 4px;font-size:17px;font-weight:450;letter-spacing:-.015em;color:var(--fg);border-bottom:1px solid var(--line)!important}
+.nav a svg{width:16px;height:16px;opacity:.55}
+.nav a:hover,.mchip:hover{background:var(--accent-soft);color:var(--fg)}
+.nav a.on,.mchip.on{background:transparent;color:var(--fg);font-weight:700}
+.nav a.on svg{color:var(--accent-text);opacity:1}
+.nav a.on::after,.mchip.on::after{content:"";width:4px;align-self:stretch;margin:-13px -4px -13px 0;background:var(--accent)}
+.mdot{width:11px;height:11px;border:0}
+.side .mchip:not(.on) .mdot[style*="accent"],.side .mchip .mdot[style*="accent"]{background:var(--accent)}
+.side .mchip .mdot[style*="dim"]{background:var(--line-2)!important}
+.mchip b{font-family:var(--f-display);font-size:14px;font-weight:500;color:var(--muted)}
+.mchip.on b{color:var(--muted)}
+.side .vgrp{color:var(--dim);opacity:1;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;padding:18px 4px 4px}
+.side .mchip .t.muted{color:var(--accent-text);opacity:1;font-weight:600}
+.side .muted{color:var(--muted);opacity:1}
+.side a:not(.brand):not(.mchip):not([data-nav]){color:var(--fg)}
+.badge{background:var(--fg);color:var(--panel)}
+.side-foot{border-top:1px solid var(--rule);color:var(--fg);padding:14px 22px 18px}
+.side-foot small{color:var(--muted);opacity:1}
+.side .icon-btn{border-color:var(--rule);color:var(--fg)} .side .icon-btn:hover{background:var(--fg);color:var(--accent)}
+.live{box-shadow:0 0 0 2px var(--rule)}
+.side > *:not(.brand){padding-left:22px;padding-right:22px}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .brand{padding:16px 18px 14px}
+  .brand b{font-size:26px}
+  .brand small{font-size:13px;margin-top:10px}
+  .side > div,.side .nav{padding-top:10px;padding-bottom:10px}
+  .side .sec-h{display:none}
+  .nav a,.mchip{font-size:14px;padding:8px 10px;border:1px solid var(--line)!important}
+  .nav a.on::after,.mchip.on::after{display:none}
+  .nav a.on,.mchip.on{background:var(--fg);color:var(--panel)}
+  .side > *:not(.brand){padding-left:14px;padding-right:14px}
+}
 </style>
 </head>
 <body>
@@ -285,7 +482,7 @@ select.sel,input[list]{width:100%;background:var(--panel);border:1px solid var(-
   <aside class="side">
     <a href="#/" class="brand">
       <span class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg></span>
-      <span><b>TERTORTOR LITE</b><small>Studio video vertikal</small></span>
+      <span><b>TERTORTOR LITE<sup>®</sup></b><small>Studio video vertikal<i class="brand-rule"></i></small></span>
     </a>
     <nav class="nav" aria-label="Menu utama">
       <div class="sec-h">Produksi</div>
@@ -519,8 +716,8 @@ const STORY = { musafo: { label: "Musafo", skill: "musafo" }, berakitkehulu: { l
 // ---------- views ----------
 const videoCard = (v) => `
       <a class="card" href="#/v/${v.slug}">
-        <div class="cv">${v.thumbnail?.url ? `<img class="cover" src="${v.thumbnail.url}" alt="" loading="lazy">` : v.video ? `<video class="cover" src="${v.video}#t=1.2" muted preload="metadata"></video>` : v.cover || v.keyvisuals?.[0] ? `<img class="cover" src="${v.cover || v.keyvisuals[0]}" alt="" loading="lazy">` : `<div class="cover cover-wip"><span>${esc(v.waiting || (v.scriptState === "waiting" || v.scriptState === "stale" ? "Setujui naskah" : v.next))}</span><small>belum ada gambar</small></div>`}
-        ${v.next !== "Selesai" && (v.thumbnail?.url || v.video || v.cover || v.keyvisuals?.[0]) ? `<span class="wip">ON PROGRESS</span>` : ""}</div>
+        <div class="cv" style="--ar:${esc(v.ratio || "9/16")}">${v.thumbnail?.url ? `<img class="cover" src="${v.thumbnail.url}" alt="" loading="lazy">` : v.video ? `<img class="cover" src="/api/videos/${v.slug}/poster.jpg?t=${encodeURIComponent(v.video)}" alt="" loading="lazy">` : v.cover || v.keyvisuals?.[0] ? `<img class="cover" src="${v.cover || v.keyvisuals[0]}" alt="" loading="lazy">` : `<div class="cover cover-wip"><span>${esc(v.waiting || (v.scriptState === "waiting" || v.scriptState === "stale" ? "Setujui naskah" : v.next))}</span><small>belum ada gambar</small></div>`}
+        ${v.next !== "Selesai" && (v.thumbnail?.url || v.video || v.cover || v.keyvisuals?.[0]) ? `<span class="wip">ON PROGRESS</span>` : ""}${v.buffered?.length ? `<span class="buffered" title="Sudah diterbitkan: ${esc(v.buffered.join(", "))}">PUBLISHED</span>` : ""}</div>
         <span class="cnt">${esc((subOf(v)?.label ?? v.sub ?? "").toUpperCase())} · ${esc(v.next === "Selesai" ? "SELESAI" : v.waiting ? "→ " + v.waiting.toUpperCase() : v.scriptState === "waiting" || v.scriptState === "stale" ? "→ SETUJUI NASKAH" : "→ " + v.next.toUpperCase())}</span>
         <div class="card-b"><div class="card-t">${esc(v.title)}</div><div class="prog"><i style="width:${Math.round(v.progress * 100)}%"></i></div></div>
       </a>`;
@@ -637,53 +834,52 @@ function bindLogoBox(cat, sub, tab, extra) {
     toast("Logo dihapus"); sub.logo = null; viewSub(cat, sub, tab, extra);
   };
 }
-// Buffer targets of a channel / preset / product (tools/buffer.mjs): which Buffer channels its videos are forwarded to
-async function bufferBox(cat, sub) {
-  const box = $("#bufBox"); if (!box) return;
-  const [ch, conf] = await Promise.all([fetch(`/api/buffer/channels?sub=${encodeURIComponent(sub.id)}`).then((r) => r.json()), fetch(`/api/subs/${cat.id}/${sub.id}/buffer`).then((r) => r.json())]);
-  if (!$("#bufBox")) return;
+// Tebar targets of a channel / preset / product (tools/tebar.mjs, main sending route since user 2026-11-14)
+async function tebarBox(cat, sub) {
+  const box = $("#tebBox"); if (!box) return;
+  const [ch, conf] = await Promise.all([fetch(`/api/tebar/accounts?sub=${encodeURIComponent(sub.id)}`).then((r) => r.json()), fetch(`/api/subs/${cat.id}/${sub.id}/tebar`).then((r) => r.json())]);
+  if (!$("#tebBox")) return;
   const viewer = me?.role === "viewer";
-  // the API key of this sub's own Buffer account (user 2026-11-12): pasted here, kept on the laptop, shown only as ••••1234
-  const keyForm = (replace) => viewer ? "" : `<div class="meta-row" style="gap:8px;margin-top:8px;flex-wrap:wrap" id="bufKeyRow">
-      <input type="password" id="bufKey" autocomplete="off" spellcheck="false" placeholder="${replace ? "Tempel API key baru" : "Tempel API key Buffer"}" style="flex:1;min-width:220px">
-      <button class="btn sm pri" id="bufKeySave">Simpan key</button>${replace ? '<button class="btn sm" id="bufKeyCancel">Batal</button>' : ""}</div>`;
+  const keyForm = (replace) => viewer ? "" : `<div class="meta-row" style="gap:8px;margin-top:8px;flex-wrap:wrap">
+      <input type="password" id="tebKey" autocomplete="off" spellcheck="false" placeholder="${replace ? "Tempel API key Tebar baru" : "Tempel API key Tebar (tb_live_…)"}" style="flex:1;min-width:220px">
+      <button class="btn sm pri" id="tebKeySave">Simpan key</button>${replace ? '<button class="btn sm" id="tebKeyCancel">Batal</button>' : ""}</div>`;
   const keyLine = () => `<div class="meta-row" style="gap:8px;flex-wrap:wrap;font-size:13px;margin-bottom:8px"><span class="pill ok">API key ${esc(ch.hint)}</span>
       <span class="muted">${ch.source === "studio" ? `tersimpan di laptop${ch.at ? " · " + new Date(ch.at).toLocaleDateString("id-ID") : ""}` : `dari <span class="mono">.env</span> (${esc(ch.keyName)})`}</span>
-      ${viewer ? "" : `<button class="btn sm" id="bufKeyNew">Ganti</button>${ch.source === "studio" ? '<button class="btn sm" id="bufKeyDel">Hapus key</button>' : ""}`}</div>`;
+      ${viewer ? "" : `<button class="btn sm" id="tebKeyNew">Ganti</button>${ch.source === "studio" ? '<button class="btn sm" id="tebKeyDel">Hapus key</button>' : ""}`}</div>`;
   const bindKey = () => {
-    const save = $("#bufKeySave");
+    const save = $("#tebKeySave");
     if (save) save.onclick = async () => {
-      const k = $("#bufKey").value.trim();
+      const k = $("#tebKey").value.trim();
       if (!k) return toast("Tempel API key dulu");
       save.disabled = true;
-      const r = await fetch(`/api/subs/${cat.id}/${sub.id}/buffer-key`, { method: "POST", body: JSON.stringify({ key: k }) });
-      $("#bufKey").value = "";
-      toast(r.ok ? "API key Buffer disimpan" : (await r.json()).error ?? "gagal");
-      if (r.ok) bufferBox(cat, sub); else save.disabled = false;
+      const r = await fetch(`/api/subs/${cat.id}/${sub.id}/tebar-key`, { method: "POST", body: JSON.stringify({ key: k }) });
+      $("#tebKey").value = "";
+      toast(r.ok ? "API key Tebar disimpan" : (await r.json()).error ?? "gagal");
+      if (r.ok) tebarBox(cat, sub); else save.disabled = false;
     };
-    if ($("#bufKeyCancel")) $("#bufKeyCancel").onclick = () => bufferBox(cat, sub);
-    if ($("#bufKeyNew")) $("#bufKeyNew").onclick = () => { $("#bufKeyNew").closest(".meta-row").insertAdjacentHTML("afterend", keyForm(true)); $("#bufKeyNew").remove(); bindKey(); $("#bufKey").focus(); };
-    if ($("#bufKeyDel")) $("#bufKeyDel").onclick = async () => {
-      if (!confirm(`Hapus API key Buffer ${sub.label} dari laptop? Video channel ini tidak bisa dikirim ke Buffer sampai key diisi lagi.`)) return;
-      const r = await fetch(`/api/subs/${cat.id}/${sub.id}/buffer-key`, { method: "DELETE" });
+    if ($("#tebKeyCancel")) $("#tebKeyCancel").onclick = () => tebarBox(cat, sub);
+    if ($("#tebKeyNew")) $("#tebKeyNew").onclick = () => { $("#tebKeyNew").closest(".meta-row").insertAdjacentHTML("afterend", keyForm(true)); $("#tebKeyNew").remove(); bindKey(); $("#tebKey").focus(); };
+    if ($("#tebKeyDel")) $("#tebKeyDel").onclick = async () => {
+      if (!confirm(`Hapus API key Tebar ${sub.label} dari laptop?`)) return;
+      const r = await fetch(`/api/subs/${cat.id}/${sub.id}/tebar-key`, { method: "DELETE" });
       toast(r.ok ? "API key dihapus" : (await r.json()).error ?? "gagal");
-      bufferBox(cat, sub);
+      tebarBox(cat, sub);
     };
   };
   if (!ch.key) {
-    box.innerHTML = `<div class="eyebrow">Buffer</div><div class="muted" style="font-size:13px">Belum tersambung. Tiap channel punya akun Buffer sendiri: login ke akun Buffer ${esc(sub.label)}, buat API key di <a href="https://publish.buffer.com/settings/api" target="_blank" rel="noopener">publish.buffer.com/settings/api</a>, lalu tempel di sini. Key disimpan di laptop (tidak masuk git) dan setelah itu hanya tampil 4 karakter terakhirnya.</div>${keyForm(false)}`;
+    box.innerHTML = `<div class="eyebrow">Tebar · jalur kirim utama</div><div class="muted" style="font-size:13px">Belum tersambung. Di <a href="https://publish.tebar.app" target="_blank" rel="noopener">tebar.app</a>, sambungkan akun Instagram/TikTok/YouTube ${esc(sub.label)}, lalu buat API key (baca dan tulis). Paling rapi: satu workspace per channel dan key dari menu ⋯ workspace itu. Key disimpan di laptop (tidak masuk git) dan setelah itu hanya tampil 4 karakter terakhirnya.</div>${keyForm(false)}`;
     return bindKey();
   }
-  if (ch.error) { box.innerHTML = `<div class="eyebrow" style="margin-bottom:8px">Buffer · akun ${esc(sub.label)}</div>${keyLine()}<div class="notice" style="margin:4px 0 0"><span>${esc(ch.error)}</span></div>`; return bindKey(); }
-  const on = new Set(conf.channels ?? []);
-  box.innerHTML = `<div class="eyebrow" style="margin-bottom:8px">Buffer · akun ${esc(sub.label)} · video diteruskan ke</div>${keyLine()}
-    ${ch.channels.length ?`<div class="meta-row" style="gap:8px 18px;flex-wrap:wrap">${ch.channels.map((c) => `<label style="display:flex;gap:8px;align-items:center;cursor:pointer">${c.avatar ? `<img src="${esc(c.avatar)}" alt="" style="width:22px;height:22px;border-radius:50%">` : ""}<input type="checkbox" data-buf="${esc(c.id)}" ${on.has(c.id) ? "checked" : ""}> ${esc(c.displayName || c.name)} <span class="pill">${esc(c.service)}</span>${c.isQueuePaused ? ' <span class="pill warn">antrean dijeda</span>' : ""}</label>`).join("")}</div>` : '<span class="muted">Akun Buffer ini belum punya channel.</span>'}
-    <div class="meta-row" style="margin-top:10px;gap:10px"><select id="bufMode"><option value="addToQueue" ${conf.mode === "addToQueue" ? "selected" : ""}>Default: masuk antrean Buffer</option><option value="shareNow" ${conf.mode === "shareNow" ? "selected" : ""}>Default: terbitkan sekarang</option></select><button class="btn sm" id="bufSave">Simpan</button></div>`;
+  if (ch.error) { box.innerHTML = `<div class="eyebrow" style="margin-bottom:8px">Tebar · ${esc(sub.label)}</div>${keyLine()}<div class="notice" style="margin:4px 0 0"><span>${esc(ch.error)}</span></div>`; return bindKey(); }
+  const on = new Set(conf.saved === false ? ch.accounts.map((a) => a.id) : conf.accounts ?? []);
+  box.innerHTML = `<div class="eyebrow" style="margin-bottom:8px">Tebar · jalur kirim utama · video dikirim ke</div>${keyLine()}
+    ${ch.accounts.length ? `<div class="meta-row" style="gap:8px 18px;flex-wrap:wrap">${ch.accounts.map((a) => `<label style="display:flex;gap:8px;align-items:center;cursor:pointer">${a.avatar ? `<img src="${esc(a.avatar)}" alt="" style="width:22px;height:22px;border-radius:50%">` : ""}<input type="checkbox" data-teb="${esc(a.id)}" ${on.has(a.id) ? "checked" : ""}> ${esc(a.name)} <span class="pill">${esc(a.platform)}</span>${a.status && a.status !== "active" ? ` <span class="pill warn">${esc(a.status)}</span>` : ""}</label>`).join("")}</div>` : '<span class="muted">Belum ada akun sosial tersambung di Tebar.</span>'}
+    <div class="meta-row" style="margin-top:10px;gap:10px"><label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="tebAi" ${conf.ai !== false ? "checked" : ""}> Tandai konten AI (label AI Instagram, TikTok, YouTube)</label><button class="btn sm" id="tebSave">Simpan</button></div>`;
   bindKey();
-  $("#bufSave").onclick = async () => {
-    const channels = [...document.querySelectorAll("[data-buf]")].filter((x) => x.checked).map((x) => x.dataset.buf);
-    const r = await fetch(`/api/subs/${cat.id}/${sub.id}/buffer`, { method: "POST", body: JSON.stringify({ channels, mode: $("#bufMode").value }) });
-    toast(r.ok ? `Buffer: ${channels.length} channel tujuan disimpan` : (await r.json()).error);
+  $("#tebSave").onclick = async () => {
+    const accounts = [...document.querySelectorAll("[data-teb]")].filter((x) => x.checked).map((x) => x.dataset.teb);
+    const r = await fetch(`/api/subs/${cat.id}/${sub.id}/tebar`, { method: "POST", body: JSON.stringify({ accounts, ai: $("#tebAi").checked }) });
+    toast(r.ok ? `Tebar: ${accounts.length} akun tujuan disimpan` : (await r.json()).error);
   };
 }
 function viewSub(cat, sub, tab = "video", extra) {
@@ -695,9 +891,9 @@ function viewSub(cat, sub, tab = "video", extra) {
       <div class="vh-r">${sub.draft ? `<span class="pill">belum didesain</span>` : `<a class="btn pri" href="#/baru/${cat.id}/${esc(sub.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Buat video</a>`}</div></div>
     <div class="tabs">${tabs.map(([id, label, n]) => `<a class="${id === tab ? "on" : ""}" href="#/s/${cat.id}/${esc(sub.id)}${id === "video" ? "" : "/" + id}">${label}${n !== "" ? ` <span>${n}</span>` : ""}</a>`).join("")}</div>
     <div id="subBody"></div>`;
-  if (!sub.draft) $(".tabs").insertAdjacentHTML("beforebegin", logoBox(cat, sub) + '<div class="panel pad" id="bufBox" style="margin-bottom:16px"><div class="eyebrow">Buffer</div><span class="muted" style="font-size:13px">Memuat…</span></div>');
+  if (!sub.draft) $(".tabs").insertAdjacentHTML("beforebegin", logoBox(cat, sub) + '<div class="panel pad" id="tebBox" style="margin-bottom:16px"><div class="eyebrow">Tebar</div><span class="muted" style="font-size:13px">Memuat…</span></div>');
   bindLogoBox(cat, sub, tab, extra);
-  if (!sub.draft) bufferBox(cat, sub);
+  if (!sub.draft) { tebarBox(cat, sub); }
   const body = $("#subBody");
   if (tab === "footage") return viewLibrary({ category: cat.id, sub: sub.id }, body);
   if (tab === "cerita") return viewStories(sub.id, extra, body);
@@ -742,7 +938,7 @@ function viewNew(presetId) {
         <div class="fld"><span class="lb">Preset gaya</span><div class="presets">${presetCard(preset, true).replace('<input', '<input disabled')}</div><span class="hint">Warna, font, caption, dan template scene. <a href="#/baru/explainer">Ganti preset</a>; bisa juga diganti nanti di editor.</span></div>
         ${(preset.formats ?? []).length > 1 ? `<div class="fld"><span class="lb">Format</span><div class="seg">${preset.formats.map((f, i) => `<label><input type="radio" name="format" value="${f}"${i === 0 ? " checked" : ""}>${f === "horizontal" ? "Horizontal 16:9" : "Vertikal 9:16"}</label>`).join("")}</div><span class="hint">Ditetapkan saat video dibuat. Dunia dan kamera disusun untuk format ini.</span></div>` : ""}
         <div class="fld"><span class="lb">Color tone</span>${toneRow(preset)}<span class="hint">Warna aksen video ini: kata kunci, kotak penanda, grafik, dan kata aktif di caption. Bulatan pelangi = warna sendiri. Bisa diganti nanti di editor.</span></div>
-        <div class="fld" id="speakerFld"><label for="speaker">Suara Gemini</label><select id="speaker" class="sel"></select><span class="hint">Bisa diganti nanti di tab Suara (ada sampel untuk didengar).</span></div>
+        <div class="fld" id="speakerFld"><label for="speaker">Suara</label><select id="speaker" class="sel"></select><span class="hint">Bisa diganti nanti di tab Suara (ada sampel untuk didengar).</span></div>
         <button class="btn pri" id="go" style="width:100%;padding:12px">Buat video</button>
       </form>
       <div class="panel">
@@ -770,8 +966,8 @@ function viewNew(presetId) {
     d.ondragleave = () => d.classList.remove("over");
     d.ondrop = (e) => { e.preventDefault(); d.classList.remove("over"); take(e.dataTransfer.files); };
   });
-  fetch("/api/voices").then((r) => r.json()).then(({ voices, speaker }) => {
-    $("#speaker").innerHTML = voices.map((x) => `<option value="${esc(x.name)}" ${x.name === speaker ? "selected" : ""}>${esc(x.name)} · ${esc(x.desc)}${x.sample ? "" : " (belum ada sampel)"}</option>`).join("");
+  fetch("/api/voices").then((r) => r.json()).then(({ voices, clones, speaker }) => {
+    $("#speaker").innerHTML = `<optgroup label="Gemini TTS">${voices.map((x) => `<option value="${esc(x.name)}" ${x.name === speaker ? "selected" : ""}>${esc(x.name)} · ${esc(x.desc)}${x.sample ? "" : " (belum ada sampel)"}</option>`).join("")}</optgroup>${(clones || []).length ? `<optgroup label="Suara clone (ElevenLabs)">${clones.map((c) => `<option value="${esc(c.speaker)}">${esc(c.name)} · clone</option>`).join("")}</optgroup>` : ""}`;
     speakerPreview(voices);
   });
   document.querySelectorAll("input[name=voice]").forEach((r) => (r.onchange = () => ($("#speakerFld").style.display = $("input[name=voice]:checked").value === "Gemini TTS" ? "" : "none")));
@@ -837,7 +1033,7 @@ function viewNewMusafo(channelId) {
           <span class="hint">Foto asli tokohnya (mis. Eka Tjipta muda dan tua). Claude membuat character sheet per usia dari foto ini, lalu semua shot memakai sheet itu supaya wajahnya konsisten. Bisa juga ditambahkan nanti di tab Tokoh.</span>
           <div class="thumbs" id="tokohPrev"></div></div>` : ""}
         <div class="fld" id="lookFld" style="display:none"><span class="lb">Gaya visual</span><span class="seg" id="lookSeg"></span><span class="hint" id="lookHint"></span></div>
-        <div class="fld"><label for="speaker">Suara Gemini</label><select id="speaker" class="sel"></select></div>
+        <div class="fld"><label for="speaker">Suara</label><select id="speaker" class="sel"></select></div>
         <div class="fld"><label for="vstyle">Gaya bicara (opsional)</label><input type="text" id="vstyle" placeholder="${bkh ? "seperti pendongeng sejarah: hangat, penuh semangat, ada jeda dramatis" : bdp ? "seperti dalang bercerita: tenang, berwibawa, ada jeda" : "seperti ustadz bercerita di majelis: hangat, pelan, ada jeda haru"}"></div>
         <button class="btn pri" id="go" style="width:100%;padding:12px">Buat proyek</button>
       </form>
@@ -873,8 +1069,8 @@ function viewNewMusafo(channelId) {
     $("#libBook").onchange = libStories; libStories();
   });
   // the type's own default voice (brand.json → <type>.voice, BumiDiPijak = Kira)
-  fetch("/api/voices?type=" + encodeURIComponent(type || "")).then((r) => r.json()).then(({ voices, speaker, style }) => {
-    $("#speaker").innerHTML = voices.map((x) => `<option value="${esc(x.name)}" ${x.name === speaker ? "selected" : ""}>${esc(x.name)} · ${esc(x.desc)}${x.sample ? "" : " (belum ada sampel)"}</option>`).join("");
+  fetch("/api/voices?type=" + encodeURIComponent(type || "")).then((r) => r.json()).then(({ voices, clones, speaker, style }) => {
+    $("#speaker").innerHTML = `<optgroup label="Gemini TTS">${voices.map((x) => `<option value="${esc(x.name)}" ${x.name === speaker ? "selected" : ""}>${esc(x.name)} · ${esc(x.desc)}${x.sample ? "" : " (belum ada sampel)"}</option>`).join("")}</optgroup>${(clones || []).length ? `<optgroup label="Suara clone (ElevenLabs)">${clones.map((c) => `<option value="${esc(c.speaker)}">${esc(c.name)} · clone</option>`).join("")}</optgroup>` : ""}`;
     if (style && !$("#vstyle").value) $("#vstyle").value = style;
     speakerPreview(voices);
   });
@@ -1336,7 +1532,7 @@ async function viewEditor(slug, startTab) {
   const isM = !!STORY[v.type], isA = !!v.ad; // Advertisement: no script, voice or Flow prompts (tools/ad.mjs)
   $("#main").innerHTML = `
     <div class="vh"><div><div class="eyebrow">${esc(slug)}${v.duration ? " · " + fmt(v.duration) : ""}${v.beats.length ? " · " + v.beats.length + " beat" : ""}</div><h1>${esc(v.title)}</h1><div class="meta-row">${stepPills(v)}${isM || isA ? `<span class="pill acc">${esc(placeLabel(v))}</span>` : `<span class="pill">${esc(catOf(v.category)?.label ?? "")}</span><button class="pill acc" id="presetBtn" title="Ganti preset gaya dan color tone">Preset: ${esc(subOf(v)?.label ?? v.preset)}${v.accent ? ` <i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${esc(v.accent)};vertical-align:0"></i>` : ""}</button>`}</div></div>
-      <div class="vh-r">${v.next !== "Selesai" ? cmdBox(slug, isM ? STORY[v.type].skill : isA ? (v.animation ? "animation" : v.preset) : undefined) : ""}${v.video ? `<button class="btn" id="shareBtn" title="Link yang bisa diputar tanpa login">${v.share ? (v.share.stale ? "Link: render lama" : "Link berbagi") : "Bagikan"}</button><a class="btn pri" href="${v.video}" download>Unduh MP4</a>` : ""}${(() => { const ready = !!v.video && !v.thumbnail?.videoRendering; return `<button class="btn" id="bufBtn" ${ready ? "" : "disabled"} title="${ready ? "Teruskan ke channel Buffer milik channel ini" : v.video ? "Tunggu render selesai" : "Aktif setelah video selesai dirender"}" style="background:#16a34a;border-color:#16a34a;color:#fff${ready ? "" : ";opacity:.45;cursor:not-allowed"}">Kirim ke Buffer</button>`; })()}</div></div>
+      <div class="vh-r">${v.next !== "Selesai" ? cmdBox(slug, isM ? STORY[v.type].skill : isA ? (v.animation ? "animation" : v.preset) : undefined) : ""}${v.video ? `<button class="btn" id="shareBtn" title="Link yang bisa diputar tanpa login">${v.share ? (v.share.stale ? "Link: render lama" : "Link berbagi") : "Bagikan"}</button><a class="btn pri" href="${v.video}" download>Unduh MP4</a>` : ""}${v.thumbnail?.url ? `<a class="btn" href="${v.thumbnail.url}" download="${slug}-thumbnail.png" title="Unduh thumbnail (PNG)">Unduh thumbnail</a>` : ""}${(() => { const ready = !!v.video && !v.thumbnail?.videoRendering; const why = v.video ? "Tunggu render selesai" : "Aktif setelah video selesai dirender"; return `<button class="btn" id="tebBtn" ${ready ? "" : "disabled"} title="${ready ? "Unggah ke Tebar dan posting ke akun channel ini" : why}" style="background:#16a34a;border-color:#16a34a;color:#fff${ready ? "" : ";opacity:.45;cursor:not-allowed"}">${v.tebar?.job && !["done", "error"].includes(v.tebar.job.phase) ? "Mengirim ke Tebar…" : "Kirim ke Tebar"}</button>`; })()}</div></div>
     <div class="ed${v.wide ? " cine" : ""}">
       <div class="viewer">
         ${v.video ? `<video class="stage" id="stage" src="${v.video}"${v.cinematic && v.cover ? ` poster="${v.cover}"` : ""} controls playsinline preload="metadata"></video>
@@ -1358,12 +1554,13 @@ async function viewEditor(slug, startTab) {
           <button data-t="naskah">Naskah ${v.approval.approved && v.scriptState !== "old" ? "<span>✓</span>" : ""}</button>
           <button data-t="shot">Shot <span>${v.musafo.shots.length}</span></button>
           <button data-t="suara">Suara <span>${v.voice.seconds ? fmt(v.voice.seconds) : "–"}</span></button>
-          <button data-t="beat">Beat <span>${v.beats.length}</span></button>` : `${v.clone ? `<button data-t="clone">Clone <span>${v.cloneData?.shots.length || "–"}${v.cloneData?.approval?.approved ? " ✓" : ""}</span></button>` : ""}<button data-t="beat"${v.clone ? "" : ' class="on"'}>Beat <span>${v.beats.length}</span></button>
+          <button data-t="beat">Beat <span>${v.beats.length}</span></button>` : `<button data-t="brief">Brief</button>
+          ${v.clone ? `<button data-t="clone">Clone <span>${v.cloneData?.shots.length || "–"}${v.cloneData?.approval?.approved ? " ✓" : ""}</span></button>` : ""}
           ${hasRef ? `<button data-t="konsep">Konsep <span>${v.concept ? esc(v.concept.id) : v.concepts.concepts.length || "–"}</span></button>` : ""}
           ${isA ? "" : `<button data-t="naskah">Naskah</button>`}
-          <button data-t="brief">Brief</button>
           ${isA || v.oneTake ? "" : `<button data-t="flow">Prompt Flow <span>${v.flowCheck.shots.length}</span></button>`}
-          ${isA ? "" : `<button data-t="suara">Suara <span>${v.voice.seconds ? fmt(v.voice.seconds) : "–"}</span></button>`}`}
+          ${isA ? "" : `<button data-t="suara">Suara <span>${v.voice.seconds ? fmt(v.voice.seconds) : "–"}</span></button>`}
+          <button data-t="beat"${v.clone ? "" : ' class="on"'}>Beat <span>${v.beats.length}</span></button>`}
           <button data-t="thumb">Thumbnail ${v.thumbnail?.url ? (v.thumbnail.stale ? "<span>!</span>" : "<span>✓</span>") : ""}</button>
           <button data-t="aset">Aset <span>${v.keyvisuals.length + v.screens.length + v.footage.length + v.reference.length}</span></button>
         </div>
@@ -1374,7 +1571,15 @@ async function viewEditor(slug, startTab) {
   let editing = false; // tab Naskah in edit mode
   const stage = $("#stage");
   const body = {
-    beat: () => v.oneTake ? beatTableView(v) : v.beats.length ? `
+    beat: () => v.oneTake ? beatTableView(v) : v.kvBeats ? `
+      <div class="pad"><div class="notice"><span><b>Durasi tiap beat bisa diubah.</b> Cut dibulatkan ke ketukan musik (kelipatan 0,3 s; beat pertama 0,55 + 0,3 s); beat penutup bebas. Semua waktu di dalamnya, potongan orang, celah bingkai, SFX, dan musik ikut menyesuaikan. Total sekarang <b id="kvTotal">${v.beats.reduce((s, b) => s + b.duration, 0).toFixed(2)} s</b>.</span></div></div>
+      <div class="pad" id="beatInfo" style="padding-top:0"></div>
+      <ul class="blist" style="border-top:1px solid var(--line)">${v.beats.map((b, i) => `
+        <li data-i="${i}" style="--rc:${REG[b.register]?.[0]}">${thumb(b) ? `<img class="bt" src="${thumb(b)}" alt="" loading="lazy">` : `<span class="bt"></span>`}
+          <div style="min-width:0"><b>${esc(b.hero)}</b><small>${esc(b.job)}</small></div>
+          <time>${fmt(b.start)}<br><input class="kvdur" data-id="${esc(b.id)}" type="number" min="0.3" step="${b.id === "close" ? 0.05 : 0.3}" value="${b.duration}" style="width:74px;text-align:right" title="durasi (detik)"> s</time></li>`).join("")}</ul>
+      <div class="pad" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="kvSave">Simpan durasi</button><button class="btn pri" id="kvRender">Simpan &amp; render ulang</button><span class="muted" id="kvMsg" style="align-self:center;font-size:12.5px"></span></div>`
+      : v.beats.length ? `
       <div class="pad" id="beatInfo"></div>
       <ul class="blist" style="border-top:1px solid var(--line)">${v.beats.map((b, i) => `
         <li data-i="${i}" style="--rc:${REG[b.register]?.[0]}">${thumb(b) ? `<img class="bt" src="${thumb(b)}" alt="" loading="lazy">` : `<span class="bt"></span>`}
@@ -1395,7 +1600,7 @@ async function viewEditor(slug, startTab) {
       const warns = naskahWarns[slug]?.length ? `<div class="notice"><span><b>Perlu dicek Claude:</b> ${naskahWarns[slug].map(esc).join(" · ")}</span></div>` : "";
       if (!editing) {
         const doc = isM && shots.length
-          ? shots.map((s) => `<div class="sline"><b class="mono">${esc(s.id)}</b><div>${s.lines.map((l) => `<div>${esc(l.text)}<br><small class="muted">${esc(l.en)}</small></div>`).join("")}</div></div>`).join("")
+          ? shots.map((s) => `<div class="sline"><b class="mono">${esc(s.id)}${s.stat ? `<br><small class="${s.stat.over ? "over" : "muted"}" title="maks ±${v.musafo.shotLimit?.words} kata ≈ ${v.musafo.shotLimit?.seconds} s per shot">${s.stat.words} kata<br>${s.stat.measured ? "" : "±"}${s.stat.sec}s${s.stat.over ? " ⚠" : ""}</small>` : ""}</b><div>${s.lines.map((l) => `<div>${esc(l.text)}<br><small class="muted">${esc(l.en)}</small></div>`).join("")}</div></div>`).join("")
           : `<div class="doc">${esc(v.script) || '<span class="muted">Naskah belum ditulis.</span>'}</div>`;
         return `<div class="pad">${bar}${pend}${warns}${canEdit ? `<div class="meta-row" style="justify-content:flex-end;margin:4px 0 8px"><button class="btn sm" id="sEdit">Edit naskah</button></div>` : ""}${doc}</div>`;
       }
@@ -1403,7 +1608,7 @@ async function viewEditor(slug, startTab) {
         ? `<div class="notice"><span><b>Suara sudah dibuat.</b> Hanya kalimat yang kamu ubah yang dibuat ulang suaranya (satu per satu, tidak rekam ulang semua).${isM ? " Shot yang sudah punya klip dan isinya berubah mungkin butuh klip baru (15 kredit per generate)." : ""} Jaga panjangnya mirip supaya durasi tetap aman.</span></div>`
         : "";
       const form = isM
-        ? shots.map((s) => `<div class="shot" data-sid="${esc(s.id)}"><div class="shot-h"><b>${esc(s.id)}</b><span class="pill">${esc(s.framing)}</span>${s.clipUrl ? '<span class="pill">sudah ada klip</span>' : ""}<span class="muted" style="font-size:12.5px">${esc(s.hero)}</span></div>
+        ? shots.map((s) => `<div class="shot" data-sid="${esc(s.id)}"><div class="shot-h"><b>${esc(s.id)}</b><span class="pill">${esc(s.framing)}</span>${s.clipUrl ? '<span class="pill">sudah ada klip</span>' : ""}<span class="muted" style="font-size:12.5px">${esc(s.hero)}</span><span class="wc" data-wc data-max="${v.musafo.shotLimit?.words ?? 18}"></span></div>
             <div class="shot-b"><div data-rows>${s.lines.map((l) => naskahRow("shot", l)).join("")}</div><div><button class="btn sm" data-add="shot">+ kalimat</button></div></div></div>`).join("")
         : `<div data-rows>${v.paragraphs.map((p) => naskahRow("para", { text: p })).join("")}</div><button class="btn sm" data-add="para">+ paragraf</button>`;
       return `<div class="pad">${note}<p class="muted" style="font-size:12.5px;margin:0 0 12px">${isM ? "Kiri: kalimat lisan (jadi suara + caption Indonesia). Kanan: terjemahan Inggris untuk caption. Satu kotak = satu caption, maksimal ±9 kata." : "Satu kotak = satu paragraf lisan. Baris catatan (#) di naskah tetap disimpan."}</p>
@@ -1433,6 +1638,18 @@ async function viewEditor(slug, startTab) {
           <button class="btn pri sm" id="vSave">Simpan suara</button>
           ${s.source === "gemini-tts" ? '<span class="muted" style="font-size:12px;margin-left:8px">Mengganti suara butuh take baru di AI Studio.</span>' : ""}
         </div>
+        <div class="panel pad" style="margin-bottom:16px" id="clonePanel">
+          <div class="eyebrow" style="margin-bottom:6px">Clone suara · ElevenLabs</div>
+          <p class="muted" style="font-size:12.5px;margin:0 0 12px">Suaramu sendiri (atau suara orang yang sudah setuju) dari 1-3 menit rekaman bersih. Naskah lalu dibaca suara itu dalam satu take, lengkap dengan waktu tiap kata, dan satu kalimat bisa diganti tanpa rekam ulang.</p>
+          ${(s.clones || []).length ? `<div style="display:grid;gap:8px;margin-bottom:14px">${s.clones.map((c) => `<div style="display:grid;grid-template-columns:minmax(0,130px) 1fr auto auto;gap:10px;align-items:center"><b style="font-size:13px;overflow:hidden;text-overflow:ellipsis">${esc(c.name)}<small class="muted" style="display:block;font-weight:400">${c.seconds} s rekaman</small></b>${c.sample ? `<audio controls preload="none" src="${c.sample}" style="width:100%;height:34px"></audio>` : '<span class="muted" style="font-size:12px">belum ada sampel</span>'}<button class="btn sm" data-pick="${esc(c.speaker)}">${s.speaker === c.speaker ? "Dipakai" : "Pakai"}</button><button class="btn sm" data-clonedel="${esc(c.id)}" title="Hapus clone ini dari laptop dan akun ElevenLabs">Hapus</button></div>`).join("")}</div>` : ""}
+          ${s.cloneKey ? "" : `<div class="notice" style="margin:0 0 12px"><span>Butuh <span class="mono">ELEVENLABS_API_KEY</span> di <span class="mono">.env</span> (buat di elevenlabs.io → API Keys; clone suara butuh paket Starter ke atas). Isi sendiri, lalu muat ulang halaman ini.</span></div>`}
+          <div class="two"><div class="fld"><label for="clName">Nama suara</label><input type="text" id="clName" maxlength="40" placeholder="mis. Suaraku"></div>
+            <div class="fld"><label for="clFiles">Rekaman (boleh beberapa file)</label><input type="file" id="clFiles" multiple accept="audio/*,video/*"></div></div>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:4px 0 12px"><input type="checkbox" id="clOk" style="margin-top:3px"> Ini suaraku sendiri, atau pemilik suaranya sudah setuju suaranya di-clone untuk video ini.</label>
+          <button class="btn pri sm" id="clMake" ${s.cloneKey ? "" : "disabled"}>Buat clone</button>
+          <span class="hint" style="margin-left:8px">Satu orang bicara, tanpa musik, tanpa gema. Lebih panjang dan lebih bersih = lebih mirip.</span>
+        </div>
+        ${String(s.speaker || "").startsWith("clone:") ? `<div class="notice ok" style="margin-bottom:16px"><span>Video ini memakai suara clone. Take dibuat Claude lewat ElevenLabs: <span class="mono">npm run voice -- ${esc(slug)} --force</span>. Teks AI Studio di bawah tidak dipakai.</span></div>` : ""}
         ${(s.samples.length ? s.samples : s.voices.filter((v) => v.sample).map((v) => ({ name: v.name, url: v.sample }))).length ? `<div class="eyebrow sub">Sampel suara${s.samples.length ? "" : " (kalimat contoh yang sama untuk semua speaker)"}</div><div style="display:grid;gap:8px;margin-bottom:16px">${(s.samples.length ? s.samples : s.voices.filter((v) => v.sample).map((v) => ({ name: v.name, url: v.sample }))).map((x) => { const nm = x.name.replace(/^\d+-/, ""); return `<div style="display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center"><b style="font-size:13px">${esc(x.name)}</b><audio controls preload="none" src="${x.url}" style="width:100%;height:34px"></audio><button class="btn sm" data-pick="${esc(nm.charAt(0).toUpperCase() + nm.slice(1))}">Pakai</button></div>`; }).join("")}</div>` : ""}
         <div class="eyebrow sub">Teks untuk AI Studio (satu blok = satu take)</div>
         <div class="prompt"><span class="lb">${s.text.length} karakter</span><button class="btn sm" data-copy="${esc(s.text)}">Salin</button>${esc(s.text) || '<span class="muted">Naskah belum ditulis.</span>'}</div>
@@ -1583,17 +1800,38 @@ async function viewEditor(slug, startTab) {
       const ring = (on) => (on ? "3px solid var(--acc,#e5b84a)" : "1px solid #0003");
       return `<div class="pad"><div style="display:grid;grid-template-columns:minmax(180px,280px) 1fr;gap:20px;align-items:start">
         <div>${t.url ? `<a href="${t.url}" target="_blank"><img src="${t.url}" alt="thumbnail" style="width:100%;border-radius:10px;display:block"></a>` : '<div class="empty" style="aspect-ratio:9/16"><b>Belum ada thumbnail</b>Isi teksnya lalu klik Render.</div>'}
+          ${t.url ? `<a class="btn sm" href="${t.url}" download="${slug}-thumbnail.png" style="margin-top:8px;width:100%;justify-content:center">Unduh thumbnail</a>` : ""}
           ${t.stale && t.url ? '<p class="muted" style="font-size:12.5px;margin-top:6px">Pengaturan berubah sejak render terakhir.</p>' : ""}</div>
         <div>
+          <div class="fld"><span class="lb">Isi thumbnail</span><div class="meta-row" style="gap:18px;margin-top:4px">
+            <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="thText" ${t.text ? "checked" : ""}> teks (headline, sub, episode, logo)</label>
+            <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="thShade" ${t.shade ? "checked" : ""}> bayangan gelap</label></div>
+            ${t.kv ? '<span class="hint">Default iklan key visual: gambar saja, tanpa teks dan bayangan.</span>' : ""}</div>
+          <div id="thTextFlds" style="${t.text ? "" : "display:none"}">
           <div class="fld"><label for="thHead">Headline <span class="muted" style="font-weight:400">· *kata* = warna aksen</span></label><input type="text" id="thHead" value="${esc(t.headline)}" maxlength="80"></div>
           <div class="fld"><label for="thSub">Sub headline</label><input type="text" id="thSub" value="${esc(t.sub)}" maxlength="140"></div>
           <div class="two"><div class="fld"><label for="thEp">Episode</label><input type="text" id="thEp" value="${esc(t.episode)}" placeholder="${esc(t.episodeDefault || "kosong = tanpa label")}" maxlength="30"></div>
-            <div class="fld"><label for="thPos">Posisi teks</label><select id="thPos"><option value="top" ${t.position !== "bottom" ? "selected" : ""}>Atas (di bawah logo)</option><option value="bottom" ${t.position === "bottom" ? "selected" : ""}>Bawah</option></select></div>
-            <div class="fld"><span class="lb">Di depan video</span><label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="thCover" ${t.cover ? "checked" : ""}> tampil ${t.seconds} s di awal</label></div></div>
+            <div class="fld"><label for="thPos">Posisi teks</label><select id="thPos"><option value="top" ${t.position !== "bottom" ? "selected" : ""}>Atas (di bawah logo)</option><option value="bottom" ${t.position === "bottom" ? "selected" : ""}>Bawah</option></select></div></div>
+          <div class="fld"><span class="lb">Warna aksen <span class="muted" style="font-weight:400">· *kata* di headline + label episode</span></span>
+            <div class="meta-row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${(t.swatches || []).map((c) => `<button type="button" class="thSw" data-hex="${c.hex}" title="${esc(c.label)} ${c.hex}" style="width:28px;height:28px;border-radius:50%;cursor:pointer;background:${c.hex};border:2px solid #0003;outline:${(t.accent || t.accentDefault || "").toLowerCase() === c.hex.toLowerCase() ? "3px solid var(--acc,#e5b84a)" : "none"};outline-offset:2px;padding:0"></button>`).join("")}
+              <input type="color" id="thAcc" value="${t.accent || t.accentDefault || "#e5b84a"}" title="Pilih warna sendiri" style="width:40px;height:30px;padding:0;border:1px solid #0003;border-radius:6px;cursor:pointer">
+              <input type="text" class="mono" id="thAccHex" value="${t.accent || t.accentDefault || ""}" placeholder="#RRGGBB" maxlength="9" spellcheck="false" title="Tempel kode hex lalu Enter" style="width:96px;font-size:12.5px;padding:4px 6px">${t.accent ? "" : '<span class="muted" style="font-size:12.5px">(default)</span>'}
+              ${t.accent ? '<button type="button" class="btn sm" id="thAccReset">Kembali ke default</button>' : ""}</div></div>
+          <div class="fld"><span class="lb">Warna sub headline</span>
+            <div class="meta-row" style="gap:8px;margin-top:6px"><input type="color" id="thSubC" value="${t.subColor || "#ffffff"}" style="width:40px;height:30px;padding:0;border:1px solid #0003;border-radius:6px;cursor:pointer">
+              <input type="text" class="mono" id="thSubHex" value="${t.subColor || ""}" placeholder="putih (default)" maxlength="9" spellcheck="false" title="Tempel kode hex lalu Enter" style="width:132px;font-size:12.5px;padding:4px 6px">${t.subColor ? '<button type="button" class="btn sm" id="thSubReset">Kembali ke default</button>' : ""}</div>
+            ${t.series ? '<label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="thSeriesC" checked> warna berlaku untuk semua bagian series ini</label><span class="hint">Series lain punya warnanya sendiri. Matikan centang untuk mengubah bagian ini saja.</span>' : ""}</div>
           <div class="fld"><span class="lb">Watermark</span><label style="display:flex;gap:8px;align-items:center;margin-top:4px"><input type="checkbox" id="thWm" ${w.off ? "" : "checked"} ${w.logo ? "" : "disabled"}> logo channel di kiri atas${w.logo ? "" : ' <span class="muted">(belum ada logo: unggah di halaman channel)</span>'}</label></div>
-          ${t.backgrounds.length ? `<div class="fld"><span class="lb">Latar</span><div class="meta-row" style="gap:8px;flex-wrap:wrap">${t.backgrounds.map((b) => `<label style="cursor:pointer"><input type="radio" name="thBg" value="${esc(b.path)}" ${b.path === t.bg ? "checked" : ""} hidden><img src="${b.url}" alt="" loading="lazy" style="width:64px;height:114px;object-fit:cover;border-radius:6px;outline:${ring(b.path === t.bg)}"></label>`).join("")}</div></div>` : '<p class="muted" style="font-size:12.5px">Latar: frame dari render (belum ada key visual).</p>'}
-          <div class="meta-row" style="margin:12px 0 18px"><button class="btn pri" id="thRender">Simpan &amp; render thumbnail</button>${t.url && !t.stale ? `<button class="btn" id="thVideo" ${t.videoRendering ? "disabled" : ""}>${t.videoRendering ? "Merender video…" : "Setujui & render video"}</button>` : ""}<button class="btn" id="thOpts">${t.options.length ? "Opsi baru" : "Buat opsi hook"}</button></div>
-          ${t.options.length ? `<div class="eyebrow" style="margin-bottom:8px">Opsi headline · klik untuk memakai</div>${t.options.map(opt).join("")}` : ""}
+          </div>
+          <div class="fld"><span class="lb">Di depan video</span><label style="display:flex;gap:8px;align-items:center;margin-top:4px"><input type="checkbox" id="thCover" ${t.cover ? "checked" : ""}> tampil <select id="thSec">${[0.5, 1, 1.5, 2, 2.5, 3].concat([t.seconds]).filter((x, i, a) => a.indexOf(x) === i).sort((a, b) => a - b).map((x) => `<option value="${x}" ${x === t.seconds ? "selected" : ""}>${String(x).replace(".", ",")} s</option>`).join("")}</select> di awal</label></div>
+          ${t.backgrounds.length ? `<div class="fld"><span class="lb">Latar</span><div class="meta-row" style="gap:8px;flex-wrap:wrap">${t.backgrounds.map((b) => `<label style="cursor:pointer" title="${esc(b.path)}"><input type="radio" name="thBg" value="${esc(b.path)}" ${b.path === t.bg ? "checked" : ""} hidden><img src="${b.url}${b.path.startsWith("assets/thumbs/") && t.url ? `?t=${t.url.split("?t=")[1] ?? ""}` : ""}" alt="" loading="lazy" style="width:64px;height:114px;object-fit:cover;border-radius:6px;outline:${ring(b.path === t.bg)}"></label>`).join("")}</div></div>` : '<p class="muted" style="font-size:12.5px">Latar: frame dari render (belum ada key visual).</p>'}
+          ${v.video ? `<div class="fld"><span class="lb">Ambil dari video · geser untuk mencari scene terbaik</span>
+            <div style="display:flex;gap:12px;align-items:center;margin-top:6px"><video id="thScrub" src="${v.video}" muted playsinline preload="auto" style="width:72px;height:128px;object-fit:cover;border-radius:6px;background:#000;flex:none"></video>
+              <div style="flex:1;min-width:0"><input type="range" id="thRange" min="0" max="${(v.duration || 30).toFixed(2)}" step="0.033" value="${t.bgTime ?? 0}" style="width:100%">
+                <div class="meta-row" style="gap:10px;margin-top:6px"><span class="mono" id="thAt">${(t.bgTime ?? 0).toFixed(2)} s</span><button class="btn sm" id="thFrame">Pakai frame ini</button></div></div></div></div>` : ""}
+          <div class="fld"><span class="lb">Gambar sendiri</span><div class="meta-row" style="gap:10px;margin-top:4px"><input type="file" id="thUpFile" accept="image/png,image/jpeg,image/webp" hidden><button class="btn sm" id="thUp">Unggah gambar…</button><span class="hint">PNG, JPG, atau WebP; dipotong mengisi ${v.horizontal ? "16:9" : "9:16"}.</span></div></div>
+          <div class="meta-row" style="margin:12px 0 18px"><button class="btn pri" id="thRender">Simpan &amp; render thumbnail</button>${t.url && !t.stale ? `<button class="btn" id="thVideo" ${t.videoRendering ? "disabled" : ""}>${t.videoRendering ? "Merender video…" : "Setujui & render video"}</button>` : ""}${t.text ? `<button class="btn" id="thOpts">${t.options.length ? "Opsi baru" : "Buat opsi hook"}</button>` : ""}</div>
+          ${t.text && t.options.length ? `<div class="eyebrow" style="margin-bottom:8px">Opsi headline · klik untuk memakai</div>${t.options.map(opt).join("")}` : ""}
           <p class="muted" style="font-size:12.5px;margin-top:10px">${t.videoRendering ? `⏳ Video sedang dirender dengan thumbnail ini (${t.videoRendering === "cover" ? "hanya pasang thumbnail di depan, ±1 menit" : "render penuh, beberapa menit"}). Tab ini diperbarui sendiri.` : t.videoError ? `✖ Render video gagal: ${esc(t.videoError)}` : t.videoBehind ? "⚠ Video yang ada belum memuat perubahan terbaru (thumbnail, gambar, atau klip). Klik Setujui &amp; render video untuk membuatnya ulang." : t.rendered ? "Simpan thumbnail tidak mengubah video. Video dibuat ulang hanya saat kamu klik Setujui &amp; render video." : "Video belum dirender. Setujui &amp; render video membuatnya dengan thumbnail ini di depan."} Link berbagi lama tetap memutar versi sebelumnya sampai dibagikan ulang.</p>
         </div></div></div>`;
     },
@@ -1673,6 +1911,23 @@ async function viewEditor(slug, startTab) {
     document.querySelector(".ed")?.classList.toggle("wide", t === "draft" || (t === "storyline" && !!v.musafo?.sourceText));
     $("#tabBody").innerHTML = body[t]();
     document.querySelectorAll(".blist li").forEach((li) => (li.onclick = () => showBeat(+li.dataset.i, true)));
+    // BRI-style ad: beat durations (retime.mjs on the laptop, then optionally a fresh render)
+    document.querySelectorAll(".kvdur").forEach((x) => {
+      x.onclick = (e) => e.stopPropagation();
+      x.oninput = () => { const t = $("#kvTotal"); if (t) t.textContent = `${[...document.querySelectorAll(".kvdur")].reduce((s, y) => s + (+y.value || 0), 0).toFixed(2)} s`; };
+    });
+    const kvSend = async (render) => {
+      const durs = Object.fromEntries([...document.querySelectorAll(".kvdur")].map((x) => [x.dataset.id, +x.value]));
+      const msg = $("#kvMsg"); ["#kvSave", "#kvRender"].forEach((s) => ($(s).disabled = true));
+      msg.textContent = "Menyesuaikan waktu, potongan orang, celah bingkai, dan musik…";
+      try {
+        const r = await fetch(`/api/videos/${slug}/kv-beats`, { method: "POST", body: JSON.stringify({ durs, render }) });
+        const j = await r.json(); if (!r.ok) throw new Error(j.error);
+        toast(`Durasi disimpan · total ${j.duration} s${render ? " · render dimulai" : ""}${j.warn ? ` · ${j.warn}` : ""}`);
+        await viewEditor(slug, "beat");
+      } catch (err) { msg.textContent = err.message; ["#kvSave", "#kvRender"].forEach((s) => ($(s).disabled = false)); }
+    };
+    if ($("#kvSave")) { $("#kvSave").onclick = () => kvSend(false); $("#kvRender").onclick = () => kvSend(true); }
     $("#tabBody").querySelectorAll("[data-copy]").forEach((b) => (b.onclick = () => toast(copyText(b.dataset.copy) ? "Prompt tersalin" : "Browser menolak menyalin. Salin manual.")));
     document.querySelectorAll("[data-goto]").forEach((b) => (b.onclick = () => openTab(b.dataset.goto)));
     document.querySelectorAll("[data-pick]").forEach((b) => (b.onclick = () => { $("#vSpeaker").value = b.dataset.pick; $("#vSpeaker").focus(); }));
@@ -1682,6 +1937,34 @@ async function viewEditor(slug, startTab) {
       const j = await r.json(); if (!r.ok) return toast(j.error);
       toast(`Suara disimpan: ${j.speaker}`); viewEditor(slug, "suara");
     };
+    // clone a voice (tools/voice-clone.mjs): upload the recordings one by one, then create the clone on ElevenLabs
+    const clMake = $("#clMake");
+    if (clMake) clMake.onclick = async () => {
+      const files = [...($("#clFiles").files || [])], name = $("#clName").value.trim();
+      if (!name) return toast("Beri nama suaranya");
+      if (!files.length) return toast("Pilih file rekamannya");
+      if (!$("#clOk").checked) return toast("Centang persetujuannya dulu");
+      clMake.disabled = true;
+      const batch = Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => b.toString(16).padStart(2, "0")).join("");
+      try {
+        for (const [i, f] of files.entries()) {
+          clMake.textContent = `Mengunggah ${i + 1}/${files.length}…`;
+          const r = await fetch(`/api/voices/clone/upload?batch=${batch}&name=${encodeURIComponent(f.name)}`, { method: "PUT", body: f });
+          if (!r.ok) throw new Error((await r.json()).error);
+        }
+        clMake.textContent = "Membuat clone…";
+        const r = await fetch("/api/voices/clone", { method: "POST", body: JSON.stringify({ name, batch, consent: true }) });
+        const j = await r.json(); if (!r.ok) throw new Error(j.error);
+        toast(`Clone "${j.clone.name}" siap. Klik Pakai lalu Simpan suara.`);
+        viewEditor(slug, "suara");
+      } catch (e) { alert(e.message); clMake.disabled = false; clMake.textContent = "Buat clone"; }
+    };
+    document.querySelectorAll("[data-clonedel]").forEach((b) => (b.onclick = async () => {
+      if (!confirm("Hapus suara clone ini? Suaranya ikut dihapus dari akun ElevenLabs, dan video yang memakainya harus memilih suara lain.")) return;
+      const r = await fetch(`/api/voices/clone/${b.dataset.clonedel}`, { method: "DELETE" });
+      if (!r.ok) return alert((await r.json()).error);
+      toast("Clone dihapus"); viewEditor(slug, "suara");
+    }));
     document.querySelectorAll("input[data-shot]").forEach((r) => (r.onchange = async () => { await fetch(`/api/videos/${slug}/flow/${r.dataset.shot}`, { method: "POST", body: JSON.stringify({ status: r.value }) }); toast("Status disimpan"); }));
     document.querySelectorAll("[data-concept]").forEach((b) => (b.onclick = async () => {
       const r = await fetch(`/api/videos/${slug}/concept`, { method: "POST", body: JSON.stringify({ id: b.dataset.concept }) });
@@ -1804,8 +2087,11 @@ async function viewEditor(slug, startTab) {
     else $("#tabBody").onclick = null;
     // English follows the Indonesian line: changing a line clears its caption (unless the user typed the English
     // themself), and the server translates every empty caption on save
+    const wcount = () => document.querySelectorAll("[data-wc]").forEach((el) => { const n = [...el.closest("[data-sid]").querySelectorAll(".lrow [data-k=text]")].reduce((a, x) => a + (x.value.match(/[\p{L}\p{N}]+(?:[-'’][\p{L}\p{N}]+)*/gu)?.length ?? 0), 0), max = +el.dataset.max; el.textContent = `${n}/${max} kata${n > max ? " · lebih dari 10 s" : ""}`; el.classList.toggle("over", n > max); });
+    if (t === "naskah" && editing && isM) wcount();
     $("#tabBody").oninput = t === "naskah" && editing && isM ? (e) => {
       const f = e.target, row = f.closest(".lrow"); if (!row) return;
+      wcount();
       const en = row.querySelector("[data-k=en]");
       if (f === en) { en.dataset.own = en.value.trim() ? "1" : ""; return; }
       if (f.dataset.k === "text" && !en.dataset.own) { en.value = ""; en.placeholder = "English: diterjemahkan otomatis saat disimpan"; }
@@ -1838,8 +2124,31 @@ async function viewEditor(slug, startTab) {
       if (!r.ok) return toast(j.error);
       v.thumbnail = j.thumbnail; if (j.watermark) v.watermark = j.watermark;
       openTab("thumb");
+      if (j.seriesParts) toast(`Warna dipakai juga di ${j.seriesParts} bagian lain series ini (thumbnail-nya dirender ulang di latar)`);
     };
-    $("#thOpts").onclick = () => go($("#thOpts"), `/api/videos/${slug}/thumbnail/options`, null, "Menulis opsi…");
+    if ($("#thOpts")) $("#thOpts").onclick = () => go($("#thOpts"), `/api/videos/${slug}/thumbnail/options`, null, "Menulis opsi…");
+    if ($("#thText")) $("#thText").onchange = () => { $("#thTextFlds").style.display = $("#thText").checked ? "" : "none"; };
+    // pick a frame from the video: the slider seeks a small preview, "Pakai frame ini" grabs that second and renders
+    const sc = $("#thScrub"), rg = $("#thRange");
+    if (sc && rg) {
+      const seek = () => { $("#thAt").textContent = `${(+rg.value).toFixed(2)} s`; try { sc.currentTime = +rg.value; } catch {} };
+      sc.onloadedmetadata = () => { if (sc.duration) rg.max = sc.duration.toFixed(2); seek(); };
+      rg.oninput = seek;
+      $("#thFrame").onclick = () => go($("#thFrame"), `/api/videos/${slug}/thumbnail`, { frameAt: +rg.value, text: $("#thText").checked, shade: $("#thShade").checked, cover: $("#thCover").checked, seconds: +$("#thSec").value }, "Mengambil frame…");
+    }
+    const upb = $("#thUp"), upf = $("#thUpFile");
+    if (upb && upf) {
+      upb.onclick = () => upf.click();
+      upf.onchange = async () => {
+        const f = upf.files[0]; if (!f) return;
+        const old = upb.textContent; upb.disabled = true; upb.textContent = "Mengunggah…";
+        try {
+          const r = await fetch(`/api/videos/${slug}/upload?kind=thumb&name=${encodeURIComponent(f.name)}`, { method: "PUT", body: f });
+          const j = await r.json(); if (!r.ok) throw new Error(j.error);
+          v.thumbnail = j.thumbnail; openTab("thumb"); toast("Gambar dipakai sebagai thumbnail");
+        } catch (err) { toast(err.message); upb.disabled = false; upb.textContent = old; }
+      };
+    }
     if ($("#thVideo")) $("#thVideo").onclick = () => go($("#thVideo"), `/api/videos/${slug}/thumbnail/video`, null, "Memulai…");
     // while the video renders, refresh the tab every 5 s until it is done
     clearTimeout(window.__thPoll);
@@ -1849,10 +2158,40 @@ async function viewEditor(slug, startTab) {
       if ($("#thVideo")) openTab("thumb");
       if (!nv.thumbnail.videoRendering && !nv.thumbnail.videoError) toast("Video selesai dirender dengan thumbnail baru");
     }, 5000);
-    $("#thRender").onclick = () => {
+    // colour picker (user 2026-11-15): a swatch, the native picker, or "Kembali ke default" saves and re-renders the thumbnail only
+    const save = (extra = {}) => {
+      if (("accent" in extra || "subColor" in extra) && $("#thSeriesC")) extra.colorScope = $("#thSeriesC").checked ? "series" : "part";
       const bg = document.querySelector("input[name=thBg]:checked");
-      go($("#thRender"), `/api/videos/${slug}/thumbnail`, { headline: $("#thHead").value, sub: $("#thSub").value, episode: $("#thEp").value, cover: $("#thCover").checked, position: $("#thPos").value, ...(v.watermark.logo ? { watermark: $("#thWm").checked } : {}), ...(bg ? { bg: bg.value } : {}) }, "Merender…");
+      go($("#thRender"), `/api/videos/${slug}/thumbnail`, { text: $("#thText").checked, shade: $("#thShade").checked, headline: $("#thHead").value, sub: $("#thSub").value, episode: $("#thEp").value, cover: $("#thCover").checked, seconds: +$("#thSec").value, position: $("#thPos").value, ...(v.watermark.logo ? { watermark: $("#thWm").checked } : {}), ...(bg ? { bg: bg.value } : {}), ...extra }, "Merender…");
     };
+    const isDef = (hex) => hex.toLowerCase() === String(v.thumbnail.accentDefault || "").toLowerCase();
+    document.querySelectorAll(".thSw").forEach((b) => (b.onclick = () => save({ accent: isDef(b.dataset.hex) ? "" : b.dataset.hex })));
+    if ($("#thAcc")) { $("#thAcc").oninput = () => { $("#thAccHex").value = $("#thAcc").value.toUpperCase(); }; $("#thAcc").onchange = () => save({ accent: isDef($("#thAcc").value) ? "" : $("#thAcc").value }); }
+    if ($("#thAccReset")) $("#thAccReset").onclick = () => save({ accent: "" });
+    if ($("#thSubC")) { $("#thSubC").oninput = () => { $("#thSubHex").value = $("#thSubC").value.toUpperCase(); }; $("#thSubC").onchange = () => save({ subColor: $("#thSubC").value }); }
+    // typed / pasted hex (user 2026-11-16): "#abc", "abc", "#aabbcc", "AABBCC" all work; saved on Enter, paste or leaving the field
+    const hexIn = (s) => { const m = String(s).trim().replace(/^#/, "").match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i); if (!m) return null; const h = m[1].length === 3 ? m[1].replace(/./g, "$&$&") : m[1]; return "#" + h.toUpperCase(); };
+    const hexField = (inp, picker, key, def) => {
+      if (!inp) return;
+      let last = inp.value.trim().toUpperCase();
+      const commit = () => {
+        const raw = inp.value.trim();
+        if (raw.toUpperCase() === last) return;
+        if (!raw) { last = ""; return save({ [key]: "" }); }
+        const h = hexIn(raw);
+        if (!h) { inp.style.outline = "2px solid #d33"; inp.title = "Kode hex tidak valid, contoh #E5B84A"; return; }
+        inp.style.outline = ""; inp.value = h; last = h; if (picker) picker.value = h.toLowerCase();
+        save({ [key]: def && def(h) ? "" : h });
+      };
+      inp.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } };
+      inp.onpaste = () => setTimeout(commit, 0);
+      inp.onchange = commit;
+      inp.oninput = () => { inp.style.outline = ""; const h = hexIn(inp.value); if (h && picker) picker.value = h.toLowerCase(); };
+    };
+    hexField($("#thAccHex"), $("#thAcc"), "accent", isDef);
+    hexField($("#thSubHex"), $("#thSubC"), "subColor");
+    if ($("#thSubReset")) $("#thSubReset").onclick = () => save({ subColor: "" });
+    $("#thRender").onclick = () => save();
   };
   document.querySelectorAll("#tabs button").forEach((x) => (x.onclick = () => openTab(x.dataset.t)));
   document.querySelectorAll(".tb").forEach((x) => (x.onclick = () => showBeat(+x.dataset.i, true)));
@@ -1860,67 +2199,132 @@ async function viewEditor(slug, startTab) {
     const i = v.beats.findIndex((b) => stage.currentTime >= b.start && stage.currentTime < b.start + b.duration);
     if (i >= 0 && i !== sel) showBeat(i, false);
   };
-  // forward to Buffer (tools/buffer.mjs): one post per Buffer channel picked on this channel's page
-  if ($("#bufBtn")) $("#bufBtn").onclick = async () => {
-    const b = v.buffer, box = document.createElement("div");
+  // Kirim ke Tebar (tools/tebar.mjs, main route since user 2026-11-14): uploads the render, one post to the ticked accounts.
+  // The caption is caption.md (tools/caption.mjs, agent-written, edited here). The send runs as a job on the laptop.
+  if ($("#tebBtn")) $("#tebBtn").onclick = async () => {
+    const fresh = await fetch(`/api/videos/${slug}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    if (fresh) { v.caption = fresh.caption; v.tebar = fresh.tebar; }
+    const t = v.tebar ?? {}, c = v.caption ?? {}, box = document.createElement("div");
     box.className = "modal";
-    const close = () => box.remove();
-    const last = (b.sent ?? []).at(-1);
-    let chans = [], writing = false, capErr = "";
-    // what the user typed survives a redraw (channel names arriving, a send result)
+    let alive = true;
+    const close = () => { alive = false; box.remove(); };
+    let accs = [], accErr = "", loading = !!t.key, writing = false, capErr = "";
+    let picked = new Set(t.accounts ?? []);
     const keep = () => {
-      if ($("#bufText", box) && !$("#bufText", box).disabled) b.text = $("#bufText", box).value;
-      if ($("#bufTitle", box)) b.title = $("#bufTitle", box).value;
-      if ($("#bufMode2", box)) { b.pick = $("#bufMode2", box).value; b.due = $("#bufDue", box).value; }
+      if (box.querySelector("input[data-acc]")) picked = new Set([...box.querySelectorAll("input[data-acc]:checked")].map((x) => x.dataset.acc));
+      if ($("#tebText", box) && !$("#tebText", box).disabled) c.text = $("#tebText", box).value;
+      if ($("#tebTitle", box)) c.title = $("#tebTitle", box).value;
+      if ($("#tebWhen", box)) { t.pick = $("#tebWhen", box).value; t.day = $("#tebDay", box).value; t.time = $("#tebTime", box).value; t.aiPick = $("#tebAi2", box).checked; t.kids = $("#tebKids", box).value; }
     };
-    b.title = b.title || (v.thumbnail?.headline || v.title || "").replace(/\*/g, "");
-    // the agent writes the caption + YouTube title (tools/buffer.mjs writeCaption, Gemini or Claude haiku); the user edits it
+    c.title = c.title || (v.thumbnail?.headline || v.title || "").replace(/\*/g, "");
     const writeCap = async () => {
       writing = true; capErr = ""; keep(); draw();
-      const r = await fetch(`/api/videos/${slug}/buffer-caption`, { method: "POST" }).catch(() => null);
+      const r = await fetch(`/api/videos/${slug}/caption`, { method: "POST" }).catch(() => null);
       const j = r ? await r.json().catch(() => ({})) : { error: "jaringan" };
       writing = false;
-      if (r?.ok) { b.text = j.text; b.title = j.title || b.title; b.caption = true; if ($("#bufTitle", box)) $("#bufTitle", box).value = b.title; } else capErr = j.error ?? "gagal";
+      if (r?.ok) { c.text = j.text; c.title = j.title || c.title; c.caption = true; } else capErr = j.error ?? "gagal";
       draw();
     };
-    const draw = (busy = "", result = null) => {
+    const shell = (inner) => `<div class="panel pad" style="max-width:560px;width:100%;max-height:90vh;overflow:auto"><div class="eyebrow">Kirim ke Tebar</div>${inner}</div>`;
+    const resultLines = (res) => res.map((x) => (x.ok ? "✓ " : "✗ ") + esc(`${x.platform ?? ""} ${x.name ?? x.account ?? ""}`.trim()) + (x.ok ? (x.status === "scheduled" || x.status === "pending" ? " · terjadwal" : x.status === "published" ? " · terbit" : "") + (x.permalink ? ` · <a href="${esc(x.permalink)}" target="_blank" rel="noopener">lihat</a>` : "") : ": " + esc(x.error ?? "gagal"))).join("<br>");
+    // the job screen: upload progress, then the result (no Kirim button, so a second click cannot double-post)
+    const jobScreen = (job) => {
+      if (job.phase === "error") return shell(`<h3 style="margin:14px 0 6px">Gagal mengirim</h3><div class="notice" style="margin:10px 0"><span>${esc(job.error)}</span></div><div class="meta-row" style="justify-content:flex-end"><button class="btn" id="tebBack">Kembali</button><button class="btn" id="tebClose">Tutup</button></div>`);
+      if (job.phase === "done") {
+        const res = job.result?.results ?? [], bad = res.filter((x) => !x.ok);
+        return shell(`<h3 style="margin:14px 0 6px;${bad.length ? "" : "color:#16a34a"}">${bad.length ? (res.some((x) => x.ok) ? "Sebagian gagal" : "Gagal") : "✓ Terkirim ke Tebar"}</h3><div class="notice ${bad.length ? "" : "ok"}" style="margin:10px 0"><span>${resultLines(res) || esc(job.result?.error ?? "")}</span></div><p class="muted" style="margin:0 0 14px;font-size:13px">Tebar menerbitkan di latar belakang. Klik Cek status untuk melihat link post, atau buka dashboard Tebar.</p><div class="meta-row" style="justify-content:flex-end"><button class="btn" id="tebRefresh">Cek status</button><button class="btn pri" id="tebClose">Selesai</button></div>`);
+      }
+      const pct = Math.round((job.progress ?? 0) * 100);
+      return shell(`<h3 style="margin:14px 0 6px">${job.phase === "post" ? "Membuat post…" : `Mengunggah video ke Tebar… ${pct}%`}</h3><div style="height:6px;background:rgba(127,127,127,.25);border-radius:3px;overflow:hidden;margin:10px 0"><div style="height:100%;width:${job.phase === "post" ? 100 : pct}%;background:#16a34a"></div></div><p class="muted" style="margin:0 0 14px">Jangan klik Kirim lagi. Popup ini boleh ditutup: kirimannya jalan terus di laptop dan hasilnya masuk notifikasi.</p><div class="meta-row" style="justify-content:flex-end"><button class="btn" id="tebClose">Tutup</button></div>`);
+    };
+    const poll = async () => {
+      while (alive) {
+        await new Promise((ok) => setTimeout(ok, 2000));
+        const j = await fetch(`/api/videos/${slug}/tebar`).then((r) => r.json()).catch(() => null);
+        if (!alive || !j) continue;
+        v.tebar = j; t.sent = j.sent; t.job = j.job;
+        if (!j.job) return draw();
+        box.innerHTML = jobScreen(j.job); bindJob();
+        if (["done", "error"].includes(j.job.phase)) return;
+      }
+    };
+    const bindJob = () => {
+      $("#tebClose", box).onclick = close;
+      if ($("#tebBack", box)) $("#tebBack", box).onclick = () => { t.job = null; draw(); };
+      if ($("#tebRefresh", box)) $("#tebRefresh", box).onclick = async () => {
+        const j = await fetch(`/api/videos/${slug}/tebar?refresh=1`).then((r) => r.json()).catch(() => null);
+        const last = j?.sent?.at(-1);
+        if (last) { box.innerHTML = jobScreen({ phase: "done", result: { results: last.results } }); bindJob(); }
+        toast(j ? "Status diperbarui" : "Gagal membaca status");
+      };
+    };
+    const draw = (result = null) => {
       keep();
-      box.innerHTML = `<div class="panel pad" style="max-width:560px;width:100%;max-height:90vh;overflow:auto"><div class="eyebrow">Kirim ke Buffer</div>
-        ${!b.key ? `<p style="margin:10px 0">Buffer channel ini belum tersambung. Tempel API key akun Buffer-nya di <a href="#/s/${esc(v.category)}/${esc(v.sub)}">halaman channel</a>, panel Buffer.</p>`
-        : !b.channels.length ? `<p style="margin:10px 0">Channel ini belum punya tujuan Buffer. Pilih di halaman channel, panel Buffer.</p>`
-        : `<p class="muted" style="font-size:13px;margin:8px 0 12px">Ke: ${b.channels.map((id) => esc(chans.find((c) => c.id === id)?.displayName || chans.find((c) => c.id === id)?.name || id)).join(", ")}. Video dikirim lewat link berbagi (dibuat/diperbarui otomatis); jangan cabut link itu sebelum Buffer menerbitkannya.</p>`}
-          <div class="fld"><label for="bufText" style="display:flex;justify-content:space-between;align-items:center">Caption <button class="btn sm" id="bufRewrite" ${writing ? "disabled" : ""} style="text-transform:none;letter-spacing:0">${writing ? "Menulis…" : b.caption ? "Tulis ulang" : "Tulis caption"}</button></label>
-            <textarea id="bufText" rows="10" ${writing ? "disabled" : ""}>${writing ? "Agen sedang menulis caption dari naskah video ini…" : esc(b.text)}</textarea>
-            <span class="hint">${capErr ? `Caption otomatis gagal: ${esc(capErr)}. Tulis sendiri atau coba lagi.` : "Ditulis agen dari naskah; kredit dari credits.md ikut di bawah. Edit sesukamu, baru terkirim saat kamu klik Kirim."}</span></div>
-          <div class="fld"><label for="bufTitle">Judul (YouTube)</label><input type="text" id="bufTitle" maxlength="100" value="${esc(b.title ?? "")}"></div>
-          <div class="two"><div class="fld"><label for="bufMode2">Kapan</label><select id="bufMode2"><option value="addToQueue">Masuk antrean Buffer</option><option value="shareNow">Terbitkan sekarang</option><option value="customScheduled">Jadwalkan</option></select></div>
-            <div class="fld" id="bufWhen" style="display:none"><label for="bufDue">Tanggal &amp; jam</label><input type="datetime-local" id="bufDue"></div></div>
-          ${last ? `<p class="muted" style="font-size:12.5px">Terakhir dikirim ${new Date(last.at).toLocaleString("id-ID")}: ${last.results.map((r) => (r.ok ? "✓ " : "✗ ") + esc(r.name ?? r.channel)).join(", ")}</p>` : ""}
-          ${result ? `<div class="notice ${result.ok ? "ok" : ""}" style="margin:10px 0"><span>${result.html}</span></div>` : ""}
-        <div class="meta-row" style="justify-content:flex-end;margin-top:12px">${b.key && b.channels.length ? `<button class="btn pri" id="bufGo" ${busy || writing ? "disabled" : ""}>${busy || "Kirim"}</button>` : ""}<button class="btn" id="bufClose">Tutup</button></div></div>`;
-      $("#bufClose", box).onclick = close;
-      const m = $("#bufMode2", box);
-      if (m) { m.value = b.pick || b.mode || "addToQueue"; $("#bufDue", box).value = b.due || ""; $("#bufWhen", box).style.display = m.value === "customScheduled" ? "" : "none"; m.onchange = () => ($("#bufWhen", box).style.display = m.value === "customScheduled" ? "" : "none"); }
-      if ($("#bufRewrite", box)) $("#bufRewrite", box).onclick = (e) => { e.preventDefault(); if (!b.caption || confirm("Tulis ulang caption? Editanmu di kotak caption akan diganti.")) writeCap(); };
-      const go = $("#bufGo", box);
+      if (t.job) { box.innerHTML = jobScreen(t.job); bindJob(); return; }
+      const last = (t.sent ?? []).at(-1);
+      box.innerHTML = shell(`
+        ${!t.key ? `<p style="margin:10px 0">Tebar channel ini belum tersambung. Tempel API key Tebar di <a href="#/s/${esc(v.category)}/${esc(v.sub)}">halaman channel</a>, panel Tebar.</p>`
+        : `<div class="fld"><label>Kirim ke</label>
+            ${loading ? `<span class="hint">Memuat akun Tebar…</span>`
+            : !accs.length ? `<span class="hint">${accErr ? `Akun Tebar tidak terbaca: ${esc(accErr)}` : "Belum ada akun sosial tersambung di Tebar."}</span>`
+            : accs.map((a) => `<label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;margin:4px 0;cursor:pointer"><input type="checkbox" data-acc="${esc(a.id)}" ${picked.has(a.id) ? "checked" : ""}>${esc(a.name)} <span class="muted" style="font-size:12px">${esc(a.platform)}</span></label>`).join("")}
+            <span class="hint">Video render diunggah langsung ke Tebar (tanpa link berbagi). Pilihanmu diingat untuk video berikutnya di channel ini.</span></div>`}
+        <div class="fld"><label for="tebText" style="display:flex;justify-content:space-between;align-items:center">Caption <button class="btn sm" id="tebRewrite" ${writing ? "disabled" : ""} style="text-transform:none;letter-spacing:0">${writing ? "Menulis…" : c.caption ? "Tulis ulang" : "Tulis caption"}</button></label>
+          <textarea id="tebText" rows="10" ${writing ? "disabled" : ""}>${writing ? "Agen sedang menulis caption dari naskah video ini…" : esc(c.text ?? "")}</textarea>
+          <span class="hint">${capErr ? `Caption otomatis gagal: ${esc(capErr)}. Tulis sendiri atau coba lagi.` : "Ditulis agen dari naskah; kredit dari credits.md ikut di bawah."}</span></div>
+        <div class="fld"><label for="tebTitle">Judul (YouTube)</label><input type="text" id="tebTitle" maxlength="100" value="${esc(c.title ?? "")}"></div>
+        <div class="two"><div class="fld"><label for="tebWhen">Kapan</label><select id="tebWhen"><option value="now">Terbitkan sekarang</option><option value="at">Jadwalkan</option></select></div>
+          <div class="fld"><label for="tebTime">Tanggal &amp; jam (WIB)</label><div style="display:flex;gap:6px"><input type="date" id="tebDay" style="flex:1.4"><input type="time" id="tebTime" step="60" style="flex:1"></div><span class="hint">Isi jam = dijadwalkan ke jam itu.</span></div></div>
+        <div class="two"><div class="fld"><label for="tebKids">Untuk anak (YouTube)</label><select id="tebKids"><option value="no">Bukan untuk anak</option><option value="yes">Dibuat untuk anak</option></select></div>
+          <div class="fld"><label>Label</label><label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;cursor:pointer"><input type="checkbox" id="tebAi2"> Konten dibuat dengan AI</label></div></div>
+        ${last ? `<p class="muted" style="font-size:12.5px">Terakhir dikirim ${new Date(last.at).toLocaleString("id-ID")}${last.scheduledAt ? " (jadwal " + new Date(last.scheduledAt).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + ")" : ""}:<br>${resultLines(last.results ?? [])}</p>` : ""}
+        ${result ? `<div class="notice" style="margin:10px 0"><span>${esc(result)}</span></div>` : ""}
+        <div class="meta-row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="tebSaveCap" ${writing ? "disabled" : ""}>Simpan caption</button>${t.key ? `<button class="btn pri" id="tebGo" ${writing || loading || !accs.length ? "disabled" : ""}>Kirim</button>` : ""}<button class="btn" id="tebClose">Tutup</button></div>`);
+      $("#tebClose", box).onclick = close;
+      const w = $("#tebWhen", box), day = $("#tebDay", box), time = $("#tebTime", box), pad = (n) => String(n).padStart(2, "0");
+      w.value = t.pick || "now"; day.value = t.day || ""; time.value = t.time || "";
+      $("#tebAi2", box).checked = t.aiPick ?? t.ai !== false; $("#tebKids", box).value = t.kids || "no";
+      const fill = () => { if (!day.value || !time.value) { const x = new Date(Date.now() + 3600e3); day.value ||= `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`; time.value ||= `${pad(x.getHours())}:00`; } };
+      w.onchange = () => { if (w.value === "at") fill(); };
+      day.oninput = time.oninput = () => { w.value = "at"; fill(); };
+      $("#tebRewrite", box).onclick = (e) => { e.preventDefault(); if (!c.caption || confirm("Tulis ulang caption? Editanmu di kotak caption akan diganti.")) writeCap(); };
+      $("#tebSaveCap", box).onclick = async () => {
+        keep();
+        const r = await fetch(`/api/videos/${slug}/caption`, { method: "POST", body: JSON.stringify({ text: c.text, title: c.title }) }).catch(() => null);
+        const j = r ? await r.json().catch(() => ({})) : { error: "jaringan" };
+        if (r?.ok) { c.text = j.text; c.title = j.title || c.title; c.caption = true; draw(); toast("Caption disimpan"); } else toast("Gagal menyimpan: " + (j.error ?? "gagal"));
+      };
+      const go = $("#tebGo", box);
       if (go) go.onclick = async () => {
-        if (!$("#bufText", box).value.trim()) return toast("Caption masih kosong");
-        const body = { text: $("#bufText", box).value, title: $("#bufTitle", box).value, mode: m.value, ...(m.value === "customScheduled" ? { dueAt: $("#bufDue", box).value } : {}) };
-        if (m.value === "shareNow" && !confirm("Terbitkan sekarang ke semua channel Buffer yang dipilih?")) return;
-        draw("Mengirim…");
-        const r = await fetch(`/api/videos/${slug}/buffer`, { method: "POST", body: JSON.stringify(body) });
-        const j = await r.json();
-        if (j.buffer) b.sent = j.buffer.sent;
-        const lines = (j.results ?? []).map((x) => (x.ok ? "✓ " : "✗ ") + esc(x.name ?? x.channel) + (x.ok ? "" : ": " + esc(x.error)));
-        draw("", { ok: r.ok, html: lines.length ? lines.join("<br>") : esc(j.error ?? "gagal") });
-        if (r.ok) toast("Terkirim ke Buffer");
+        if (!$("#tebText", box).value.trim()) return toast("Caption masih kosong");
+        keep();
+        const ids = [...picked].filter((id) => accs.some((a) => a.id === id));
+        if (!ids.length) return toast("Centang minimal satu akun");
+        const at = w.value === "at" ? new Date(`${day.value}T${time.value}`) : null;
+        if (at && isNaN(at)) return toast("Isi tanggal dan jam");
+        if (!at && !confirm(`Terbitkan sekarang ke ${ids.length} akun yang dicentang?`)) return;
+        go.disabled = true;
+        // the caption the user sends becomes caption.md, and the ticked accounts the sub's default
+        await fetch(`/api/videos/${slug}/caption`, { method: "POST", body: JSON.stringify({ text: c.text, title: c.title }) }).catch(() => {});
+        fetch(`/api/subs/${v.category}/${v.sub}/tebar`, { method: "POST", body: JSON.stringify({ accounts: ids, ai: t.ai !== false }) }).then(() => (t.accounts = ids)).catch(() => {});
+        const r = await fetch(`/api/videos/${slug}/tebar`, { method: "POST", body: JSON.stringify({ text: c.text, title: c.title, accounts: ids, ai: $("#tebAi2", box).checked, madeForKids: $("#tebKids", box).value === "yes", ...(at ? { at: at.toISOString() } : {}) }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { go.disabled = false; return draw(j.error ?? "gagal"); }
+        t.job = j.job ?? { phase: "upload", progress: 0 };
+        box.innerHTML = jobScreen(t.job); bindJob(); poll();
       };
     };
     document.body.appendChild(box);
     draw();
-    // first open: no caption.md yet → the agent writes one right away (the user still edits before sending)
-    if (!b.caption) writeCap();
-    if (b.key && b.channels.length) { try { chans = (await (await fetch(`/api/buffer/channels?sub=${encodeURIComponent(v.sub)}`)).json()).channels ?? []; draw(); } catch {} }
+    if (t.job && !["done", "error"].includes(t.job.phase)) poll();
+    if (!c.caption && !t.job) writeCap();
+    if (t.key) {
+      try { const j = await (await fetch(`/api/tebar/accounts?sub=${encodeURIComponent(v.sub)}`)).json(); accs = j.accounts ?? []; accErr = j.error ?? ""; }
+      catch { accErr = "jaringan"; }
+      loading = false;
+      if (t.saved === false) picked = new Set(accs.map((a) => a.id));
+      if (!t.job) draw();
+    }
   };
   // Ubah format (user 2026-11-13): other ratios and file types from the finished render (tools/formats.mjs)
   if ($("#fmtBtn")) {
@@ -2295,8 +2699,21 @@ async function viewUsers() {
   document.querySelectorAll("[data-re]").forEach((b) => (b.onclick = () => invite(b.dataset.re, b.dataset.rerole)));
 }
 
-async function route() {
-  await loadVideos();
+// menu switches draw from the list already loaded and refresh it behind (user 2026-11-16 "terasa berat saat pindah
+// menu"); the first load, and every action that changes a project (await loadVideos()), still wait for fresh data
+let listSig = "";
+async function route(fresh = false) {
+  if (!videos.length || !tree.length) { await loadVideos(); listSig = JSON.stringify(videos); }
+  else if (!fresh) {
+    const at = location.hash;
+    loadVideos().then(() => {
+      const sig = JSON.stringify(videos);
+      if (sig === listSig) return;
+      listSig = sig;
+      // lists drawn from `videos` (home, sub pages) redraw once; the editor loads its own project data
+      if (location.hash === at && !/^#\/(v\/|baru|tambah|user)/.test(at)) route(true);
+    }).catch(() => {});
+  }
   const h = location.hash || "#/";
   const m = h.match(/^#\/v\/([a-z0-9-]+)/);
   document.querySelectorAll(".nav a").forEach((a) => a.classList.toggle("on", a.dataset.nav === (h.startsWith("#/baru") || h.startsWith("#/tambah") ? "baru" : h.startsWith("#/user") ? "user" : h.startsWith("#/sampah") ? "sampah" : m || h.startsWith("#/s/") ? "" : "home")));
@@ -2356,7 +2773,7 @@ function chatRender(st) {
   chat.last = key;
   const log = $("#chatLog"), atEnd = log.scrollHeight - log.scrollTop - log.clientHeight < 80;
   log.innerHTML = st.messages.length ? st.messages.map((m) => `<div class="chat-m ${m.role}">${m.role === "assistant" ? chatMd(m.text) : esc(m.text)}</div>`).join("")
-    : `<div class="chat-empty"><b>Ngobrol dengan Claude dari sini.</b><br>Claude jalan di laptop, di folder TERTORTOR LITE, dan membaca CLAUDE.md yang sama. Kalau kamu sedang membuka satu video, Claude tahu video yang mana.<br><br>Edit file dan perintah npm/node boleh. Commit, push, kirim ke Buffer, dan publish tetap minta izinmu dulu.</div>`;
+    : `<div class="chat-empty"><b>Ngobrol dengan Claude dari sini.</b><br>Claude jalan di laptop, di folder TERTORTOR LITE, dan membaca CLAUDE.md yang sama. Kalau kamu sedang membuka satu video, Claude tahu video yang mana.<br><br>Edit file dan perintah npm/node boleh. Commit, push, kirim ke Tebar, dan publish tetap minta izinmu dulu.</div>`;
   if (atEnd || st.running) log.scrollTop = log.scrollHeight;
 }
 async function chatPoll() {

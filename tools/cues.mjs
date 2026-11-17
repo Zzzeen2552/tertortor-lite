@@ -74,7 +74,7 @@ const beats = plan.beats.map((b, i) => {
 // music grid (music.json, written by tools/music.mjs): a cut moves to the nearest beat (else half-beat) and a mark to the
 // nearest half-beat, only when the move is small, so picture and score hit together without leaving the words behind
 const mj = existsSync(join(dir, "music.json")) ? readJSON(join(dir, "music.json")) : null;
-const grid = mj?.bpm && !["off", "fit"].includes(mj.mode) ? mj : null;
+const grid = mj?.bpm && !["off", "fit", "story"].includes(mj.mode) ? mj : null;
 const SNAP = { cut: 0.22, mark: 0.14 };
 if (grid) {
   const p = 60 / grid.bpm, near = (t, step) => grid.offset + Math.round((t - grid.offset) / step) * step;
@@ -199,6 +199,8 @@ const audioTags = cues
   });
 // the score (tools/music.mjs) rides under everything, already ducked under the voice
 const musicWav = join(dir, "assets", "music.wav");
+// Storytelling underscore (tools/story-music.mjs, music.json mode "story"): no grid, nothing snapped, already ducked
+if (mj?.mode === "story" && existsSync(musicWav)) audioTags.push(`<audio id="music" src="assets/music.wav" data-start="0" data-duration="${snap(Math.min(total, probeDuration(musicWav)) - 0.01)}" data-volume="${mj.volume ?? 0.5}" data-track-index="13"></audio>`);
 if (grid && existsSync(musicWav)) audioTags.push(`<audio id="music" src="assets/music.wav" data-start="0" data-duration="${snap(Math.min(total, probeDuration(musicWav)) - 0.01)}" data-volume="${brand.music?.volume ?? 0.32}" data-track-index="13"></audio>`);
 const block = `<!--@sfx-->\n      ${audioTags.join("\n      ")}\n      <!--@sfx-end-->`;
 if (/<!--@sfx-->[\s\S]*?<!--@sfx-end-->/.test(html)) html = html.replace(/<!--@sfx-->[\s\S]*?<!--@sfx-end-->/, () => block);

@@ -79,3 +79,29 @@ versi baru.
 4. Musik: salin `template/score.mjs` ke folder video, sesuaikan daftar cut/tick/drop bila timing berubah, jalankan.
 5. `npx hyperframes lint` + `check`, still tiap beat (`snapshot --at`), perbaiki, `npm run finish -- <slug>`, baca
    contact sheet, kirim MP4.
+6. **File After Effects** (klien BRI minta file akhir AE yang bisa diedit, user 2026-11-13):
+   `node advertisement/bri/scripts/ae-export.mjs <slug>` → `out/<slug>-after-effects.zip` (skrip `.jsx` + aset +
+   `BACA-SAYA.txt`). Chrome mengukur tata letak `kv.html`, angka waktu dan gerak dibaca dari file itu, lalu
+   `ae/builder.jsx` menyusun proyek AE: teks Inter = layer teks asli, bingkai/kotak/ledakan = shape layer, satu precomp
+   per adegan, keyframe ber-easing, musik + SFX. Klien menjalankan File > Scripts > Run Script File lalu menyimpan `.aep`.
+   AE tidak terpasang di laptop ini: cek dengan `node advertisement/bri/ae/mock-run.mjs <file.jsx>` (tiruan objek AE,
+   menangkap error skrip dan nilai NaN, bukan bukti AE menerima tiap panggilan). Bila komposisi diubah (elemen/id baru),
+   builder ikut diperbarui.
+
+## Durasi per beat (user 2026-11-13)
+
+Delapan beat, durasinya di `beats.json` (`kv: true`): `healing`, `tanpa`, `kantong`, `pakai` (teks di atas klip),
+`promo` (angka odometer), `end1` (end frame promo), `end2` (end frame mitra), `close` (penutup logo). Komposisi tidak
+menyimpan detik lagi: blok `/*@beats*/` berisi durasi dan semua waktu di dalam beat (hentakan, kilau, grid, logo) diturunkan
+dari situ. Diubah di tab **Beat** Studio (Simpan / Simpan & render ulang) atau manual lalu
+`node advertisement/bri/scripts/retime.mjs <slug>`, yang juga membuat ulang potongan orang (sampai angka promo menutup
+teks), celah bingkai (jendela end frame 1), SFX, musik (`score.mjs`), dan `build/timeline.json` (daftar beat di Studio).
+Cut dibulatkan ke ketukan 100 BPM: beat pertama 0,55 + 0,3k, lainnya kelipatan 0,3; penutup bebas. Minimum: teks 0,3
+(Pakai 0,6), angka 0,9, end frame 1,5/1,8, penutup 1,2. Geometri dibaca dari `kv.html` tiap proyek, jadi versi 1:1, 4:5,
+16:9 ikut. Klip Flow 10 s: bila end frame mitra mulai sesudahnya, frame terakhir klip ditahan (skrip memberi peringatan).
+
+## Thumbnail (user 2026-11-13)
+
+Default tanpa teks, tanpa logo, tanpa bayangan: foto key visual polos (`thumbnail.json → text: false, shade: false`). User
+bisa memilih latar lain di tab Thumbnail: key visual lain, frame dari video (geser penggeser, "Pakai frame ini"), atau
+gambar unggahan sendiri. Thumbnail tidak ditaruh di depan video (`cover: false`).

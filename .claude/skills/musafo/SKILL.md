@@ -86,6 +86,13 @@ jalankan skill `/paket-ide`**: minimal 8 sudut cerita + 10 calon hook di `paket.
     lebih dulu). Tiap pilihan: `line` (kalimat pertama yang diucapkan, ≤ 12 kata ±3 detik, tanpa salam/sapaan, tanpa
     "di video ini"), `image` (gambar pertama, harus sudah bercerita tanpa suara), `loop` (pertanyaan yang sengaja dibiarkan
     terbuka = open loop), `why` (kenapa orang berhenti scroll). Hook tidak boleh menjanjikan isi yang tidak ada di bahan.
+  - **Gambar hook = adegan paling kontroversial sepanjang cerita** (user 2026-11-14, semua Storytelling): `image` tiap
+    pilihan (terutama yang bawaan) diambil dari momen paling panas di seluruh kisah (tudingan, skandal, ancaman, keputusan
+    yang ditentang orang), **walau kejadiannya di akhir**: flash-forward. `line` hook menyebut momen itu juga (fakta dari
+    bahan; tudingan tetap ditulis sebagai tudingan), lalu kalimat berikutnya membawa penonton kembali ke awal ("Puluhan
+    tahun sebelumnya…") dan kisahnya berjalan urut. Momen itu tetap muncul lagi di tempat aslinya. Series: bagian 1 memakai
+    momen paling kontroversial seluruh cerita; bagian 2 dst. memakai momen paling kontroversial di bagian itu sendiri.
+    Catat lompatannya di `## Beda dari alur asli`.
   - **Re-hook** `{ line, at }`: satu kalimat di 25-70% durasi yang membuka rasa penasaran baru ("Tapi yang terjadi
     sesudahnya…"), biasanya tepat sebelum titik balik.
   - **Cliffhanger** (hanya bagian series yang bukan terakhir): kalimat penutup di titik tegang, diakhiri "Bersambung ke
@@ -118,6 +125,14 @@ Tulis `shots` dari storyline yang disetujui. Aturan isi:
   **maks 15 s (±35 kata)**, berisi beberapa baris caption. Pilih 10 momen terkuat dari storyline; kalimat lain menempel
   ke shot momen terdekat. `check` gagal di atas 10 shot; shot 15-20 s hanya peringatan (sisa klip = frame terakhir
   ditahan), di atas 20 s gagal. Batasnya ikut panjang klip proyek: `musafo.json → clipSeconds` (Flow 10 s) menggantikan 15.
+- **Panjang shot rata** (user 2026-11-14): tiap shot ±(total narasi ÷ jumlah shot), praktisnya 7-11 s (±18-27 kata) untuk
+  klip Flow 10 s. Bagi kalimat menurut jumlah kata saat menulis `musafo.json`, bukan hanya menurut momen: momen pendek
+  mengambil kalimat tetangganya, momen panjang memberi kalimat tepinya. `check` memberi peringatan untuk shot < 60 % rata-rata
+  (min. 6 s) atau jauh di atas rata-rata; perbaiki sebelum suara dan gambar dibuat.
+- **Maks ±10 s narasi per shot** (user 2026-11-14): batas kata per shot = 10 s × kecepatan suara (sebelum suara: `wordsPerMinute`;
+  sesudah suara: kata/detik dari `voice/words.json`, Kira ±1,86 → **18 kata**). `check` memberi tanda pada shot di atasnya, dan Studio
+  menampilkan kata + detik tiap shot di tab Naskah (merah = lebih dari 10 s; Edit naskah punya penghitung langsung). Tulis naskah
+  dalam batas ini sejak awal; total narasi > 10 shot × 10 s berarti naskah terlalu panjang untuk satu bagian.
 - **Prompt klip satu shot = multi-scene, cut to cut** (user 2026-11-07). Shot dengan lebih dari satu kalimat wajib punya
   `scenes: [{ "line": n, "scene": "…", "motion": "…" }]`: adegan berikutnya mulai di kalimat ke-n shot itu (indeks mulai 0,
   naik), `scene` ditulis seperti bagian adegan `image` (bahasa Inggris, bisa berdiri sendiri), maks 4 adegan per shot,

@@ -341,6 +341,8 @@ export function checkMusafo(dir) {
   if (m.shots.length > maxShots) errors.push(`${m.shots.length} shot (maks ${maxShots}): gabungkan kalimat ke shot yang lebih sedikit; satu shot boleh berisi beberapa baris caption`);
   const beatLen = existsSync(join(dir, "build", "timeline.json")) && existsSync(join(dir, "voice", "words.json")) ? Object.fromEntries(readJSON(join(dir, "build", "timeline.json")).beats.map((b) => [b.id, b.duration])) : null;
   const ids = new Set();
+  const shotSec = (s) => beatLen?.[s.id] ?? ((s.lines ?? []).reduce((a, l) => a + tokens(l.text ?? "").length, 0) / wpm) * 60;
+  const shotTarget = m.shots.length ? m.shots.reduce((a, s) => a + shotSec(s), 0) / m.shots.length : 0;
   m.shots.forEach((s, i) => {
     const at = `shot ${s.id ?? i + 1}`;
     if (!/^[a-z][a-z0-9-]*$/.test(s.id ?? "")) errors.push(`${at}: id harus huruf kecil (mis. s01)`);
@@ -354,7 +356,8 @@ export function checkMusafo(dir) {
     // one shot = one clip, cut to cut inside it (user 2026-11-07): scenes[] = { line, scene, motion }, scene 1 = the shot's image
     const sc = s.scenes ?? [], nl = (s.lines ?? []).length;
     // a baked orb (calligraphy in the frame) may stay one take: a cut would make Flow draw the sphere again without it
-    const oneTake = [s.orb ?? []].flat().some((o) => o.baked);
+    // shots[].oneTake: a cut made Muse drift (new face, photoreal street) so the clip was kept as one take (2026-11-15)
+    const oneTake = s.oneTake || [s.orb ?? []].flat().some((o) => o.baked);
     if (nl > 1 && !sc.length) (oneTake ? warns : errors).push(`${at}: satu adegan untuk ${sec.toFixed(1)} s; tambahkan scenes (adegan berikutnya mulai di kalimat ke-n) supaya klipnya multi-scene, cut to cut`);
     if (sc.length > MAX_SHOTS - 1) errors.push(`${at}: ${sc.length + 1} adegan (maks ${MAX_SHOTS} per klip H3)`);
     sc.forEach((x, k) => {
@@ -364,6 +367,12 @@ export function checkMusafo(dir) {
     // a clip shorter than its shot is slowed down to fill it (user 2026-11-07, Flow 10 s), up to ×1.8
     if (sec > maxShotSec * MAX_STRETCH) errors.push(`${at}: ${beatLen ? "" : "perkiraan "}${sec.toFixed(1)} s narasi (klip ${maxShotSec} s diperlambat maks ×${MAX_STRETCH} = ${(maxShotSec * MAX_STRETCH).toFixed(0)} s); pindahkan kalimat ke shot tetangga atau pendekkan`);
     else if (sec > maxShotSec + 0.5) warns.push(`${at}: ${beatLen ? "" : "perkiraan "}${sec.toFixed(1)} s narasi; klip ${maxShotSec} s diperlambat ×${(sec / maxShotSec).toFixed(2)}`);
+    { const lim = shotWordLimit(dir), nw = (s.lines ?? []).reduce((a, l) => a + tokens(l.text ?? "").length, 0);
+      if (nw > lim.words || sec > lim.seconds + 0.3) warns.push(`${at}: ${nw} kata · ${sec.toFixed(1)} s, lebih dari ${lim.seconds} s (maks ±${lim.words} kata per shot); pindahkan kalimat tepi ke shot tetangga`); }
+    // shots of even length (user 2026-11-14, BDP Watugunung: 4.9 s next to 16.8 s): a short shot flashes past before its
+    // picture reads, a long one slows its clip. Target = total narration / shot count; warn below 60 % of it (min 6 s)
+    if (sec < Math.max(6, shotTarget * 0.6)) warns.push(`${at}: ${beatLen ? "" : "perkiraan "}${sec.toFixed(1)} s narasi, terlalu pendek (rata-rata ${shotTarget.toFixed(1)} s); ambil kalimat dari shot tetangga`);
+    else if (sec > Math.max(shotTarget * 1.3, shotTarget + 3) && sec <= maxShotSec + 0.5) warns.push(`${at}: ${beatLen ? "" : "perkiraan "}${sec.toFixed(1)} s narasi, jauh di atas rata-rata ${shotTarget.toFixed(1)} s; pindahkan kalimat tepi ke shot tetangga`);
     if (!s.lines?.length) errors.push(`${at}: tidak ada kalimat`);
     for (const l of s.lines ?? []) {
       if (!tokens(l.text ?? "").length) errors.push(`${at}: kalimat kosong`);
@@ -570,6 +579,13 @@ export function buildMusafo(dir, slug) {
     const tl2 = readJSON(join(dir, "build", "timeline.json")).beats;
     for (const s of m.shots) writeFileSync(join(dir, "compositions", `${s.id}.html`), scene(dir, s, tl2.find((b) => b.id === s.id)?.duration, leadOf(m, s.id)));
     spawnSync("node", [join(ROOT, "tools", "cues.mjs"), slug], { encoding: "utf8" });
+    // underscore (tools/story-music.mjs) follows every build once the voice exists: it was a manual step and Teh Sosro
+    // 1-2 went out without music (user 2026-11-15 "kenapa lupa?"). music.json mode "off" = the user turned it off.
+    const mj = join(dir, "music.json");
+    if (!existsSync(mj) || readJSON(mj).mode === "story") {
+      const r = spawnSync("node", [join(ROOT, "tools", "story-music.mjs"), slug], { encoding: "utf8" });
+      if (r.status !== 0) console.error(`musik: ${(r.stderr || r.stdout).trim().split("\n").at(-1)}`);
+    }
   }
   return { shots: m.shots.length, words: all.length };
 }
@@ -630,17 +646,56 @@ function scene(dir, s, dur, lead) {
   if (has(clip(s.id))) {
     let src = clip(s.id);
     const len = probeDuration(join(dir, src));
-    const slow = loadMusafo(dir)?.clips?.find((c) => c.shots?.[0] === s.id && c.stretch);
-    if (dur && len < dur + 0.1 && slow) {
+    const m0 = loadMusafo(dir), rec = m0?.clips?.find((c) => c.shots?.length === 1 && c.shots[0] === s.id);
+    const slow = rec?.stretch ? rec : null;
+    let starts = null;
+    // clips made outside clips[] (Meta Muse, user 2026-11-14): scenes[].clipAt = second in the clip where that scene starts
+    const cutsAt = rec?.sceneCuts?.length ? rec.sceneCuts : s.scenes?.length && s.scenes.every((x) => x.clipAt > 0) ? s.scenes.map((x) => x.clipAt) : null;
+    try { starts = cutsAt && cutsAt.length === (s.scenes ?? []).length ? lineStarts(dir, m0)[s.id] : null; } catch {}
+    if (dur && starts) {
+      // user 2026-11-14 (BDP Watugunung 4, shots rebalanced after the clips were made): a multi-scene clip is retimed per
+      // scene, so every cut inside it lands on the line it was generated for even when lines moved between shots.
+      // Segment j of the clip (its planned sceneCuts) fills the time from its line to the next; too long = trimmed, too
+      // short = slowed (blended frames, up to MAX_STRETCH), the rest held.
+      const S = [0, ...cutsAt, len], T = [0, ...s.scenes.map((x) => Math.max(0.5, starts[x.line] - 0.1)), dur + 0.3];
+      const parts = [], ins = S.length - 1;
+      for (let j = 0; j < ins; j++) {
+        const src = S[j + 1] - S[j], want = T[j + 1] - T[j];
+        if (want <= src) parts.push(`[v${j}]trim=start=${S[j].toFixed(3)}:duration=${want.toFixed(3)},setpts=PTS-STARTPTS,fps=30[o${j}]`);
+        else {
+          const f = Math.min(MAX_STRETCH, want / src), rest = Math.max(0, want - src * f);
+          // user 2026-11-15 "ada yang freeze cek" (Om Liem 4 s05: 4 s of clip under 8 s of lines = held frames)
+          if (rest > 0.3) console.log(`⚠ ${s.id}: adegan ${j + 1} klipnya ${src.toFixed(1)} s untuk ${want.toFixed(1)} s narasi, ${rest.toFixed(1)} s ditahan (freeze); geser scenes[].line atau buat klip lebih panjang`);
+          parts.push(`[v${j}]trim=start=${S[j].toFixed(3)}:end=${S[j + 1].toFixed(3)},setpts=${f.toFixed(4)}*(PTS-STARTPTS),minterpolate=fps=30:mi_mode=blend${rest > 0.03 ? `,tpad=stop_mode=clone:stop_duration=${rest.toFixed(3)}` : ""},trim=duration=${want.toFixed(3)}[o${j}]`);
+        }
+      }
+      const fc = `[0:v]split=${ins}${Array.from({ length: ins }, (_, j) => `[v${j}]`).join("")};${parts.join(";")};${Array.from({ length: ins }, (_, j) => `[o${j}]`).join("")}concat=n=${ins}:v=1:a=0[out]`;
+      src = `assets/footage/${s.id}.slow.mp4`;
+      const out = join(dir, src), sig = `${fc}|${statSync(join(dir, clip(s.id))).mtimeMs}`, sigFile = out + ".sig";
+      if (!existsSync(out) || !existsSync(sigFile) || readFileSync(sigFile, "utf8") !== sig) {
+        run("ffmpeg", ["-y", "-v", "error", "-i", join(dir, clip(s.id)), "-filter_complex", fc, "-map", "[out]", "-an", "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", out]);
+        writeFileSync(sigFile, sig);
+      }
+      source(dir, src, `${clip(s.id)} retimed per scene to its lines (same AI-generated clip)`);
+    } else if (dur && len < dur + 0.1 && slow) {
       // multi-scene clip planned shorter than its shot: slow it down to the shot's length so the cuts land on their lines
       const f = Math.min(MAX_STRETCH, (dur + 0.3) / len);
       src = `assets/footage/${s.id}.slow.mp4`;
       run("ffmpeg", ["-y", "-v", "error", "-i", join(dir, clip(s.id)), "-vf", `setpts=${f.toFixed(4)}*PTS,fps=30`, "-an", "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", join(dir, src)]);
       source(dir, src, `${clip(s.id)} slowed ×${f.toFixed(2)} to fill the shot (same AI-generated clip)`);
     } else if (dur && len < dur + 0.1) {
-      src = `assets/footage/${s.id}.hold.mp4`;
-      run("ffmpeg", ["-y", "-v", "error", "-i", join(dir, clip(s.id)), "-vf", `tpad=stop_mode=clone:stop_duration=${(dur - len + 0.5).toFixed(2)}`, "-an", "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", join(dir, src)]);
-      source(dir, src, `${clip(s.id)} held on its last frame to fill the shot (same AI-generated clip)`);
+      // user 2026-11-14 "ada beberapa gambar freeze gak motion": a clip shorter than its shot is slowed down to fill it
+      // (blended frames, up to MAX_STRETCH), never frozen on its last frame for seconds; only what is still missing
+      // after the maximum stretch is held
+      const f = Math.min(MAX_STRETCH, (dur + 0.3) / len), rest = Math.max(0, dur + 0.5 - len * f);
+      const vf = `setpts=${f.toFixed(4)}*PTS,minterpolate=fps=30:mi_mode=blend${rest > 0.05 ? `,tpad=stop_mode=clone:stop_duration=${rest.toFixed(2)}` : ""}`;
+      src = `assets/footage/${s.id}.slow.mp4`;
+      const out = join(dir, src), sig = `${vf}|${statSync(join(dir, clip(s.id))).mtimeMs}`, sigFile = out + ".sig";
+      if (!existsSync(out) || !existsSync(sigFile) || readFileSync(sigFile, "utf8") !== sig) {
+        run("ffmpeg", ["-y", "-v", "error", "-i", join(dir, clip(s.id)), "-vf", vf, "-an", "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", out]);
+        writeFileSync(sigFile, sig);
+      }
+      source(dir, src, `${clip(s.id)} slowed ×${f.toFixed(2)} to fill the shot${rest > 0.05 ? `, last ${rest.toFixed(1)} s held` : ""} (same AI-generated clip)`);
     }
     const d = Math.max(0.1, Math.min(dur ?? len, probeDuration(join(dir, src)) - 0.05)).toFixed(2);
     media = `<video id="${s.id}-clip" src="${src}" data-start="0" data-duration="${d}" muted playsinline></video>`;
@@ -767,7 +822,7 @@ export const clipMode = (m) => !!m?.clips?.length;
 // musafo.json → clipSeconds overrides it per project, e.g. 10 when the clips are made in Google Flow (clips --seconds 10)
 const genSeconds = (m) => m?.clipSeconds ?? conf().video?.seconds ?? 15;
 // seconds from the start of each shot's beat to the first spoken word of each of its lines (voice/words.json)
-function lineStarts(dir, m) {
+export function lineStarts(dir, m) {
   const words = readJSON(join(dir, "voice", "words.json")), beats = readJSON(join(dir, "build", "timeline.json")).beats;
   const out = {};
   let w = 0;
@@ -776,6 +831,23 @@ function lineStarts(dir, m) {
     out[s.id] = s.lines.map((l) => { const t = words[w]?.start ?? 0; w += tokens(l.text).length; return Math.max(0, t - (b?.start ?? 0)); });
   }
   return out;
+}
+// at most ±10 s of narration per shot (user 2026-11-14 "bikin aturan maksimal kata per shot, kasih tanda kalo lebih dari 10
+// detik"): the word limit follows the real voice (words.json words per second) once it exists, else wordsPerMinute
+export const SHOT_SECONDS = 10;
+export function shotWordLimit(dir) {
+  const secs = conf(dir).shotSeconds ?? SHOT_SECONDS;
+  let rate = (conf(dir).wordsPerMinute ?? 140) / 60;
+  try { const w = readJSON(join(dir, "voice", "words.json")); if (w.length > 20) rate = w.length / (w.at(-1).end - w[0].start); } catch {}
+  return { seconds: secs, words: Math.floor(secs * rate), rate: +rate.toFixed(2) };
+}
+export function shotStats(dir, m) {
+  const len = beatLengths(dir) ?? {}, lim = shotWordLimit(dir);
+  return Object.fromEntries((m?.shots ?? []).map((s) => {
+    const words = (s.lines ?? []).reduce((a, l) => a + tokens(l.text ?? "").length, 0);
+    const sec = len[s.id] ?? words / lim.rate;
+    return [s.id, { words, sec: +sec.toFixed(1), measured: s.id in len, over: words > lim.words || sec > lim.seconds + 0.3 }];
+  }));
 }
 function beatLengths(dir) {
   const p = join(dir, "build", "timeline.json");
@@ -912,6 +984,21 @@ export function planClips(dir, { force = false, seconds, only } = {}) {
   return m.clips;
 }
 
+// ffprobe once per clip file (path + mtime + size): Studio runs checkMusafo for every Storytelling video on each load of
+// the video list, and one ffprobe per clip made /api/videos take 20 s (user 2026-11-14 "kenapa di local loadingnya lambat")
+// kept in .cache/clip-lengths.json too (gitignored), since Studio restarts on every code change under --watch
+const LENGTHS = join(ROOT, ".cache", "clip-lengths.json");
+let lengthCache = null;
+function clipLength(file) {
+  if (!lengthCache) { try { lengthCache = new Map(Object.entries(readJSON(LENGTHS))); } catch { lengthCache = new Map(); } }
+  const st = statSync(file), key = `${file}|${st.mtimeMs}|${st.size}`;
+  if (!lengthCache.has(key)) {
+    lengthCache.set(key, probeDuration(file));
+    try { mkdirSync(join(ROOT, ".cache"), { recursive: true }); writeFileSync(LENGTHS, JSON.stringify(Object.fromEntries(lengthCache))); } catch {}
+  }
+  return lengthCache.get(key);
+}
+
 export function checkClips(dir, m) {
   const errors = [], warns = [];
   if (!clipMode(m)) return { errors, warns, generates: m.shots.length };
@@ -942,7 +1029,11 @@ export function checkClips(dir, m) {
     if (n === 1 && !scn.length && m.clips.length > 1 && len && (len[c.shots[0]] ?? 0) < max / 2) warns.push(`${at}: hanya satu shot; gabungkan dengan clip tetangga bila muat supaya hemat`);
     if (len) {
       const need = (c.shots ?? []).reduce((a, id) => a + (len[id] ?? 0), 0);
-      if (need > c.seconds * (c.stretch ? MAX_STRETCH : 1) + 0.05) errors.push(`${at}: shot-nya butuh ${need.toFixed(1)} s, generate hanya ${c.seconds} s${c.stretch ? ` (diperlambat maks ×${MAX_STRETCH})` : ""}`);
+      // a one-shot clip that is already made is slowed / retimed per scene by build (scene()) whatever was planned, so it
+      // only has to fit the stretch limit of its real length (user 2026-11-14: lines moved between shots after the clips)
+      const made = n === 1 && existsSync(join(dir, clip(c.shots[0]))) ? clipLength(join(dir, clip(c.shots[0]))) : 0;
+      if (made && need <= made * MAX_STRETCH + 0.05) {}
+      else if (need > c.seconds * (c.stretch ? MAX_STRETCH : 1) + 0.05) errors.push(`${at}: shot-nya butuh ${need.toFixed(1)} s, generate hanya ${c.seconds} s${c.stretch ? ` (diperlambat maks ×${MAX_STRETCH})` : ""}`);
       let t = 0;
       const plan = (c.shots ?? []).slice(0, -1).map((id) => +(t += len[id] ?? 0).toFixed(2));
       if (plan.some((x, i) => Math.abs(x - (cuts[i] ?? -9)) > 0.3)) errors.push(`${at}: cut ${cuts.join(", ")} tidak cocok dengan durasi beat sekarang (${plan.join(", ")}): suara berubah, jalankan clips --force`);
@@ -1021,6 +1112,70 @@ function add(dir, kind, id, file) {
   }
   console.log(`✔ ${kind} ${id} → ${kind === "image" ? frame(id) : clip(id)}`);
 }
+// ---------- Meta Muse prompts (user 2026-11-15 "wajahnya terus berubah nggak konsisten") ----------
+// Muse animates ONE reference image. Faces drift when (1) a prompt cuts to a new scene with people (Muse invents them
+// with no reference), (2) the camera pushes into a facial close-up (the face is re-drawn at a size the still never
+// fixed), (3) the prompt re-describes the style at length and fights the image. So (skill cinematic-director, S1
+// motion-only): one continuous shot per generate, the image carries the look, the main character's identity string is
+// stated verbatim, one camera move that keeps its distance from faces, one action that settles, nobody new enters.
+// A scene with people after a cut becomes its own part: its own image (assets/frames/<shot>-<b|c>.png) and its own
+// generate, joined by `join`. A scene without people may stay a hard cut inside the first generate.
+const PEOPLE = /\b(man|men|woman|women|people|person|boy|girl|child|children|son|daughter|father|mother|worker|workers|customers?|crowd|shoppers?|businessman|businesswoman|soldiers?|farmers?|traders?|family|he|she|his|her|him)\b/i;
+const FACE_PUSH = /(slow |very slow )?push(es)? in (on|to|toward) (his|her|their) (face|eyes|smile)[^.,;]*/gi;
+const safeMove = (m = "") => dot(m.replace(FACE_PUSH, "slow push in toward him that stops at a medium shot")).replace(/^./, (x) => x.toUpperCase());
+export function musePlan(dir, id) {
+  const m = readJSON(join(dir, "musafo.json")), c = conf(dir), s = m.shots.find((x) => x.id === id);
+  if (!s) throw new Error(`shot ${id} tidak ada`);
+  const ch = (s.characters ?? []).map((k) => m.characters?.find((x) => x.id === k)).filter(Boolean);
+  const era = s.era ?? m.era;
+  const lines = s.lines?.length ?? 1, scenes = s.scenes ?? [];
+  // the first part runs to the first scene with people; scenes without people before that stay cuts inside it
+  const firstPeople = scenes.findIndex((x) => PEOPLE.test(x.scene));
+  const inner = scenes.slice(0, firstPeople < 0 ? scenes.length : firstPeople);
+  const rest = firstPeople < 0 ? [] : scenes.slice(firstPeople);
+  const lock = (who, text) => {
+    const out = [];
+    for (const x of who) out.push(`The main character is ${x.desc.trim().replace(/\.$/, "")}. He keeps exactly the face, hair, skin tone, build and clothes shown in the image in every frame; his face never morphs, ages or turns into someone else.`);
+    if (PEOPLE.test(text)) out.push("Everyone in the frame keeps their own face, body and place from the image; nobody new walks into the frame and no face changes.");
+    return out.join(" ");
+  };
+  const tail = `${era ? `Set in ${era.replace(/;.*$/, "")}: period clothing and props only. ` : ""}No text, letters, numbers, logos or flags. Silent.`;
+  const head = "Animate this exact image. Keep its look exactly: the same 3D rendering, palette, light and composition; do not restyle it.";
+  const at = (k) => +(10 * (k / lines)).toFixed(1);
+  const first = sceneOf(s.image, c);
+  const parts = [{
+    part: "a", image: frame(id), fromLine: 0,
+    prompt: [head,
+      inner.length ? `[0-${at(inner[0].line)} s]` : "One continuous 10-second shot, no cuts.",
+      lock(ch, first),
+      `${safeMove(s.motion)} The camera keeps the same distance from faces and never pushes into a close-up of a face. One main action only, which settles into a still pose for the last second.`,
+      ...inner.map((x, k) => `[${at(x.line)}-${k + 1 < inner.length ? at(inner[k + 1].line) : 10} s] Hard cut to ${lc(dot(x.scene))} No people in this part. ${safeMove(x.motion)}`),
+      tail].join(" "),
+  }];
+  rest.forEach((x, k) => parts.push({
+    part: String.fromCharCode(98 + k), image: `assets/frames/${id}-${String.fromCharCode(98 + k)}.png`, fromLine: x.line, scene: x.scene,
+    prompt: [head, "One continuous 10-second shot, no cuts.", lock(ch.filter((y) => x.scene.includes(y.desc.slice(0, 30))), x.scene),
+      `${safeMove(x.motion)} The camera keeps the same distance from faces and never pushes into a close-up of a face. One main action only, which settles into a still pose for the last second.`, tail].join(" "),
+  }));
+  return parts;
+}
+// join the parts of one shot (a, b, ...) into assets/footage/<shot>.mp4 via `add`; scenes[].clipAt = where each part starts
+export function joinParts(dir, id, files) {
+  const m = readJSON(join(dir, "musafo.json")), s = m.shots.find((x) => x.id === id), plan = musePlan(dir, id);
+  if (files.length !== plan.length) throw new Error(`${id}: ${plan.length} bagian (${plan.map((p) => p.part).join(", ")}), file ${files.length}`);
+  const tmp = join(dir, "build", `${id}.joined.mp4`);
+  mkdirSync(join(dir, "build"), { recursive: true });
+  const lens = files.map((f) => probeDuration(f));
+  run("ffmpeg", ["-y", "-v", "error", ...files.flatMap((f) => ["-i", f]), "-filter_complex",
+    files.map((_, i) => `[${i}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,fps=30[v${i}]`).join(";") + ";" + files.map((_, i) => `[v${i}]`).join("") + `concat=n=${files.length}:v=1:a=0[v]`,
+    "-map", "[v]", "-an", "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p", tmp]);
+  // part starts become the clipAt of the scenes that open them (inner no-people cuts keep their own clipAt)
+  let t = 0;
+  plan.forEach((p, i) => { if (i) { const sc = s.scenes.find((x) => x.line === p.fromLine); if (sc) sc.clipAt = +t.toFixed(2); } t += lens[i]; });
+  writeJSON(join(dir, "musafo.json"), m);
+  return { file: tmp, lens };
+}
+
 function source(dir, path, line) {
   const p = join(dir, "sources.txt");
   const old = existsSync(p) ? readFileSync(p, "utf8").split(/\r?\n/).filter((l) => l && !l.startsWith(path + "\t")) : [];
@@ -1060,6 +1215,8 @@ if (process.argv[1]?.endsWith("musafo.mjs")) {
   } else if (cmd === "build") {
     const synced = syncCharacters(dir);
     if (synced.length) console.log(`✔ dari bagian lain series: ${synced.join(", ")}`);
+    // headline + sub headline follow the script (user 2026-11-16); before the build, which can stop on a stale voice
+    try { await (await import("./thumbnail.mjs")).syncOptions(dir); } catch (e) { console.log(`  ⚠ opsi thumbnail belum dibuat: ${e.message}`); }
     const r = buildMusafo(dir, slug);
     console.log(`✔ ${r.shots} shot, ${r.words} kata → script.md, beats.json, compositions/`);
   } else if (cmd === "clips") {
@@ -1077,6 +1234,18 @@ if (process.argv[1]?.endsWith("musafo.mjs")) {
     const [kind, id, file] = rest;
     if (!["image", "clip", "character"].includes(kind) || !id || !file) die("Usage: node tools/musafo.mjs add <slug> image <shotId> <file> | clip <clipId|shotId> <file> | character <characterId> <file>");
     add(dir, kind, id, file);
+  } else if (cmd === "muse") {
+    // node tools/musafo.mjs muse <slug> [s01,s02]: Muse prompt per part -> build/muse/<shot>-<part>.txt (+ which images exist)
+    const ids = rest[0] ? rest[0].split(",") : readJSON(join(dir, "musafo.json")).shots.map((s) => s.id);
+    mkdirSync(join(dir, "build", "muse"), { recursive: true });
+    for (const id of ids) for (const p of musePlan(dir, id)) {
+      writeFileSync(join(dir, "build", "muse", `${id}-${p.part}.txt`), p.prompt);
+      console.log(`${id}-${p.part}  ${existsSync(join(dir, p.image)) ? "✔" : "✖"} ${p.image}${p.scene ? `  (gambar baru: ${p.scene.slice(0, 70)}…)` : ""}`);
+    }
+  } else if (cmd === "join") {
+    // node tools/musafo.mjs join <slug> <shot> a.mp4 b.mp4 ...: parts of one shot -> one clip (add) with clipAt per part
+    const [id, ...files] = rest;
+    try { const r = joinParts(dir, id, files); add(dir, "clip", id, r.file); console.log(`  bagian ${r.lens.map((x) => x.toFixed(1)).join(" + ")} s`); } catch (e) { die(e.message); }
   } else if (cmd === "orb-kv") {
     const [id, ...o] = rest;
     if (!id) die("Usage: node tools/musafo.mjs orb-kv <slug> <shotId> [--at x,y] [--size px] [--end]");

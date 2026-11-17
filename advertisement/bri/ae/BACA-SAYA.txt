@@ -1,0 +1,44 @@
+PROYEK AFTER EFFECTS: IKLAN BRI (bisa diedit)
+===============================================
+
+Isi folder
+- <Nama>.jsx : skrip yang menyusun proyek After Effects
+- assets/    : klip Flow, foto, potongan orang (PNG sequence), logo, logo partner, musik, SFX, dan
+               beberapa lapisan dekoratif (assets/ae/: gradasi, panel biru bertitik, kartu putih)
+
+Cara membuka (After Effects 2022 atau lebih baru)
+1. Pasang font Inter dulu (gratis, SIL Open Font License): https://rsms.me/inter/ atau Google Fonts.
+   Yang dipakai: Inter Regular, Medium, SemiBold, Bold.
+2. Ekstrak zip ini. Folder assets/ harus tetap di sebelah file .jsx.
+3. Buka After Effects, lalu File > Scripts > Run Script File..., dan pilih file .jsx.
+4. Proyek tersusun sendiri dan komposisi utama terbuka. Simpan sebagai .aep (File > Save As).
+   Kalau ada catatan di jendela "Selesai", baca dulu; biasanya soal font yang belum terpasang.
+
+Susunan proyek
+- Komposisi utama (nama iklan + rasio), 13 detik, 30 fps
+  - Latar          : precomp "02 Latar" = klip Flow + teks kinetik + latar end frame 2
+  - End Frame 1    : bingkai putih rounded square + kalimat promo + angka 25%
+  - End Frame 2    : kartu logo partner + kotak "Promo Up To 25%"
+  - Headline       : 2 baris + sub headline, digerakkan oleh null "Headline"
+  - Panel Angka    : panel biru, angka besar, garis ledakan
+  - Footer klien, kartu QR, QR BRImo
+  - Penutup        : putih, logo Danantara / 131 / BRI + disclaimer LPS, OJK, BI
+  - Musik + SFX
+- Folder Precomp: 01 Foto + Teks Kinetik, 02 Latar, 03 End Frame 1, 04 Panel Angka, 05 End Frame 2,
+  05a Kartu Partner, 05b Kotak Promo, 06 Penutup
+
+Mengedit
+- Semua teks adalah layer teks Inter biasa: dobel klik lalu ketik.
+- Angka promo (Panel Angka, kotak promo) menghitung naik ke angka yang diketik di layernya sendiri. Ketik "30" dan
+  animasinya ikut. Angka "25" di End Frame 1 adalah teks biasa.
+- Animasi masuk per huruf/kata memakai Text Animator "Masuk" dengan Expression Selector. Waktu mulai, durasi, dan jeda
+  ada di baris pertama ekspresinya (t0, d, st).
+- Bingkai putih rounded square: shape layer, bentuknya tetap persegi. Ubah ukurannya dengan Scale (proporsional),
+  jangan dengan Size.
+- Bingkai lewat di belakang lengan/kepala lewat mask "Lengan/kepala" (keyframe per frame) di layer bingkai.
+- Logo, QR, footer, dan logo partner adalah file asli klien. Ganti lewat Replace Footage.
+
+Beda kecil dengan MP4 aslinya
+- Angka besar menghitung naik (0 sampai 25); di MP4 digitnya berputar seperti odometer.
+- Kurva easing dibuat dengan keyframe Bezier yang meniru kurva aslinya, jadi gerakannya sangat mirip tapi tidak sama
+  piksel per piksel.

@@ -5,7 +5,7 @@
 // One claude process at a time; messages sent while it works wait in a queue. Only the child this module started is ever
 // stopped (never other node/claude processes: other sessions run tools/wait-event.mjs).
 // Safety: no permission prompt is possible here, so tools are limited: edits in this folder (acceptEdits), read/search,
-// npm/node tools/npx hyperframes, read-only git. Commit, push, Buffer send, and publish are refused; Claude is told to ask
+// npm/node tools/npx hyperframes, read-only git. Commit, push, Tebar send, and publish are refused; Claude is told to ask
 // the user to approve them in chat first and to do anything outside the allowlist in Claude Desktop.
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync, renameSync, mkdirSync } from "node:fs";
@@ -25,12 +25,12 @@ const ALLOWED = [
 ];
 const DENIED = [
   "Bash(git commit*)", "Bash(git push*)", "Bash(git reset*)", "Bash(git checkout*)", "Bash(git clean*)", "Bash(rm *)",
-  "Bash(node tools/buffer.mjs send*)", "Bash(node tools/wait-event.mjs*)", "Bash(npx hyperframes publish*)", "Bash(taskkill*)",
+  "Bash(node tools/tebar.mjs send*)", "Bash(node tools/wait-event.mjs*)", "Bash(npx hyperframes publish*)", "Bash(taskkill*)",
 ];
 const SYSTEM = `You are answering from the Chat panel inside TERTORTOR Studio (the user's dashboard at localhost:4331, TERTORTOR LITE), not from Claude Desktop.
 - Reply in casual Indonesian, short and plain: the panel is narrow and often read on a phone.
 - There is no permission prompt here. If a tool is denied, say what you wanted to run and ask the user to do it in Claude Desktop (or to approve a different route); never try to get around the limit.
-- Never commit, push, send to Buffer, publish, delete videos, or spend money/credits (RunningHub coins, paid APIs) unless the user asked for that exact action in this chat. Free Flow images are fine when the user asks for them.
+- Never commit, push, send to Tebar, publish, delete videos, or spend money/credits (RunningHub coins, paid APIs) unless the user asked for that exact action in this chat. Free Flow images are fine when the user asks for them.
 - Do not run tools/wait-event.mjs and do not edit .events.jsonl: Studio clicks already reach the sessions that wait for them.
 - When a page context line like "[Studio: …]" opens a message, it tells you which video or page the user is looking at.`;
 

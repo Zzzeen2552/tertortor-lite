@@ -13,6 +13,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, copyFileSync } from
 import { join } from "node:path";
 import { videoDir, readJSON, writeJSON, die, run, probeDuration, loadBrand, ROOT, norm, spokenText, takeKey } from "./lib.mjs";
 import { makeTts, alignToScript } from "./tts.mjs";
+import { applyClone } from "./voice-clone.mjs";
 
 
 const args = process.argv.slice(2);
@@ -23,6 +24,8 @@ const opt = (name, def) => {
 
 const dir = videoDir(args[0]);
 const brand = loadBrand(dir);
+// speaker "clone:<id>" (tools/voice-clone.mjs, user 2026-11-17): the take is read by ElevenLabs in the cloned voice
+const clone = applyClone(dir, brand);
 const vdir = join(dir, "voice");
 const work = join(vdir, "work");
 mkdirSync(work, { recursive: true });
@@ -52,7 +55,7 @@ if (args.includes("--from-take")) {
 } else {
   const text = spokenText(join(dir, "script.md"));
   if (!text) die("script.md has no spoken text.");
-  const provider = (source = opt("provider", process.env.ELEVENLABS_API_KEY ? "elevenlabs" : process.platform === "win32" ? "sapi" : "kokoro"));
+  const provider = (source = opt("provider", clone || process.env.ELEVENLABS_API_KEY ? "elevenlabs" : process.platform === "win32" ? "sapi" : "kokoro"));
   const key = takeKey(provider, brand.voice, text);
   const keyFile = join(vdir, "take.key");
   if (!force && existsSync(TAKE) && existsSync(TAKE_WORDS) && existsSync(keyFile) && readFileSync(keyFile, "utf8") === key) {
@@ -126,7 +129,7 @@ writeFileSync(filterFile, filter);
 const out = join(vdir, "voice.wav");
 run("ffmpeg", ["-y", "-v", "error", "-i", TAKE, "-/filter_complex", filterFile, "-map", "[out]", "-c:a", "pcm_s16le", out]);
 writeJSON(join(vdir, "words.json"), words);
-writeJSON(join(vdir, "source.json"), { provider: source, draft: ["estimate", "sapi", "kokoro"].includes(source) });
+writeJSON(join(vdir, "source.json"), { provider: source, draft: ["estimate", "sapi", "kokoro"].includes(source), ...(clone && source === "elevenlabs" ? { clone: clone.id } : {}) });
 mkdirSync(join(dir, "assets"), { recursive: true });
 copyFileSync(out, join(dir, "assets", "voice.wav"));
 

@@ -3,14 +3,14 @@
 // Also lists every video's stage and plays finished renders, and browses the reusable footage library.
 //   npm run studio   ->  http://localhost:4331
 import { createServer } from "node:http";
-import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync, readdirSync, statSync, createReadStream, createWriteStream, renameSync, unlinkSync } from "node:fs";
+import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync, readdirSync, statSync, createReadStream, createWriteStream, renameSync, unlinkSync, rmSync } from "node:fs";
 import { join, extname, normalize, basename } from "node:path";
 import { tmpdir } from "node:os";
 import { spawn, spawnSync } from "node:child_process";
 import { ROOT, spokenText, loadBrand, listPresets, presetOf, isHex } from "../lib.mjs";
 import { approval, approve, unapprove, checkFlow, loadFlow } from "../flow.mjs";
 import { checkConcepts, pickConcept, refFiles } from "../ref.mjs";
-import { isMusafo, checkMusafo, createMusafo, STORY_TYPES, storyType, storylineApproval, approveStoryline, loadHooks, checkHooks, editScript, fillEnglish, sourceFlowErrors, draftApproval, saveDraft, approveDraft, productionState, startProduction, saveStoryline, charRefs, charSheet, looksOf, setLook } from "../musafo.mjs";
+import { isMusafo, checkMusafo, shotStats, shotWordLimit, createMusafo, STORY_TYPES, storyType, storylineApproval, approveStoryline, loadHooks, checkHooks, editScript, fillEnglish, sourceFlowErrors, draftApproval, saveDraft, approveDraft, productionState, startProduction, saveStoryline, charRefs, charSheet, looksOf, setLook } from "../musafo.mjs";
 import { editScriptMd, scriptParagraphs, pendingEdits } from "../script-edit.mjs";
 import { working, finished, claudeWaiting } from "../progress.mjs";
 import { state as chatState, send as chatSend, stop as chatStop, reset as chatReset } from "../studio-chat.mjs";
@@ -23,8 +23,10 @@ import { listBooks, loadBook, useStory, readJob, listChannels, addChannel, chann
 import { structure, placeOf, clipPlaces, addSub, subDir, listProducts } from "../categories.mjs";
 import { isAd, loadAd, create as createAd, importAsset, ASSET_KINDS, importAudio, AUDIO_KINDS } from "../ad.mjs";
 import { channelLogo, logoFile, saveLogo, removeLogo } from "../brandmark.mjs";
-import { hasKey as bufferKey, keyInfo as bufferKeyInfo, setKey as setBufferKey, removeKey as removeBufferKey, writeCaption as writeBufferCaption, hasCaption as bufferHasCaption, captionTitle as bufferTitle, listBufferChannels, subBuffer, saveSubBuffer, forward as bufferForward, sentLog as bufferLog, defaultText as bufferText, MODES as BUFFER_MODES } from "../buffer.mjs";
-import { settings as thumbSettings, backgrounds as thumbBackgrounds, stale as thumbStale, thumbPng, loadThumb, episodeOf } from "../thumbnail.mjs";
+import { clones as voiceClones, hasKey as cloneKey, addClone, makeSample as cloneSample, removeClone, sampleFile as cloneSampleFile } from "../voice-clone.mjs";
+import { writeCaption, saveCaption, captionBy, captionTitle, hasCaption, defaultText as captionText, bufferHistory } from "../caption.mjs";
+import { hasKey as tebarKey, keyInfo as tebarKeyInfo, setKey as setTebarKey, removeKey as removeTebarKey, listAccounts as tebarAccounts, subTebar, saveSubTebar, forward as tebarForward, refreshStatus as tebarRefresh, sentLog as tebarLog } from "../tebar.mjs";
+import { seriesDirs as seriesThumbDirs, settings as thumbSettings, backgrounds as thumbBackgrounds, stale as thumbStale, thumbPng, loadThumb, episodeOf, grabFrame as grabThumbFrame } from "../thumbnail.mjs";
 
 const PORT = +(process.env.PORT || 4331);
 const VIDEOS = join(ROOT, "videos");
@@ -75,10 +77,84 @@ function musafoStage(slug) {
   };
 }
 
+// /api/videos cache (MOTION user 2026-11-16 "dashboard terasa berat saat pindah menu": ±150 ms per story per list).
+// One entry per slug, reused while nothing in its folder (3 levels deep) or the shared config changed, no Studio write
+// happened since (listEpoch, bumped on every non-GET request), and no background job runs for it.
+const listCache = new Map();
+let listEpoch = 0;
+const GLOBAL_FILES = ["brand/brand.json", ".tebar-keys.json", "musafo/library/channels.json", "advertisement/products.json"].map((f) => join(ROOT, f));
+// files are stat'ed only where the list reads their content or time (the folder itself, out/, voice/); deeper folders
+// count by their own mtime, which moves when a file is added, removed or renamed (a full stat walk was ±700 ms)
+const STAT_FILES = new Set(["", "out", "voice"]);
+function folderPrint(dir, depth = 3) {
+  let h = 0;
+  const add = (x) => (h = (h * 31 + x) % 1e15);
+  const walk = (p, rel, left) => {
+    let names; try { names = readdirSync(p, { withFileTypes: true }); } catch { return; }
+    const files = STAT_FILES.has(rel);
+    for (const e of names) {
+      const f = join(p, e.name);
+      if (e.isDirectory()) { if (left > 0 && e.name !== "node_modules" && e.name !== ".preview") { try { add(statSync(f).mtimeMs); } catch {} walk(f, rel ? `${rel}/${e.name}` : e.name, left - 1); } }
+      else if (files) try { const s = statSync(f); add(s.mtimeMs + s.size); } catch {}
+      else add(e.name.length);
+    }
+  };
+  walk(dir, "", depth);
+  return h;
+}
+const globalPrint = () => GLOBAL_FILES.map((f) => (existsSync(f) ? statSync(f).mtimeMs : 0)).join("|");
+function listStage(slug, g = globalPrint()) {
+  if (coverJobs.has(slug) || shareJobs.has(slug) || tebarJobs.has(slug)) return stage(slug);
+  const key = `${listEpoch}|${g}|${folderPrint(join(VIDEOS, slug))}`;
+  const hit = listCache.get(slug);
+  if (hit?.key === key) return hit.value;
+  const value = stage(slug);
+  listCache.set(slug, { key, value });
+  return value;
+}
+
+// connected Tebar accounts change rarely: kept 5 min per sub + key (a new key = a new entry), so opening
+// a channel page does not call the outside API every time (MOTION user 2026-11-16); failures are not kept
+const remembered = new Map();
+async function remember(key, fn, ms = 5 * 60 * 1000) {
+  const hit = remembered.get(key);
+  if (hit && Date.now() - hit.at < ms) return hit.value;
+  const value = await fn();
+  remembered.set(key, { at: Date.now(), value });
+  return value;
+}
+
+// the video's frame as a CSS aspect-ratio ("16/9", "1/1", ...), so its card in Studio has the same shape (MOTION user 2026-11-17):
+// meta.json → format (name or { width, height }), else the canvas in index.html, else the render, else 9:16
+const FORMAT_RATIO = { vertical: "9/16", horizontal: "16/9", feed: "4/5", square: "1/1" };
+function ratioOf(d, slug) {
+  const meta = existsSync(join(d, "meta.json")) ? JSON.parse(readFileSync(join(d, "meta.json"), "utf8")) : {};
+  const f = meta.format;
+  if (typeof f === "string" && FORMAT_RATIO[f]) return FORMAT_RATIO[f];
+  if (f?.width && f?.height) return `${f.width}/${f.height}`;
+  const idx = join(d, "index.html");
+  const m = existsSync(idx) ? readFileSync(idx, "utf8").match(/data-width="(\d+)"[^>]*data-height="(\d+)"/) : null;
+  if (m) return `${m[1]}/${m[2]}`;
+  const mp4 = join(d, "out", `${slug}.mp4`);
+  if (existsSync(mp4)) {
+    const r = spawnSync("ffprobe", ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x", mp4], { encoding: "utf8" });
+    const [w, h] = String(r.stdout || "").trim().split("x").map(Number);
+    if (w && h) return `${w}/${h}`;
+  }
+  return "9/16";
+}
+
 // every project carries its place in the style tree (category + preset/channel/product), derived from meta.json
 function stage(slug) {
   const d = join(VIDEOS, slug);
-  return { ...(isMusafo(d) ? musafoStage(slug) : isAd(d) ? adStage(slug) : explainerStage(slug)), ...placeOf(d), share: shareInfo(d, slug), shareJob: shareJobs.get(slug) ?? null, thumbnail: thumbInfo(d, slug), watermark: watermarkInfo(d), buffer: bufferInfo(d) };
+  return { ...(isMusafo(d) ? musafoStage(slug) : isAd(d) ? adStage(slug) : explainerStage(slug)), ...placeOf(d), ratio: ratioOf(d, slug), share: shareInfo(d, slug), shareJob: shareJobs.get(slug) ?? null, thumbnail: thumbInfo(d, slug), watermark: watermarkInfo(d), caption: captionInfo(d), tebar: tebarInfo(d, slug), seriesNav: seriesNav(d) };
+}
+// series part: the previous / next part that exists (MOTION user 2026-11-16)
+function seriesNav(d) {
+  const f = join(d, "meta.json"), s = existsSync(f) ? JSON.parse(readFileSync(f, "utf8")).series : null;
+  if (!s?.id || !s.part) return null;
+  const slugOf = (k) => (k === 1 ? s.id : `${s.id}-${k}`), has = (k) => k >= 1 && k <= (s.total ?? k) && existsSync(join(VIDEOS, slugOf(k), "meta.json"));
+  return { part: s.part, total: s.total ?? null, prev: has(s.part - 1) ? slugOf(s.part - 1) : null, next: has(s.part + 1) ? slugOf(s.part + 1) : null };
 }
 
 // Advertisement (meta.json type "advertisement", tools/ad.mjs): product photos -> shots in ad.json -> gate -> render
@@ -100,6 +176,7 @@ function thumbInfo(d, slug) {
 // raw.mp4, or there is no render yet, it is the full finish. One run per slug.
 const coverJobs = new Map();
 const shareJobs = new Map(); // share link uploads running in the background, per slug
+const tebarJobs = new Map(); // "Kirim ke Tebar" running in the background, per slug: { phase, progress, error, result }
 function rawCurrent(d) {
   const raw = join(d, "out", "raw.mp4");
   if (!existsSync(raw)) return false;
@@ -133,10 +210,14 @@ function renderVideo(d, slug) {
   });
   return mode;
 }
-// Buffer (tools/buffer.mjs): the sub's targets, the caption to start from, and what was already sent
-function bufferInfo(d) {
+// Tebar (tools/tebar.mjs, the only sending route; Buffer removed, MOTION 2026-11-16): key, targets, log, running job
+function tebarInfo(d, slug) {
   const { category, sub } = placeOf(d);
-  return { ...bufferKeyInfo(sub), ...subBuffer(category, sub), text: bufferText(d), caption: bufferHasCaption(d), title: bufferTitle(d), sent: bufferLog(d).slice(-5), modes: BUFFER_MODES };
+  return { ...tebarKeyInfo(sub), ...subTebar(category, sub), sent: tebarLog(d).slice(-5).map(({ text, ...e }) => e), job: slug ? tebarJobs.get(slug) ?? null : null };
+}
+// posting caption + YouTube title (tools/caption.mjs), edited in the Tebar dialog
+function captionInfo(d) {
+  return { text: captionText(d), caption: hasCaption(d), title: captionTitle(d) };
 }
 function watermarkInfo(d) {
   const { category, sub } = placeOf(d);
@@ -257,7 +338,7 @@ function createVideo({ title, idea, duration, voice = "Gemini TTS", voiceSpeaker
   if (r.status !== 0) throw new Error(r.stderr || r.stdout);
   const d = join(VIDEOS, slug);
   for (const sub of ["assets/reference", "assets/keyvisuals"]) mkdirSync(join(d, sub), { recursive: true });
-  const req = { title, idea, duration, voice, ...(voiceSpeaker ? { voiceSpeaker } : {}), refLink: refLink || "", created: new Date().toISOString(), status: "menunggu Claude" };
+  const req = { title, idea, duration, voice: String(voiceSpeaker || "").startsWith("clone:") ? voiceLabel(voiceSpeaker) : voice, ...(voiceSpeaker ? { voiceSpeaker } : {}), refLink: refLink || "", created: new Date().toISOString(), status: "menunggu Claude" };
   writeFileSync(join(d, "request.json"), JSON.stringify(req, null, 2));
   writeFileSync(
     join(d, "brief.md"),
@@ -294,6 +375,7 @@ const EVENTS = join(ROOT, ".events.jsonl");
 
 // finished work → a push notification on the user's phone through the web relay (user 2026-11-07). Studio stays the
 // only place that knows a project's state; the relay only stores the notice and sends a payload-free Web Push.
+const videoName = (d, slug) => { try { return JSON.parse(readFileSync(join(d, "meta.json"), "utf8")).name || slug; } catch { return slug; } };
 async function notify(title, body, url) {
   const relay = process.env.RELAY_URL, token = process.env.RELAY_WORKER_TOKEN;
   if (!relay || !token) return;
@@ -340,6 +422,9 @@ const emit = (type, slug, data = {}) => appendFileSync(EVENTS, JSON.stringify({ 
 // the scan runs detached from Studio and reports through musafo/library/.job.json (tools/stories.mjs), so restarting
 // Studio (node --watch on every tool edit) does not kill a book that is half read
 // a short sample of every Gemini speaker (tools/voice-samples.mjs → library/voices/<Name>.mp3), played before picking
+// cloned voices (tools/voice-clone.mjs, MOTION user 2026-11-17): picked like a speaker, value "clone:<id>"
+const cloneList = () => voiceClones().map((c) => ({ id: c.id, name: c.name, speaker: `clone:${c.id}`, seconds: c.seconds, createdAt: c.createdAt, sample: existsSync(cloneSampleFile(c.id)) ? `/files/library/voices/clone-${c.id}.mp3` : null }));
+const voiceLabel = (speaker) => (String(speaker || "").startsWith("clone:") ? "Clone suara (ElevenLabs)" : "Gemini TTS");
 const withSamples = (voices = []) => voices.map((v) => ({ ...v, sample: existsSync(join(ROOT, "library", "voices", `${v.name}.mp3`)) ? `/files/library/voices/${encodeURIComponent(v.name)}.mp3` : null }));
 function runStories(args) {
   if (readJob()?.state === "running") return false;
@@ -384,6 +469,7 @@ createServer(async (req, res) => {
   try {
     const url = new URL(req.url, "http://x");
     const p = decodeURIComponent(url.pathname);
+    if (req.method !== "GET" && req.method !== "HEAD") listEpoch++;
     if (p === "/") return send(res, 200, readFileSync(join(ROOT, "tools", "studio", "index.html")), MIME[".html"]);
     // browser tab icon = the Desktop shortcut's icon
     if (p === "/favicon.ico") return serveFile(req, res, join(ROOT, "tools", "tertortor.ico"));
@@ -424,7 +510,10 @@ createServer(async (req, res) => {
     if (p === "/api/working" && req.method === "GET") return send(res, 200, { claude: claudeWaiting(), items: working() });
     if (p === "/api/videos" && req.method === "GET") {
       const slugs = existsSync(VIDEOS) ? readdirSync(VIDEOS).filter((s) => !s.startsWith(".") && statSync(join(VIDEOS, s)).isDirectory()) : [];
-      return send(res, 200, slugs.map(stage).sort((a, b) => b.created.localeCompare(a.created)));
+      // buffered: networks that got a post for this video (tebar.json, plus buffer.json from before Buffer was removed), a badge on the card
+      const buffered = (s) => [...new Set([...bufferHistory(join(VIDEOS, s)).flatMap((e) => (e.results ?? []).filter((x) => x.ok).map((x) => x.service)), ...tebarLog(join(VIDEOS, s)).flatMap((e) => (e.results ?? []).filter((x) => x.ok).map((x) => x.platform))].filter(Boolean))];
+      const g = globalPrint();
+      return send(res, 200, slugs.map((s) => ({ ...listStage(s, g), buffered: buffered(s) })).sort((a, b) => b.created.localeCompare(a.created)));
     }
     if (p === "/api/videos" && req.method === "POST") {
       const body = JSON.parse((await readBody(req)).toString());
@@ -467,7 +556,7 @@ createServer(async (req, res) => {
         }
         const tv = typeVoice(loadBrand(), type);
         const speaker = String(body.voiceSpeaker || tv.speaker || "").trim().slice(0, 40);
-        writeFileSync(join(VIDEOS, slug, "request.json"), JSON.stringify({ type, channel, title, story, source, voice: "Gemini TTS", ...(speaker ? { voiceSpeaker: speaker } : {}), voiceStyle: String(body.voiceStyle || tv.style || "").trim().slice(0, 300), created: new Date().toISOString() }, null, 2) + "\n");
+        writeFileSync(join(VIDEOS, slug, "request.json"), JSON.stringify({ type, channel, title, story, source, voice: voiceLabel(speaker), ...(speaker ? { voiceSpeaker: speaker } : {}), voiceStyle: String(body.voiceStyle || tv.style || "").trim().slice(0, 300), created: new Date().toISOString() }, null, 2) + "\n");
         // the link or pasted article also joins Library Cerita, its stories tied to this project (user 2026-11-07);
         // an idea of a few lines is not a source and stays out
         let library = null;
@@ -545,6 +634,27 @@ createServer(async (req, res) => {
     }
     const up = p.match(/^\/api\/videos\/([a-z0-9-]+)\/upload$/);
     const adKind = url.searchParams.get("kind");
+    // the user's own thumbnail picture (Thumbnail tab, any category, MOTION user 2026-11-13): assets/thumbs/upload-N.<ext>,
+    // made the background and rendered right away
+    if (up && req.method === "PUT" && adKind === "thumb") {
+      const d = join(VIDEOS, up[1]);
+      if (!existsSync(d)) return send(res, 404, { error: "video not found" });
+      const name = safeName(url.searchParams.get("name") || "thumb.png"), ext = (name.match(/\.(png|jpe?g|webp)$/i)?.[1] || "").toLowerCase();
+      if (!ext) return send(res, 400, { error: "Hanya gambar PNG, JPG, atau WebP." });
+      const td = join(d, "assets", "thumbs");
+      mkdirSync(td, { recursive: true });
+      const n = readdirSync(td).filter((f) => f.startsWith("upload-")).length + 1;
+      const rel = `assets/thumbs/upload-${n}.${ext === "jpeg" ? "jpg" : ext}`;
+      await new Promise((ok, bad) => req.pipe(createWriteStream(join(d, rel))).on("finish", ok).on("error", bad));
+      const srcFile = join(d, "sources.txt");
+      writeFileSync(srcFile, (existsSync(srcFile) ? readFileSync(srcFile, "utf8") : "") + `${rel}\tthumbnail dari user (diunggah lewat Studio). ${name}\n`);
+      const t = loadThumb(d);
+      t.bg = rel; delete t.bgTime;
+      writeFileSync(join(d, "thumbnail.json"), JSON.stringify(t, null, 2) + "\n");
+      const r = await runTool([join(ROOT, "tools", "thumbnail.mjs"), "render", up[1]]);
+      if (r.code !== 0) return send(res, 400, { error: r.out.trim().split("\n").slice(-2).join(" ") || "render thumbnail gagal" });
+      return send(res, 200, { ok: true, thumbnail: thumbInfo(d, up[1]) });
+    }
     if (up && req.method === "PUT" && (ASSET_KINDS[adKind] || AUDIO_KINDS[adKind])) {
       const d = join(VIDEOS, up[1]), audio = !!AUDIO_KINDS[adKind];
       if (!isAd(d)) return send(res, 400, { error: "bukan proyek Advertisement" });
@@ -673,11 +783,14 @@ createServer(async (req, res) => {
       const body = JSON.parse((await readBody(req)).toString() || "{}");
       const speaker = String(body.speaker || "").trim().slice(0, 40), style = String(body.style || "").trim().slice(0, 300);
       if (!speaker) return send(res, 400, { error: "Pilih suara dulu." });
+      const isClone = speaker.startsWith("clone:");
+      if (isClone && !voiceClones().some((c) => `clone:${c.id}` === speaker)) return send(res, 400, { error: "Suara clone itu tidak ada lagi." });
       const rp = join(d, "request.json");
       const r = existsSync(rp) ? JSON.parse(readFileSync(rp, "utf8")) : {};
-      Object.assign(r, { voice: "Gemini TTS", voiceSpeaker: speaker, voiceStyle: style });
+      Object.assign(r, { voice: voiceLabel(speaker), voiceSpeaker: speaker, voiceStyle: style });
       writeFileSync(rp, JSON.stringify(r, null, 2) + "\n");
-      if (body.makeDefault) {
+      // the brand default stays a Gemini speaker: a clone is chosen per video
+      if (body.makeDefault && !isClone) {
         const bp = join(ROOT, "brand", "brand.json");
         const br = JSON.parse(readFileSync(bp, "utf8"));
         Object.assign(br.voice.gemini, { speaker, style });
@@ -698,30 +811,63 @@ createServer(async (req, res) => {
         return send(res, 400, { error: e.message });
       }
     }
-    // Buffer: a sub's own account (?sub=<id>, one key per sub), its targets, and forwarding one video (tools/buffer.mjs)
-    if (p === "/api/buffer/channels" && req.method === "GET") {
-      const bsub = String(url.searchParams.get("sub") ?? "");
-      if (!/^[a-z0-9-]+$/.test(bsub)) return send(res, 400, { error: "sub wajib" });
-      if (!bufferKey(bsub)) return send(res, 200, { ...bufferKeyInfo(bsub), channels: [] });
-      try { return send(res, 200, { ...bufferKeyInfo(bsub), channels: await listBufferChannels(bsub) }); }
-      catch (e) { return send(res, 200, { ...bufferKeyInfo(bsub), channels: [], error: e.message }); }
+    // Tebar (tools/tebar.mjs): the sub's connected accounts, its key, its targets, and sending one video as a background job
+    if (p === "/api/tebar/accounts" && req.method === "GET") {
+      const tsub = String(url.searchParams.get("sub") ?? "");
+      if (!/^[a-z0-9-]+$/.test(tsub)) return send(res, 400, { error: "sub wajib" });
+      if (!tebarKey(tsub)) return send(res, 200, { ...tebarKeyInfo(tsub), accounts: [] });
+      try { return send(res, 200, { ...tebarKeyInfo(tsub), accounts: await remember(`tebar|${tsub}|${tebarKey(tsub)}`, () => tebarAccounts(tsub)) }); }
+      catch (e) { return send(res, 200, { ...tebarKeyInfo(tsub), accounts: [], error: e.message }); }
     }
-    // the sub's Buffer API key, pasted in the Buffer panel (user 2026-11-12): stored in .buffer-keys.json (gitignored);
-    // answers only "••••1234", never the key
-    const skey = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement)\/([a-z0-9-]+)\/buffer-key$/);
-    if (skey) {
-      if (!structure().find((c) => c.id === skey[1])?.subs.some((x) => x.id === skey[2])) return send(res, 404, { error: "channel tidak ada" });
+    // the sub's Tebar API key, pasted in the Tebar panel: stored in .tebar-keys.json (gitignored); answers only "••••1234"
+    const tkey = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement)\/([a-z0-9-]+)\/tebar(-key)?$/);
+    if (tkey) {
+      if (!structure().find((c) => c.id === tkey[1])?.subs.some((x) => x.id === tkey[2])) return send(res, 404, { error: "channel tidak ada" });
       try {
-        if (req.method === "POST") return send(res, 200, setBufferKey(skey[2], JSON.parse((await readBody(req)).toString() || "{}").key));
-        if (req.method === "DELETE") return send(res, 200, removeBufferKey(skey[2]));
+        if (tkey[3] && req.method === "POST") return send(res, 200, setTebarKey(tkey[2], JSON.parse((await readBody(req)).toString() || "{}").key));
+        if (tkey[3] && req.method === "DELETE") return send(res, 200, removeTebarKey(tkey[2]));
+        if (!tkey[3] && req.method === "GET") return send(res, 200, subTebar(tkey[1], tkey[2]));
+        if (!tkey[3] && req.method === "POST") return send(res, 200, saveSubTebar(tkey[1], tkey[2], JSON.parse((await readBody(req)).toString() || "{}")));
       } catch (e) { return send(res, 400, { error: e.message }); }
     }
-    // "Kirim ke Buffer": the agent writes the posting caption + YouTube title (caption.md); the user edits it before sending
-    const vcap = p.match(/^\/api\/videos\/([a-z0-9-]+)\/buffer-caption$/);
+    const vteb = p.match(/^\/api\/videos\/([a-z0-9-]+)\/tebar$/);
+    if (vteb) {
+      const slug = vteb[1], d = join(VIDEOS, slug);
+      if (!existsSync(d)) return send(res, 404, { error: "video not found" });
+      // GET: the running job, or the last post with its status refreshed from Tebar (publishing runs there in the background)
+      if (req.method === "GET") {
+        if (!tebarJobs.get(slug) && url.searchParams.has("refresh")) await tebarRefresh(d).catch(() => null);
+        return send(res, 200, tebarInfo(d, slug));
+      }
+      if (req.method === "POST") {
+        if (tebarJobs.get(slug)?.phase === "upload" || tebarJobs.get(slug)?.phase === "post") return send(res, 409, { error: "Video ini sedang dikirim ke Tebar." });
+        const b = JSON.parse((await readBody(req)).toString() || "{}");
+        const job = { phase: "upload", progress: 0, started: new Date().toISOString() };
+        tebarJobs.set(slug, job);
+        tebarForward(d, slug, {
+          text: String(b.text ?? "").slice(0, 5000), title: String(b.title ?? "").slice(0, 100), at: b.at || undefined,
+          accounts: Array.isArray(b.accounts) ? b.accounts : undefined, ai: b.ai !== false, madeForKids: !!b.madeForKids,
+          onProgress: (f) => { job.progress = f; if (f >= 1) job.phase = "post"; },
+        }).then((r) => {
+          Object.assign(job, { phase: "done", progress: 1, result: r });
+          const ok = r.results.filter((x) => x.ok), bad = r.results.filter((x) => !x.ok);
+          notify(`Tebar ${bad.length ? (ok.length ? "sebagian gagal" : "gagal") : b.at ? "terjadwal" : "berhasil"}: ${videoName(d, slug)}`,
+            [...ok.map((x) => `✓ ${x.platform ?? ""} ${x.name ?? ""}`), ...bad.map((x) => `✗ ${x.platform ?? x.account}: ${x.error}`)].join("\n"), `/#/v/${slug}`);
+        }, (e) => {
+          Object.assign(job, { phase: "error", error: e.message });
+          notify(`Tebar gagal: ${videoName(d, slug)}`, e.message, `/#/v/${slug}`);
+        }).finally(() => setTimeout(() => tebarJobs.get(slug) === job && tebarJobs.delete(slug), 10 * 60e3));
+        return send(res, 202, tebarInfo(d, slug));
+      }
+    }
+    // the agent writes the posting caption + YouTube title (caption.md); the user edits it before sending
+    const vcap = p.match(/^\/api\/videos\/([a-z0-9-]+)\/caption$/);
     if (vcap && req.method === "POST") {
       const d = join(VIDEOS, vcap[1]);
       if (!existsSync(d)) return send(res, 404, { error: "video not found" });
-      try { return send(res, 200, await writeBufferCaption(d)); }
+      // body { text, title } = the user's own edit, saved as is; empty body = the agent writes one
+      const cb = JSON.parse((await readBody(req)).toString() || "{}");
+      try { return send(res, 200, typeof cb.text === "string" ? saveCaption(d, { text: cb.text.slice(0, 5000), title: String(cb.title ?? "").slice(0, 100) }) : await writeCaption(d)); }
       catch (e) { return send(res, 400, { error: e.message }); }
     }
     // delete a video (user 2026-11-12): moved to videos/.trash/<slug>-<time>/ (gitignored), restorable from "Sampah"
@@ -730,7 +876,7 @@ createServer(async (req, res) => {
       const slug = vdel[1], d = join(VIDEOS, slug);
       if (!existsSync(d)) return send(res, 404, { error: "video not found" });
       if (JSON.parse((await readBody(req)).toString() || "{}").confirm !== slug) return send(res, 400, { error: "Ketik slug video persis untuk menghapus." });
-      if (coverJobs.get(slug)?.mode || shareJobs.get(slug)) return send(res, 409, { error: "Video ini sedang dirender atau diunggah. Tunggu selesai dulu." });
+      if (coverJobs.get(slug)?.mode || shareJobs.get(slug) || ["upload", "post"].includes(tebarJobs.get(slug)?.phase)) return send(res, 409, { error: "Video ini sedang dirender atau diunggah. Tunggu selesai dulu." });
       const id = `${slug}-${new Date().toISOString().replace(/\D/g, "").slice(0, 14)}`;
       try {
         mkdirSync(TRASH, { recursive: true });
@@ -760,24 +906,6 @@ createServer(async (req, res) => {
       try { await moveDir(t, join(VIDEOS, slug)); } catch (e) { return send(res, 409, { error: `Tidak bisa dipulihkan (${e.code ?? e.message}).` }); }
       try { unlinkSync(join(VIDEOS, slug, ".deleted.json")); } catch {}
       return send(res, 200, { ok: true, slug });
-    }
-    const sbuf = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement)\/([a-z0-9-]+)\/buffer$/);
-    if (sbuf) {
-      if (!structure().find((c) => c.id === sbuf[1])?.subs.some((x) => x.id === sbuf[2])) return send(res, 404, { error: "channel tidak ada" });
-      if (req.method === "GET") return send(res, 200, subBuffer(sbuf[1], sbuf[2]));
-      if (req.method === "POST") return send(res, 200, saveSubBuffer(sbuf[1], sbuf[2], JSON.parse((await readBody(req)).toString() || "{}")));
-    }
-    const vbuf = p.match(/^\/api\/videos\/([a-z0-9-]+)\/buffer$/);
-    if (vbuf && req.method === "POST") {
-      const d = join(VIDEOS, vbuf[1]);
-      if (!existsSync(d)) return send(res, 404, { error: "video not found" });
-      const b = JSON.parse((await readBody(req)).toString() || "{}");
-      try {
-        const r = await bufferForward(d, vbuf[1], { text: String(b.text ?? "").slice(0, 5000), mode: b.mode, dueAt: b.dueAt, title: String(b.title ?? "").slice(0, 100), channels: Array.isArray(b.channels) ? b.channels : undefined });
-        return send(res, r.results.some((x) => x.ok) ? 200 : 400, { ...r, ...(r.results.some((x) => x.ok) ? {} : { error: r.results.map((x) => `${x.name ?? x.channel}: ${x.error}`).join("; ") }), buffer: bufferInfo(d), share: shareInfo(d, vbuf[1]) });
-      } catch (e) {
-        return send(res, 400, { error: e.message });
-      }
     }
     // the channel / preset / product logo used as the watermark of all its videos (tools/brandmark.mjs)
     // the style cover of a channel / preset / product (tools/sub-covers.mjs)
@@ -844,7 +972,31 @@ createServer(async (req, res) => {
     if (p === "/api/voices") {
       // ?type=<story type>: that type's own default (brand.json → <type>.voice, e.g. BumiDiPijak = Kira)
       const brand = loadBrand(), g = brand.voice.gemini ?? {}, tv = typeVoice(brand, url.searchParams.get("type"));
-      return send(res, 200, { voices: withSamples(g.voices), speaker: tv.speaker ?? g.speaker ?? null, style: tv.style ?? "" });
+      return send(res, 200, { voices: withSamples(g.voices), clones: cloneList(), cloneKey: cloneKey(), speaker: tv.speaker ?? g.speaker ?? null, style: tv.style ?? "" });
+    }
+    // clone a voice from the Studio: PUT each recording (?batch=<b>&name=<file>), then POST { name, batch, consent }
+    if (p === "/api/voices/clone/upload" && req.method === "PUT") {
+      const batch = String(url.searchParams.get("batch") || ""), name = safeName(String(url.searchParams.get("name") || "rekaman.wav"));
+      if (!/^[a-z0-9]{6,32}$/.test(batch) || !/\.(wav|mp3|m4a|aac|ogg|flac|webm|mp4|mov)$/i.test(name)) return send(res, 400, { error: "file rekaman tidak dikenal (wav, mp3, m4a, ogg, flac, atau video)" });
+      const dir0 = join(ROOT, "library", "voices", "clones", "_up", batch);
+      mkdirSync(dir0, { recursive: true });
+      writeFileSync(join(dir0, name), await readBody(req));
+      return send(res, 200, { ok: true });
+    }
+    if (p === "/api/voices/clone" && req.method === "POST") {
+      const b = JSON.parse((await readBody(req)).toString() || "{}");
+      const batch = String(b.batch || ""), dir0 = join(ROOT, "library", "voices", "clones", "_up", batch);
+      if (!/^[a-z0-9]{6,32}$/.test(batch) || !existsSync(dir0)) return send(res, 400, { error: "unggah rekamannya dulu" });
+      try {
+        const c = await addClone(String(b.name || ""), readdirSync(dir0).map((x) => join(dir0, x)), { consent: b.consent === true });
+        await cloneSample(c.id).catch((e) => console.log(`sampel clone ${c.id}: ${e.message}`));
+        return send(res, 200, { clone: cloneList().find((x) => x.id === c.id) });
+      } catch (e) { return send(res, 400, { error: e.message }); }
+      finally { try { rmSync(dir0, { recursive: true, force: true }); } catch {} }
+    }
+    const vcl = p.match(/^\/api\/voices\/clone\/([a-z0-9-]+)$/);
+    if (vcl && req.method === "DELETE") {
+      try { return send(res, 200, await removeClone(vcl[1])); } catch (e) { return send(res, 400, { error: e.message }); }
     }
     const cpick = p.match(/^\/api\/videos\/([a-z0-9-]+)\/concept$/);
     if (cpick && req.method === "POST") {
@@ -950,9 +1102,30 @@ createServer(async (req, res) => {
       if ("headline" in b) t.headline = clean(b.headline, 80);
       if ("sub" in b) t.sub = clean(b.sub, 140);
       if ("episode" in b) t.episode = clean(b.episode, 30);
-      if ("bg" in b && thumbBackgrounds(d).includes(b.bg)) t.bg = b.bg;
-      if ("cover" in b) t.cover = !!b.cover;
+      if ("text" in b) t.text = !!b.text;
+      if ("shade" in b) t.shade = !!b.shade;
+      // a frame picked from the video (Studio: scrub the player, "Pakai frame ini"), MOTION user 2026-11-13
+      if (Number.isFinite(+b.frameAt) && b.frameAt !== null && b.frameAt !== "") {
+        try { t.bg = grabThumbFrame(d, +b.frameAt); t.bgTime = Math.round(+b.frameAt * 100) / 100; delete b.bg; }
+        catch (e) { return send(res, 400, { error: e.message }); }
+      }
+      if ("bg" in b && thumbBackgrounds(d).includes(b.bg)) { t.bg = b.bg; if (b.bg !== "assets/thumbs/frame.jpg") delete t.bgTime; }
+      // unticking "Di depan video" is recorded (coverOff), so the default-on rule in tools/thumbnail.mjs keeps it off
+      if ("cover" in b) { t.cover = !!b.cover; if (t.cover) delete t.coverOff; else t.coverOff = new Date().toISOString(); }
       if ("position" in b) t.position = b.position === "bottom" ? "bottom" : "top";
+      // colour picker (MOTION user 2026-11-15): "#rrggbb" or "" / null = back to the default. In a series the colour goes to every
+      // part (colorScope "series", the default); "part" = this part only ("" here = default even if the series has a colour)
+      const colorKeys = ["accent", "subColor"].filter((k) => k in b);
+      const hexOf = (x) => (/^#[0-9a-f]{6}$/i.test(x ?? "") ? x.toUpperCase() : null);
+      const toSeries = colorKeys.length && b.colorScope !== "part" ? seriesThumbDirs(d) : [];
+      for (const k of colorKeys) { const h = hexOf(b[k]); if (h) t[k] = h; else if (toSeries.length || !seriesThumbDirs(d).length) delete t[k]; else t[k] = ""; }
+      for (const sd of toSeries) {
+        const st = loadThumb(sd);
+        for (const k of colorKeys) { const h = hexOf(b[k]); if (h) st[k] = h; else delete st[k]; }
+        writeFileSync(join(sd, "thumbnail.json"), JSON.stringify(st, null, 2) + "\n");
+      }
+      // how long the thumbnail stays in front of the video (0.3 s was too short to read, MOTION user 2026-11-14)
+      if (Number.isFinite(+b.seconds) && +b.seconds >= 0.3 && +b.seconds <= 3) t.seconds = Math.round(+b.seconds * 10) / 10;
       writeFileSync(join(d, "thumbnail.json"), JSON.stringify(t, null, 2) + "\n");
       if ("watermark" in b) {
         const mp = join(d, "meta.json");
@@ -962,7 +1135,9 @@ createServer(async (req, res) => {
       }
       const r = await runTool([join(ROOT, "tools", "thumbnail.mjs"), "render", thb[1]]);
       if (r.code !== 0) return send(res, 400, { error: r.out.trim().split("\n").slice(-2).join(" ") || "render thumbnail gagal" });
-      return send(res, 200, { ok: true, thumbnail: thumbInfo(d, thb[1]), watermark: watermarkInfo(d) });
+      // the other parts of the series that already have a thumbnail picture: re-render them one by one in the background
+      if (toSeries.length) (async () => { for (const sd of toSeries) if (existsSync(thumbPng(sd))) await runTool([join(ROOT, "tools", "thumbnail.mjs"), "render", basename(sd)]); })();
+      return send(res, 200, { ok: true, thumbnail: thumbInfo(d, thb[1]), watermark: watermarkInfo(d), seriesParts: toSeries.length });
     }
     // share by link (tools/share.mjs): compress the render, upload it to the relay, return the public /v/<token> link
     // Ubah format (user 2026-11-13): the finished render → 4:5, 1:1, 16:9 (9:16 for wide videos), ProRes, WebM, GIF, 720p
@@ -1035,6 +1210,24 @@ createServer(async (req, res) => {
       if (req.method === "POST") emit("beats-approved", bapv[1]);
       return send(res, req.method === "POST" ? 202 : 200, { ok: true, beatsApproval: beatsApproval(d) });
     }
+    // BRI-style ads (MOTION user 2026-11-13): beat durations edited in the Beat tab; retime.mjs moves every time in the composition,
+    // the cutouts, the frame-edge occluders, SFX and music, then (render: true) the video is rendered again
+    const kvb = p.match(/^\/api\/videos\/([a-z0-9-]+)\/kv-beats$/);
+    if (kvb && req.method === "POST") {
+      const d = join(VIDEOS, kvb[1]), bp = join(d, "beats.json");
+      if (!existsSync(join(d, "compositions", "kv.html"))) return send(res, 400, { error: "bukan iklan key visual (kv.html tidak ada)" });
+      const body = JSON.parse((await readBody(req)).toString() || "{}");
+      const cur = existsSync(bp) ? JSON.parse(readFileSync(bp, "utf8")) : {};
+      if (cur.kv && body.durs) {
+        for (const b of cur.beats) if (Number.isFinite(+body.durs[b.id]) && +body.durs[b.id] > 0) b.dur = +body.durs[b.id];
+        writeFileSync(bp, JSON.stringify(cur, null, 2) + "\n");
+      }
+      const r = await runTool([join(ROOT, "advertisement", "bri", "scripts", "retime.mjs"), kvb[1], "--json"]);
+      const out = (() => { try { return JSON.parse(r.out.trim().split(/\r?\n/).at(-1)); } catch { return { ok: false, error: r.out.trim().slice(-300) || "retime gagal" }; } })();
+      if (!out.ok) return send(res, 400, { error: out.error });
+      if (body.render) out.rendering = renderVideo(d, kvb[1]);
+      return send(res, 200, out);
+    }
     const apv = p.match(/^\/api\/videos\/([a-z0-9-]+)\/approve$/);
     if (apv && (req.method === "POST" || req.method === "DELETE")) {
       const d = join(VIDEOS, apv[1]);
@@ -1042,6 +1235,9 @@ createServer(async (req, res) => {
       if (req.method === "DELETE") { unapprove(d); return send(res, 200, { ok: true }); }
       const a = approve(d, "studio");
       emit("script-approved", apv[1]);
+      // the posting caption is written as soon as the script is approved (MOTION user 2026-11-13), in the background; a caption
+      // the user saved in the Tebar dialog is kept, an agent one is rewritten from the approved script
+      if (captionBy(d) !== "user") writeCaption(d).then(() => console.log(`caption: ${apv[1]}`), (e) => console.log(`caption ${apv[1]}: ${e.message}`));
       return send(res, 200, a);
     }
     // the user edits the script (tools/script-edit.mjs): Storytelling per shot in musafo.json, explainer per paragraph of
@@ -1053,10 +1249,14 @@ createServer(async (req, res) => {
       if (isAd(d)) return send(res, 400, { error: "Iklan tidak punya naskah." });
       const body = JSON.parse((await readBody(req)).toString() || "{}");
       try {
-        if (!isMusafo(d)) return send(res, 200, { ok: true, ...editScriptMd(d, body.paragraphs) });
+        // headline + sub headline follow the script (MOTION user 2026-11-16): rewritten in the background after the save
+        const thumbSync = () => spawn(process.execPath, [join(ROOT, "tools", "thumbnail.mjs"), "sync", sedit[1]], { cwd: ROOT, stdio: "ignore", windowsHide: true }).on("error", () => {});
+        if (!isMusafo(d)) { const r = editScriptMd(d, body.paragraphs); thumbSync(); return send(res, 200, { ok: true, ...r }); }
         // empty English captions are translated first (Gemini, Claude haiku as fallback)
         const auto = await fillEnglish(d, body.shots);
-        return send(res, 200, { ok: true, translated: auto.length, ...editScript(d, body.shots, auto) });
+        const r = editScript(d, body.shots, auto);
+        thumbSync();
+        return send(res, 200, { ok: true, translated: auto.length, ...r });
       } catch (e) { return send(res, 400, { error: e.message }); }
     }
     const shot = p.match(/^\/api\/videos\/([a-z0-9-]+)\/flow\/([\w-]+)$/);
@@ -1082,6 +1282,7 @@ createServer(async (req, res) => {
         ...stage(det[1]),
         duration: tl?.duration ?? null,
         beats: tl?.beats ?? [],
+        kvBeats: !!tl?.kv, // BRI-style ad: durations editable in the Beat tab (POST kv-beats)
         ...(isOneTake(d) ? { beatTable: beatTable(d), beatsApproval: beatsApproval(d) } : {}),
         script: rd("script.md").split(/\r?\n/).filter((l) => !/^\s*#/.test(l)).join("\n").trim(),
         paragraphs: scriptParagraphs(d),
@@ -1114,6 +1315,7 @@ createServer(async (req, res) => {
             style: req.voiceStyle || tv.style || g.style || "",
             brandSpeaker: g.speaker ?? null,
             voices: withSamples(g.voices),
+            clones: cloneList(), cloneKey: cloneKey(),
             page: g.page ?? "https://aistudio.google.com/generate-speech",
             model: g.model ?? "",
             text: existsSync(join(d, "script.md")) ? spokenText(join(d, "script.md")).replace(/\n\n/g, " ") : "",
@@ -1126,9 +1328,21 @@ createServer(async (req, res) => {
         musafo: isMusafo(d) ? (() => {
           const r = checkMusafo(d);
           const f = (x) => (existsSync(join(d, x)) ? `/files/videos/${det[1]}/${x}?t=${Math.round(statSync(join(d, x)).mtimeMs)}` : null);
-          return { series: (existsSync(join(d, "meta.json")) ? JSON.parse(readFileSync(join(d, "meta.json"), "utf8")).series : null) ?? null, look: (existsSync(join(d, "meta.json")) ? JSON.parse(readFileSync(join(d, "meta.json"), "utf8")).look : null) ?? looksOf(storyType(d)).defaultLook, looks: looksOf(storyType(d)).looks, production: productionState(d), draft: existsSync(join(d, "draft.md")) ? readFileSync(join(d, "draft.md"), "utf8") : "", draftApproval: draftApproval(d), storyline: existsSync(join(d, "storyline.md")) ? readFileSync(join(d, "storyline.md"), "utf8") : "", storylineApproval: storylineApproval(d), storylineEditedAt: (existsSync(join(d, "request.json")) ? JSON.parse(readFileSync(join(d, "request.json"), "utf8")).storylineEditedAt : null) ?? null, charRefs: charRefs(d).map((x) => f(`assets/reference/tokoh/${x}`)), characters: (r.data.characters ?? []).map((c) => ({ ...c, sheetUrl: f(charSheet(c.id)), shots: r.data.shots.filter((s) => s.characters?.includes(c.id)).map((s) => s.id) })), hooks: loadHooks(d), hookErrors: existsSync(join(d, "storyline.md")) ? [...sourceFlowErrors(d), ...checkHooks(d)] : [], sourceText: existsSync(join(d, "assets", "reference", "bahan.md")) ? readFileSync(join(d, "assets", "reference", "bahan.md"), "utf8") : "", errors: r.errors, warns: r.warns, imageTool: r.data.imageTool ?? "", videoTool: r.data.videoTool ?? "", shots: r.data.shots.map((s) => ({ ...s, clip: r.data.clips?.find((c) => c.shots?.includes(s.id))?.id ?? null, frameUrl: f(`assets/frames/${s.id}.png`), clipUrl: f(`assets/footage/${s.id}.mp4`) })), clips: (r.data.clips ?? []).map((c) => ({ ...c, frameUrl: f(`assets/frames/${c.shots?.[0]}.png`), rawUrl: f(`assets/clips/${c.id}.mp4`) })) };
+          return { series: (existsSync(join(d, "meta.json")) ? JSON.parse(readFileSync(join(d, "meta.json"), "utf8")).series : null) ?? null, look: (existsSync(join(d, "meta.json")) ? JSON.parse(readFileSync(join(d, "meta.json"), "utf8")).look : null) ?? looksOf(storyType(d)).defaultLook, looks: looksOf(storyType(d)).looks, production: productionState(d), draft: existsSync(join(d, "draft.md")) ? readFileSync(join(d, "draft.md"), "utf8") : "", draftApproval: draftApproval(d), storyline: existsSync(join(d, "storyline.md")) ? readFileSync(join(d, "storyline.md"), "utf8") : "", storylineApproval: storylineApproval(d), storylineEditedAt: (existsSync(join(d, "request.json")) ? JSON.parse(readFileSync(join(d, "request.json"), "utf8")).storylineEditedAt : null) ?? null, charRefs: charRefs(d).map((x) => f(`assets/reference/tokoh/${x}`)), characters: (r.data.characters ?? []).map((c) => ({ ...c, sheetUrl: f(charSheet(c.id)), shots: r.data.shots.filter((s) => s.characters?.includes(c.id)).map((s) => s.id) })), hooks: loadHooks(d), hookErrors: existsSync(join(d, "storyline.md")) ? [...sourceFlowErrors(d), ...checkHooks(d)] : [], sourceText: existsSync(join(d, "assets", "reference", "bahan.md")) ? readFileSync(join(d, "assets", "reference", "bahan.md"), "utf8") : "", errors: r.errors, warns: r.warns, imageTool: r.data.imageTool ?? "", videoTool: r.data.videoTool ?? "", shotLimit: shotWordLimit(d), shots: r.data.shots.map((s, _i, _a, st = (r.stats ??= shotStats(d, r.data))[s.id]) => ({ ...s, stat: st ?? null, clip: r.data.clips?.find((c) => c.shots?.includes(s.id))?.id ?? null, frameUrl: f(`assets/frames/${s.id}.png`), clipUrl: f(`assets/footage/${s.id}.mp4`) })), clips: (r.data.clips ?? []).map((c) => ({ ...c, frameUrl: f(`assets/frames/${c.shots?.[0]}.png`), rawUrl: f(`assets/clips/${c.id}.mp4`) })) };
         })() : null,
       });
+    }
+    // card poster for a rendered video without a thumbnail (MOTION user 2026-11-16): one small JPG per render instead of the
+    // card opening the full MP4 with <video preload> on every page switch
+    const po = p.match(/^\/api\/videos\/([a-z0-9-]+)\/poster\.jpg$/);
+    if (po) {
+      const d = join(VIDEOS, po[1]), mp4 = join(d, "out", `${po[1]}.mp4`), out = join(d, "out", "poster.jpg");
+      if (!existsSync(mp4)) return send(res, 404, { error: "no render" });
+      if (!existsSync(out) || statSync(out).mtimeMs < statSync(mp4).mtimeMs) {
+        await new Promise((ok) => spawn("ffmpeg", ["-y", "-v", "error", "-ss", "1.2", "-i", mp4, "-frames:v", "1", "-vf", "scale=360:-2", "-q:v", "4", out]).on("close", ok).on("error", ok));
+        if (!existsSync(out)) return send(res, 404, { error: "poster failed" });
+      }
+      return serveFile(req, res, out);
     }
     // Beat thumbnail from the latest render (cached; refreshed when the render changes)
     const th = p.match(/^\/api\/videos\/([a-z0-9-]+)\/thumb\/([a-z0-9-]+)\.jpg$/);

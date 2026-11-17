@@ -27,8 +27,8 @@ Siapkan TERTORTOR LITE di PC Windows ini. Kerjakan berurutan, cek tiap langkah, 
    (a) Gambar di Google Flow gratis (0 kredit): generate gambar tanpa minta izin. Video Flow dan semua run RunningHub: laporkan biaya/kredit/koin dan catat di costs.md. Default video Flow: Omni 1.1 Flash 10 s. Kalau Flow menolak dengan "unusual activity", jangan retry otomatis; serahkan ke saya.
    (b) Thumbnail semua channel dan headline layar: setiap kata diawali huruf kapital (Title Case).
    (c) Naskah Berakit ke Hulu selalu memakai 10 shot dan ditutup dengan pencapaian merek hari ini.
-   (d) TERTORTOR LITE hanya jalan lokal (Studio port 4331). Tidak ada web app/relay: tombol Bagikan, Buffer, dan akses dari HP memang tidak aktif. Jangan deploy apa pun.
-   (e) Jangan publish, upload, atau kirim ke Buffer/platform mana pun tanpa izin eksplisit saya per video.
+   (d) TERTORTOR LITE hanya jalan lokal (Studio port 4331). Tidak ada web app/relay: tombol Bagikan dan akses dari HP memang tidak aktif. Jangan deploy apa pun.
+   (e) Jangan publish, upload, atau kirim ke Tebar/platform mana pun tanpa izin eksplisit saya per video.
    (f) Jawab saya dalam bahasa Indonesia santai.
 11. Laporkan: versi tiap alat, apa yang terpasang, apa yang gagal, dan apa yang masih harus saya lakukan sendiri (isi .env, login Chrome ke Flow/AI Studio/RunningHub).
 
