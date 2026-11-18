@@ -22,6 +22,7 @@ import { share, revoke, shareInfo } from "../share.mjs";
 import { listBooks, loadBook, useStory, readJob, listChannels, addChannel, channelOf, fetchArticle, sourceToLibrary } from "../stories.mjs";
 import { structure, placeOf, clipPlaces, addSub, subDir, listProducts } from "../categories.mjs";
 import { isAd, loadAd, create as createAd, importAsset, ASSET_KINDS, importAudio, AUDIO_KINDS } from "../ad.mjs";
+import { isAws, awsInfo, setSlot as awsSetSlot } from "../aws.mjs";
 import { channelLogo, logoFile, saveLogo, removeLogo } from "../brandmark.mjs";
 import { clones as voiceClones, hasKey as cloneKey, addClone, makeSample as cloneSample, removeClone, sampleFile as cloneSampleFile } from "../voice-clone.mjs";
 import { writeCaption, saveCaption, captionBy, captionTitle, hasCaption, defaultText as captionText, bufferHistory } from "../caption.mjs";
@@ -147,7 +148,7 @@ function ratioOf(d, slug) {
 // every project carries its place in the style tree (category + preset/channel/product), derived from meta.json
 function stage(slug) {
   const d = join(VIDEOS, slug);
-  return { ...(isMusafo(d) ? musafoStage(slug) : isAd(d) ? adStage(slug) : explainerStage(slug)), ...placeOf(d), ratio: ratioOf(d, slug), share: shareInfo(d, slug), shareJob: shareJobs.get(slug) ?? null, thumbnail: thumbInfo(d, slug), watermark: watermarkInfo(d), caption: captionInfo(d), tebar: tebarInfo(d, slug), seriesNav: seriesNav(d) };
+  return { ...(isMusafo(d) ? musafoStage(slug) : isAd(d) ? adStage(slug) : isAws(d) ? awsStage(slug, d) : explainerStage(slug)), ...placeOf(d), ratio: ratioOf(d, slug), share: shareInfo(d, slug), shareJob: shareJobs.get(slug) ?? null, thumbnail: thumbInfo(d, slug), watermark: watermarkInfo(d), caption: captionInfo(d), tebar: tebarInfo(d, slug), seriesNav: seriesNav(d) };
 }
 // series part: the previous / next part that exists (MOTION user 2026-11-16)
 function seriesNav(d) {
@@ -231,6 +232,34 @@ const runTool = (args) => new Promise((ok) => {
   c.stdout.on("data", (b) => (out += b)); c.stderr.on("data", (b) => (out += b));
   c.on("close", (code) => ok({ code, out }));
 });
+
+// Cinematic look AWS (tools/aws.mjs, MOTION user 2026-11-17): recap film with data motion graphics. It reuses the
+// Advertisement editor (no script, voice or Flow tabs) plus its own AWS tab. One job per video at a time: render | formats | ae
+const awsJobs = new Map();
+function awsStage(slug, d) {
+  const has = (p) => existsSync(join(d, p));
+  const meta = has("meta.json") ? JSON.parse(readFileSync(join(d, "meta.json"), "utf8")) : {};
+  const info = awsInfo(d, slug) ?? { data: [], slots: [], logos: [], variants: [], tbc: [] };
+  const sc = has("aws.json") ? (JSON.parse(readFileSync(join(d, "aws.json"), "utf8")).scenes ?? []).length : 0;
+  const steps = [
+    { name: "Data & adegan", ok: sc > 0 },
+    { name: "Footage", ok: info.slots.length > 0 && info.slots.every((x) => x.url) },
+    { name: "Angka final", ok: sc > 0 && !info.tbc.length },
+    { name: "Render", ok: has(`out/${slug}.mp4`) },
+    ...(info.master ? [{ name: "9:16 + 1:1", ok: info.variants.every((x) => x.video) }, { name: "Paket AE", ok: !!info.ae }] : []),
+  ];
+  const f = (p) => (has(p) ? `/files/videos/${slug}/${p}` : null);
+  const req = has("request.json") ? JSON.parse(readFileSync(join(d, "request.json"), "utf8")) : {};
+  return {
+    slug, title: meta.name || slug, created: statSync(d).birthtime.toISOString(),
+    steps, progress: steps.filter((s) => s.ok).length / steps.length, next: steps.find((s) => !s.ok)?.name ?? "Selesai",
+    video: f(`out/${slug}.mp4`), sheet: f("out/contact-sheet.png"), cover: f("out/cover.jpg"),
+    keyvisuals: [], reference: [], idea: req.idea ?? "",
+    preset: "aws", draftVoice: false, scriptState: "none", waiting: null, ad: true, cinematic: true,
+    aws: true, awsData: info, awsJob: awsJobs.get(slug)?.kind ?? null,
+    wide: (meta.format ?? "vertical") === "horizontal",
+  };
+}
 
 function adStage(slug) {
   const d = join(VIDEOS, slug);
@@ -574,6 +603,20 @@ createServer(async (req, res) => {
         if (!body.wait) emit(type === "musafo" ? "musafo-new" : `${type}-new`, slug);
         return send(res, 200, { slug, library });
       }
+      if (body.type === "cinematic") {
+        // Cinematic form: only the AWS look here. tools/aws.mjs new makes the folder, brief/footage/logo files follow as
+        // uploads, then /ready wakes Claude (cinematic-new) to write aws.json and the first animatic
+        if (body.look !== "aws") return send(res, 400, { error: "Gaya Cinematic ini tidak ada." });
+        const title = String(body.title || "").trim().slice(0, 100), idea = String(body.idea || "").trim().slice(0, 4000);
+        if (!title || !idea) return send(res, 400, { error: "Judul dan ide wajib diisi." });
+        let slug = slugify(title);
+        for (let i = 2; existsSync(join(VIDEOS, slug)); i++) slug = `${slugify(title)}-${i}`;
+        const fmt = ["horizontal", "vertical", "square"].includes(body.format) ? body.format : "horizontal";
+        const r = spawnSync("node", [join(ROOT, "tools", "aws.mjs"), "new", slug, title, "--format", fmt, "--idea", idea], { encoding: "utf8" });
+        if (r.status !== 0) return send(res, 400, { error: (r.stderr || r.stdout || "gagal").trim() });
+        if (!body.wait) emit("cinematic-new", slug, { look: "aws" });
+        return send(res, 200, { slug });
+      }
       if (body.type === "advertisement") {
         // Flashcut form: the project is made first, the photos follow (upload ?kind=angle|logo|model|art), then /ready
         // wakes Claude to write ad.json
@@ -632,6 +675,33 @@ createServer(async (req, res) => {
       }
       return send(res, 200, { slug });
     }
+    // AWS (tools/aws.mjs): render the master, make + render the 9:16 and 1:1, or the After Effects package
+    const awm = p.match(/^\/api\/videos\/([a-z0-9-]+)\/aws-(render|formats|ae)$/);
+    if (awm && req.method === "POST") {
+      const [, slug, kind] = awm, d = join(VIDEOS, slug);
+      if (!existsSync(d) || !isAws(d)) return send(res, 404, { error: "bukan proyek AWS" });
+      if (awsJobs.has(slug)) return send(res, 409, { error: `Masih berjalan: ${awsJobs.get(slug).kind}` });
+      const node = process.execPath, T = (f) => join(ROOT, "tools", f);
+      const cmds = kind === "render" ? [[T("aws.mjs"), "build", slug], [T("finish.mjs"), slug, "--no-thumbnail"]]
+        : kind === "ae" ? [[T("aws-ae.mjs"), slug]]
+        : [[T("aws.mjs"), "formats", slug], [T("finish.mjs"), `${slug}-9x16`, "--no-thumbnail"], [T("finish.mjs"), `${slug}-1x1`, "--no-thumbnail"]];
+      const job = { kind, child: null };
+      awsJobs.set(slug, job);
+      (async () => {
+        let err = "";
+        for (const args of cmds) {
+          const code = await new Promise((ok) => {
+            const c = spawn(node, args, { cwd: ROOT, windowsHide: true, stdio: ["ignore", "ignore", "pipe"] });
+            job.child = c;
+            c.stderr.on("data", (b) => (err += b));
+            c.on("close", ok); c.on("error", () => ok(1));
+          });
+          if (code) { console.error(`aws ${kind} ${slug}: ${err.slice(-800)}`); break; }
+        }
+        awsJobs.delete(slug);
+      })();
+      return send(res, 202, { ok: true });
+    }
     const up = p.match(/^\/api\/videos\/([a-z0-9-]+)\/upload$/);
     const adKind = url.searchParams.get("kind");
     // the user's own thumbnail picture (Thumbnail tab, any category, MOTION user 2026-11-13): assets/thumbs/upload-N.<ext>,
@@ -655,7 +725,7 @@ createServer(async (req, res) => {
       if (r.code !== 0) return send(res, 400, { error: r.out.trim().split("\n").slice(-2).join(" ") || "render thumbnail gagal" });
       return send(res, 200, { ok: true, thumbnail: thumbInfo(d, up[1]) });
     }
-    if (up && req.method === "PUT" && (ASSET_KINDS[adKind] || AUDIO_KINDS[adKind])) {
+    if (up && req.method === "PUT" && (ASSET_KINDS[adKind] || AUDIO_KINDS[adKind]) && !isAws(join(VIDEOS, up[1]))) {
       const d = join(VIDEOS, up[1]), audio = !!AUDIO_KINDS[adKind];
       if (!isAd(d)) return send(res, 400, { error: "bukan proyek Advertisement" });
       const name = safeName(url.searchParams.get("name") || "file");
@@ -689,17 +759,25 @@ createServer(async (req, res) => {
       emit("docucine-new", ready[1]);
       return send(res, 200, { ok: true });
     }
+    if (ready && req.method === "POST" && isAws(join(VIDEOS, ready[1]))) {
+      emit("cinematic-new", ready[1], { look: "aws" });
+      return send(res, 200, { ok: true });
+    }
     if (ready && req.method === "POST") {
       if (!isAd(join(VIDEOS, ready[1]))) return send(res, 400, { error: "bukan proyek Advertisement" });
       emit("ad-new", ready[1]);
       return send(res, 200, { ok: true });
     }
     if (up && req.method === "PUT") {
-      const kind = url.searchParams.get("kind") === "reference" ? "reference" : "keyvisuals";
+      const k0 = url.searchParams.get("kind"), vd = join(VIDEOS, up[1]);
+      // AWS: footage (optionally into one slot of aws.json), logos, licensed music
+      const kind = k0 === "reference" ? "reference" : existsSync(vd) && isAws(vd) && ["footage", "logos", "music"].includes(k0) ? k0 : "keyvisuals";
       const dir = join(VIDEOS, up[1], "assets", kind);
       if (!existsSync(join(VIDEOS, up[1]))) return send(res, 404, { error: "video not found" });
       mkdirSync(dir, { recursive: true });
-      const dest = join(dir, safeName(url.searchParams.get("name") || "file"));
+      const slot = kind === "footage" ? url.searchParams.get("slot")?.match(/^([a-z0-9-]+):(\d+)$/) : null;
+      let dest = join(dir, safeName(url.searchParams.get("name") || "file"));
+      if (slot) { try { dest = awsSetSlot(vd, slot[1], +slot[2], (url.searchParams.get("name") || "").match(/\.[a-z0-9]+$/i)?.[0] ?? ".mp4"); } catch (e) { return send(res, 400, { error: e.message }); } }
       await new Promise((ok, bad) => req.pipe(createWriteStream(dest)).on("finish", ok).on("error", bad));
       if (kind === "reference" && /\.(mp4|mov|webm|mkv)$/i.test(dest)) runRef(up[1]);
       return send(res, 200, { ok: true });
@@ -820,7 +898,7 @@ createServer(async (req, res) => {
       catch (e) { return send(res, 200, { ...tebarKeyInfo(tsub), accounts: [], error: e.message }); }
     }
     // the sub's Tebar API key, pasted in the Tebar panel: stored in .tebar-keys.json (gitignored); answers only "••••1234"
-    const tkey = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement)\/([a-z0-9-]+)\/tebar(-key)?$/);
+    const tkey = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement|cinematic)\/([a-z0-9-]+)\/tebar(-key)?$/);
     if (tkey) {
       if (!structure().find((c) => c.id === tkey[1])?.subs.some((x) => x.id === tkey[2])) return send(res, 404, { error: "channel tidak ada" });
       try {
@@ -909,14 +987,14 @@ createServer(async (req, res) => {
     }
     // the channel / preset / product logo used as the watermark of all its videos (tools/brandmark.mjs)
     // the style cover of a channel / preset / product (tools/sub-covers.mjs)
-    const scover = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement)\/([a-z0-9-]+)\/cover$/);
+    const scover = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement|cinematic)\/([a-z0-9-]+)\/cover$/);
     if (scover && req.method === "GET") {
       const f = join(subDir(scover[1], scover[2]), "cover.jpg");
       if (!structure().find((c) => c.id === scover[1])?.subs.some((s) => s.id === scover[2]) || !existsSync(f)) return send(res, 404, { error: "belum ada cover" });
       res.setHeader("cache-control", "max-age=86400");
       return send(res, 200, readFileSync(f), "image/jpeg");
     }
-    const slogo = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement)\/([a-z0-9-]+)\/logo$/);
+    const slogo = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement|cinematic)\/([a-z0-9-]+)\/logo$/);
     if (slogo) {
       const [, cat, id] = slogo;
       if (!structure().find((c) => c.id === cat)?.subs.some((s) => s.id === id)) return send(res, 404, { error: "channel tidak ada" });
@@ -930,7 +1008,7 @@ createServer(async (req, res) => {
         catch (e) { return send(res, 400, { error: e.message }); }
       }
     }
-    const sup = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement)\/([a-z0-9-]+)\/upload$/);
+    const sup = p.match(/^\/api\/subs\/(explainer|storytelling|advertisement|cinematic)\/([a-z0-9-]+)\/upload$/);
     if (sup && req.method === "PUT") {
       const dir = join(subDir(sup[1], sup[2]), "reference");
       if (!existsSync(join(subDir(sup[1], sup[2]), "brief.md"))) return send(res, 404, { error: "brief tidak ada" });

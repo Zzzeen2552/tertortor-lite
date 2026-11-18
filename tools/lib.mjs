@@ -182,9 +182,9 @@ export function numberIsSpoken(raw, spokenNorm, lang) {
 export function brandCss(b = loadBrand()) {
   const c = b.colors;
   const f = b.fonts;
-  // fontFaces: [{ family, src: "assets/fonts/x.woff2" | "local('Name')", weight, style }] for fonts HyperFrames does not bundle
+  // fontFaces: [{ family, src: "assets/fonts/x.woff2" | "local('Name')", weight, style, range? (unicode-range: Thai + Latin subsets) }] for fonts HyperFrames does not bundle
   // (an assets/fonts/ file lives in presets/<id>/fonts/ and cues copies it into the video)
-  const faces = (b.fontFaces ?? []).map((ff) => `@font-face { font-family: "${ff.family}"; src: ${/^local\(/.test(ff.src) ? ff.src : `url("${ff.src}")`}; font-weight: ${ff.weight ?? "normal"}; font-style: ${ff.style ?? "normal"}; }`).join(" ");
+  const faces = (b.fontFaces ?? []).map((ff) => `@font-face { font-family: "${ff.family}"; src: ${/^local\(/.test(ff.src) ? ff.src : `url("${ff.src}")`}; font-weight: ${ff.weight ?? "normal"}; font-style: ${ff.style ?? "normal"};${ff.range ? ` unicode-range: ${ff.range};` : ""} }`).join(" ");
   const extra = Object.entries(c).filter(([k]) => !["ground", "ink", "muted", "accent", "alert", "card"].includes(k)).map(([k, v]) => `--${k}: ${v};`).join(" ");
   return `/*@brand*/${faces} :root { --ground: ${c.ground}; --ink: ${c.ink}; --muted: ${c.muted}; --accent: ${c.accent}; --alert: ${c.alert}; --card: ${c.card}; ${extra} --font-display: "${f.display}", sans-serif; --font-body: "${f.body}", sans-serif; --font-caption: "${f.caption}", sans-serif; --font-mono: "${f.mono}", monospace; } ${b.presetCss ?? ""}/*@end*/`;
 }

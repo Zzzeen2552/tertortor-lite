@@ -9,6 +9,7 @@ import { existsSync, readFileSync, writeFileSync, statSync, readdirSync } from "
 import { join } from "node:path";
 import { ROOT, readJSON } from "./lib.mjs";
 import { productionDone } from "./musafo.mjs";
+import { isAws } from "./aws.mjs";
 
 const EVENTS = join(ROOT, ".events.jsonl"), TIMES = join(ROOT, ".process-times.json"), BEAT = join(ROOT, ".waiting");
 const VIDEOS = join(ROOT, "videos");
@@ -47,6 +48,8 @@ export const PROCESSES = {
   production: { label: "Claude membuat suara (Gemini TTS), lalu key visual per shot", eta: [20, 45], done: (d, at) => productionDone(d, at), next: "suara dan semua key visual sudah jadi" },
   // App Demo (product appdemo) writes demo.json, builds and renders: done when an MP4 is newer than the click
   "ad-new": { label: (d) => (existsSync(join(d, "demo.json")) ? "Claude menyusun storyboard demo aplikasi, membangun, lalu merender" : "Claude menyusun iklan"), eta: (d) => (existsSync(join(d, "demo.json")) ? [8, 20] : [10, 25]), done: (d, at) => { if (!existsSync(join(d, "demo.json"))) { const f = join(d, "ad.json"); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; } const mp4 = existsSync(join(d, "out")) ? readdirSync(join(d, "out")).filter((x) => x.endsWith(".mp4")).map((x) => statSync(join(d, "out", x)).mtimeMs).sort((a, b) => b - a)[0] ?? 0 : 0; return mp4 > at ? mp4 : 0; }, next: (d) => (existsSync(join(d, "demo.json")) ? "demo aplikasi siap ditonton" : "iklan siap dicek") },
+  // AWS (Cinematic, user 2026-11-17) answers with aws.json (data + scenes) and a first build: the animatic with slates and TBC chips
+  "cinematic-new": { label: "Claude menyusun data, adegan, dan animatic rekap", eta: [5, 15], done: (d, at) => { if (!isAws(d)) return 0; const f = join(d, "build", "timeline.json"); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; }, next: "animatic dan daftar footage siap di tab AWS" },
 };
 const val = (v, d) => (typeof v === "function" ? v(d) : v);
 

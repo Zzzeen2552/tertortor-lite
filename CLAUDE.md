@@ -20,9 +20,10 @@ HyperFrames dipin di `package.json` (0.9.15). `npx hyperframes render videos/<sl
 | **Video Explainer** | (kosong) | preset `presets/<id>` | **Hyperframe** (default, `brand.json → defaultPreset`), **VOX** (kolase kertas + adegan berlapis, `presets/vox/style.md`), **SNAPCN** |
 | **Storytelling** | `berakitkehulu` / `bumidipijak` | channel `musafo/library/channels.json` | **Berakit ke Hulu** (BKH), **BumiDiPijak** (BDP) |
 | **Advertisement** | `advertisement` | product `advertisement/products.json` | **Flashcut**, **BRI** (`form: "kv"`), **App Demo** (`form: "appdemo"`) |
+| **Cinematic** | `cinematic` | gaya (`look`) `cinematic/looks.json` | **AWS** saja (skill `/aws`, engine `tools/aws.mjs`, aturan `cinematic/aws/style.md`, preset `presets/aws`): rekap sinematik + motion graphic **visualisasi data** dari brief klien (rekap acara klien): **footage asli** klien di-grade lewat `media-treatment`, angka besar dihitung naik, funnel, titik/kurva, papan Top 20, timeline, kartu logo; teks **Thai + Inggris** (font OFL Inter + IBM Plex Sans Thai, `unicode-range` di `fontFaces`) + `out/<slug>.en.srt`; tanpa narasi, HyperFrames. `aws.json` → satu `compositions/film.html`; slot footage kosong = slate berlabel, angka `null` = kotak TBC (animatic sebelum bahan klien datang). **Master 16:9 + 9:16 + 1:1** dari data yang sama (`node tools/aws.mjs formats <slug>` → proyek `<slug>-9x16`/`-1x1`). **Paket After Effects** (`node tools/aws-ae.mjs <slug>` → `out/ae/`: plate ProRes 422 HQ, grafis alpha ProRes 4444, stem audio, `.jsx` dengan setiap teks dan angka sebagai text layer yang bisa diedit). Tab **AWS** di editor: angka/TBC, unggah footage per slot (`upload?kind=footage&slot=<adegan>:<n>`), logo, lagu, tombol Render / 9:16 + 1:1 / Paket After Effects (`/api/videos/<slug>/aws-render|formats|ae`). Formulir `#/baru/cinematic/aws`. File Amazon Ember berlisensi hanya di laptop (`presets/aws/fonts/ember/`), **tidak pernah di-commit** (repo publik); begitu juga footage, logo, musik, dan brief klien. |
 
-Tidak ada di LITE: preset explainer lain (Kolase, Berkas, Docucine), channel Musafo dan Miracle of Hajj, kategori
-Cinematic, Cinema Clone, Animation, dan City timelapse/stok Adobe (STOKER). Bila user memintanya, arahkan ke MOTION.
+Tidak ada di LITE: preset explainer lain (Kolase, Berkas, Docucine), channel Musafo dan Miracle of Hajj, gaya
+Cinematic selain AWS (Escapement, Sandekala), Cinema Clone, Animation, dan City timelapse/stok Adobe (STOKER). Bila user memintanya, arahkan ke MOTION.
 
 **Mesin bersama Storytelling.** BKH dan BDP memakai engine Musafo: `tools/musafo.mjs` (state `musafo.json`), blok dasar
 `brand.json → musafo` (suara, klip, caption), preset `presets/musafo` (caption BKH), dan langkah teknis 0–6 di skill
@@ -103,6 +104,7 @@ lagi penunggunya. Timeout (4 jam, exit 2) = jalankan lagi bila masih menunggu.
 | `characters` (BKH) | foto tokoh baru di tab Tokoh: buat/ulang character sheet usia yang terdampak, laporkan |
 | `channel-new` (sub baru, `category` + `dir`) | baca `<dir>/brief.md` + `<dir>/reference/`, tanya user yang belum jelas, desain sub itu, hapus `draft` |
 | `ad-new` (advertisement) | `flashcut`: skill `/flashcut <slug>` (`ad.json` → `node tools/ad.mjs check` → `finish`). `bri`: `advertisement/bri/style.md`. `appdemo`: `advertisement/appdemo/style.md` (`node tools/appdemo.mjs info|check`, `finish --no-thumbnail`). Selalu baca contact sheet, kirim MP4, minta persetujuan |
+| `cinematic-new` (look `aws`) | skill `/aws <slug>`: baca brief (`request.json` + `assets/reference/`, docx lewat zipfile) → `/paket-ide` → `aws.json` (data angka, `null` = TBC; adegan open/stat/funnel/montage/end; slot footage dengan `need`) → `node tools/aws.mjs check` → snapshot tiap adegan → laporkan slot footage, angka TBC, logo kurang, teks Thai perlu dicek native. Render, 9:16 + 1:1, dan paket After Effects lewat tombol di tab AWS (atau CLI di `cinematic/aws/style.md`) |
 
 **Edit naskah dari Studio** (tab Naskah): Studio menulis `musafo.json`/`script.md`, persetujuan lama gugur, log di
 `script-edits.json`. Setiap `script-approved`: `node tools/script-edit.mjs list <slug>` dulu. Kata-kata user tidak ditulis

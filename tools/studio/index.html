@@ -1127,6 +1127,7 @@ function viewNewMusafo(channelId) {
 // ---------- Advertisement (tools/ad.mjs): product angles + logo + optional model + CTA → Claude writes ad.json ----------
 // ---------- Cinematic (user 2026-11-09): procedural Blender short, no narration; Claude writes shotlist + scene ----------
 function viewNewCinematic(lookId) {
+  if (lookId === "aws") return viewNewAws();
   const cat = catOf("cinematic"), lk = cat.subs.find((s) => s.id === lookId);
   const files = [];
   $("#main").innerHTML = `
@@ -1185,6 +1186,60 @@ function viewNewCinematic(lookId) {
 }
 
 // ---------- Animation (user 2026-11-12): one classic animation style, no narration, everything in code ($0) ----------
+// ---------- AWS (user 2026-11-17): cinematic recap + data motion graphics from a client brief, real footage, Thai + EN ----------
+function viewNewAws() {
+  const cat = catOf("cinematic"), lk = cat.subs.find((s) => s.id === "aws");
+  const bins = { reference: [], footage: [], logos: [] };
+  $("#main").innerHTML = `
+    <div class="vh"><div><div class="eyebrow">Proyek baru · ${esc(cat.label)}</div><h1>${esc(lk.label)}</h1><p>${esc(lk.description || "")}</p></div></div>
+    ${crumb(cat, lk)}
+    <div class="form-grid">
+      <form class="panel pad" id="form">
+        <div class="fld"><label for="title">Judul</label><input type="text" id="title" placeholder="Rekap Acara 60 Detik" required autofocus></div>
+        <div class="fld"><label for="idea">Brief · tujuan, alur, angka kunci</label><textarea id="idea" rows="7" placeholder="Tempel brief klien, atau tulis singkat: tujuan, penonton, alur per detik, angka yang tampil (boleh TBC), logo penutup, bahasa." required></textarea><span class="hint">Angka yang belum pasti tulis TBC: tampil sebagai kotak putus-putus sampai angkanya diisi.</span></div>
+        <div class="fld"><span class="lb">Format master</span><div class="seg">
+          <label><input type="radio" name="format" value="horizontal" checked>16:9</label><label><input type="radio" name="format" value="vertical">9:16</label><label><input type="radio" name="format" value="square">1:1</label></div>
+          <span class="hint">Versi rasio lain dibuat ulang dari data yang sama di tab AWS (bukan dipotong).</span></div>
+        ${[["reference", "File brief (opsional)", ".docx,.pdf,.txt,.md,image/*", "Dokumen brief klien, storyboard, atau contoh gaya."], ["footage", "Footage (opsional, bisa nanti)", "video/*,image/*", "Video/foto asli acara. Bisa juga diunggah per slot di tab AWS setelah Claude menyusun adegan."], ["logos", "Logo (opsional)", "image/png,image/svg+xml,image/jpeg", "PNG transparan, satu file per mitra."]].map(([k, lb, acc, hint]) => `
+        <div class="fld"><span class="lb">${lb}</span>
+          <div class="drop" data-bin="${k}">Tarik file ke sini atau klik<input type="file" accept="${acc}" multiple></div>
+          <span class="hint">${hint}</span><div class="muted" id="list-${k}" style="font-size:12.5px"></div></div>`).join("")}
+        <button class="btn pri" id="go" style="width:100%;padding:12px">Buat proyek</button>
+      </form>
+      <div class="panel">
+        <div class="panel-h">Cara kerjanya</div>
+        <ol class="pad tips" style="margin:0;padding-left:34px">
+          <li><b>Claude</b> membaca brief, menyusun data (angka, label Thai + Inggris) dan adegan per detik, lalu membuat <b>animatic</b>: slot footage berlabel, angka TBC.</li>
+          <li><b>Kamu</b> mengunggah footage per slot dan mengisi angka final di tab AWS.</li>
+          <li><b>Render</b> master, lalu 9:16 + 1:1 disusun ulang dari data yang sama. Subtitle Inggris jadi file SRT.</li>
+          <li><b>Paket After Effects</b>: plate footage, grafis alpha, stem audio, dan skrip .jsx yang membuat semua teks dan angka jadi text layer yang bisa diedit.</li>
+        </ol>
+      </div>
+    </div>`;
+  document.querySelectorAll(".drop[data-bin]").forEach((d) => {
+    const input = $("input", d), k = d.dataset.bin;
+    const take = (list) => { bins[k].push(...list); $(`#list-${k}`).textContent = bins[k].map((f) => f.name).join(" · "); };
+    d.onclick = () => input.click();
+    input.onchange = () => take([...input.files]);
+    d.ondragover = (e) => { e.preventDefault(); d.classList.add("over"); };
+    d.ondragleave = () => d.classList.remove("over");
+    d.ondrop = (e) => { e.preventDefault(); d.classList.remove("over"); take([...e.dataTransfer.files]); };
+  });
+  $("#form").onsubmit = async (e) => {
+    e.preventDefault();
+    const go = $("#go"); go.disabled = true; go.textContent = "Menyimpan…";
+    try {
+      const r = await fetch("/api/videos", { method: "POST", body: JSON.stringify({ type: "cinematic", look: "aws", title: $("#title").value, idea: $("#idea").value, format: $("input[name=format]:checked").value, wait: true }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error);
+      for (const [k, list] of Object.entries(bins)) for (const f of list) { go.textContent = `Mengunggah ${f.name}…`; await fetch(`/api/videos/${j.slug}/upload?kind=${k}&name=${encodeURIComponent(f.name)}`, { method: "PUT", body: f }); }
+      await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
+      await loadVideos();
+      location.hash = `#/v/${j.slug}`;
+      toast("Proyek dibuat. Claude membaca brief dan menyusun animatic-nya.");
+    } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat proyek"; }
+  };
+}
+
 function viewNewAnimation(styleId) {
   const cat = catOf("animation"), st = cat.subs.find((s) => s.id === styleId);
   const uji = `/files/videos/uji-anim-${st.id}/out/uji-anim-${st.id}.mp4`;
@@ -1555,12 +1610,13 @@ async function viewEditor(slug, startTab) {
           <button data-t="shot">Shot <span>${v.musafo.shots.length}</span></button>
           <button data-t="suara">Suara <span>${v.voice.seconds ? fmt(v.voice.seconds) : "–"}</span></button>
           <button data-t="beat">Beat <span>${v.beats.length}</span></button>` : `<button data-t="brief">Brief</button>
+          ${v.aws ? `<button data-t="aws">AWS <span>${v.awsData?.tbc.length ? v.awsData.tbc.length + " TBC" : "✓"}</span></button>` : ""}
           ${v.clone ? `<button data-t="clone">Clone <span>${v.cloneData?.shots.length || "–"}${v.cloneData?.approval?.approved ? " ✓" : ""}</span></button>` : ""}
           ${hasRef ? `<button data-t="konsep">Konsep <span>${v.concept ? esc(v.concept.id) : v.concepts.concepts.length || "–"}</span></button>` : ""}
           ${isA ? "" : `<button data-t="naskah">Naskah</button>`}
           ${isA || v.oneTake ? "" : `<button data-t="flow">Prompt Flow <span>${v.flowCheck.shots.length}</span></button>`}
           ${isA ? "" : `<button data-t="suara">Suara <span>${v.voice.seconds ? fmt(v.voice.seconds) : "–"}</span></button>`}
-          <button data-t="beat"${v.clone ? "" : ' class="on"'}>Beat <span>${v.beats.length}</span></button>`}
+          <button data-t="beat"${v.clone || v.aws ? "" : ' class="on"'}>Beat <span>${v.beats.length}</span></button>`}
           <button data-t="thumb">Thumbnail ${v.thumbnail?.url ? (v.thumbnail.stale ? "<span>!</span>" : "<span>✓</span>") : ""}</button>
           <button data-t="aset">Aset <span>${v.keyvisuals.length + v.screens.length + v.footage.length + v.reference.length}</span></button>
         </div>
@@ -1835,6 +1891,39 @@ async function viewEditor(slug, startTab) {
           <p class="muted" style="font-size:12.5px;margin-top:10px">${t.videoRendering ? `⏳ Video sedang dirender dengan thumbnail ini (${t.videoRendering === "cover" ? "hanya pasang thumbnail di depan, ±1 menit" : "render penuh, beberapa menit"}). Tab ini diperbarui sendiri.` : t.videoError ? `✖ Render video gagal: ${esc(t.videoError)}` : t.videoBehind ? "⚠ Video yang ada belum memuat perubahan terbaru (thumbnail, gambar, atau klip). Klik Setujui &amp; render video untuk membuatnya ulang." : t.rendered ? "Simpan thumbnail tidak mengubah video. Video dibuat ulang hanya saat kamu klik Setujui &amp; render video." : "Video belum dirender. Setujui &amp; render video membuatnya dengan thumbnail ini di depan."} Link berbagi lama tetap memutar versi sebelumnya sampai dibagikan ulang.</p>
         </div></div></div>`;
     },
+    // AWS (tools/aws.mjs, user 2026-11-17): numbers, footage slots, logos, renders, After Effects package
+    aws: () => {
+      const a = v.awsData;
+      if (!a) return `<div class="pad"><div class="empty"><b>Belum ada aws.json</b>Claude sedang membaca brief dan menyusun adegan.</div></div>`;
+      const job = v.awsJob, busy = (k) => (job === k ? " disabled" : job ? " disabled" : "");
+      const lab = { render: "Merender…", formats: "Membuat 9:16 + 1:1…", ae: "Membuat paket AE…" };
+      const got = a.slots.filter((x) => x.url).length;
+      return `<div class="pad">
+        ${job ? `<div class="notice"><span><b>${lab[job]}</b> Halaman dimuat ulang saat selesai.</span></div>` : ""}
+        <div class="notice ${a.tbc.length ? "" : "ok"}" style="margin:0 0 14px"><span>${a.tbc.length ? `<b>${a.tbc.length} angka masih TBC</b> (tampil sebagai kotak putus-putus): jangan kirim ke publik sebelum diisi.` : "<b>Semua angka terisi.</b>"} · footage ${got}/${a.slots.length} · logo ${a.logos.filter((l) => l.url).length}/${a.logos.length}${a.music ? "" : " · musik sementara"}</span>
+          <span class="sp" style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn pri sm" id="awsRender"${busy("render")}>${v.video ? "Render ulang" : "Render"}</button>
+            ${a.master ? `<button class="btn sm" id="awsFormats"${busy("formats")}>9:16 + 1:1</button><button class="btn sm" id="awsAe"${busy("ae")}>Paket After Effects</button>` : ""}
+          </span></div>
+        ${a.master ? `<div class="eyebrow sub">Hasil</div>
+        <ul class="issues" style="margin-bottom:14px">
+          <li>${v.video ? `✔ Master: <a href="${v.video}" target="_blank">MP4</a>` : "○ Master belum dirender"}${a.srt ? ` · <a href="${a.srt}" target="_blank">subtitle .srt</a>` : ""}</li>
+          ${a.variants.map((x) => `<li>${x.video ? `✔ ${x.kind.replace("x", ":")}: <a href="${x.video}" target="_blank">MP4</a> · <a href="#/v/${x.slug}">buka</a>` : x.exists ? `○ ${x.kind.replace("x", ":")} sudah disusun, belum dirender` : `○ ${x.kind.replace("x", ":")} belum dibuat`}</li>`).join("")}
+          <li>${a.ae ? `✔ Paket After Effects: <span class="mono">${esc(a.ae.dir)}</span> (jalankan <a href="${a.ae.jsx}" target="_blank">.jsx</a> lewat File › Scripts › Run Script File)` : "○ Paket After Effects belum dibuat"}</li>
+        </ul>` : `<div class="notice" style="margin-bottom:14px"><span>Versi rasio dari master: ubah data dan footage di proyek master, lalu klik "9:16 + 1:1" di sana.</span></div>`}
+        <div class="eyebrow sub">Angka di layar · isi di aws.json → data (atau minta Claude)</div>
+        <table class="mono" style="font-size:12.5px;border-collapse:collapse;width:100%;margin-bottom:14px">${a.data.map((d) => `<tr><td style="padding:3px 10px 3px 0">${esc(d.key)}</td><td style="padding:3px 10px 3px 0">${esc(d.th)}<br><span class="muted">${esc(d.en)}</span></td><td style="padding:3px 10px 3px 0;white-space:nowrap">${d.value == null ? (d.used ? '<span class="pill">TBC</span>' : '<span class="muted">tidak dipakai</span>') : `<b>${esc(d.prefix)} ${Number(d.value).toLocaleString("en-US")}${esc(d.suffix)}</b>`}</td><td class="muted" style="padding:3px 0">${esc(d.note)}</td></tr>`).join("")}</table>
+        <div class="eyebrow sub">Footage per slot · ${got}/${a.slots.length}${a.master ? "" : " (unggah di proyek master)"}</div>
+        ${a.slots.map((x) => `<div class="shot"><div class="shot-h"><b>${esc(x.scene)} · ${x.index + 1}</b><span class="muted" style="font-size:12.5px">${esc(x.need)}${x.theme ? ` · tema ${esc(x.theme)}` : ""}</span>
+          ${x.url ? '<span class="pill acc" style="margin-left:auto">ada</span>' : '<span class="pill" style="margin-left:auto">slate</span>'}
+          ${a.master ? `<label class="btn sm">${x.url ? "Ganti" : "Unggah"}<input type="file" accept="video/*,image/*" data-awsslot="${esc(x.scene)}:${x.index}" hidden></label>` : ""}</div></div>`).join("")}
+        <div class="eyebrow sub" style="margin-top:14px">Logo kartu penutup</div>
+        <ul class="issues">${a.logos.map((l) => `<li>${l.url ? "✔" : "○"} ${esc(l.name)} <span class="muted mono">${esc(l.src)}</span></li>`).join("")}</ul>
+        ${a.master ? `<label class="btn sm" style="margin-top:8px">Unggah logo<input type="file" accept="image/*" id="awsLogo" multiple hidden></label>
+        <label class="btn sm" style="margin-top:8px">Unggah lagu berlisensi<input type="file" accept="audio/*" id="awsMusic" hidden></label>
+        <span class="hint">Nama file logo disamakan dengan daftar di atas, atau minta Claude memasangnya. Lagu: Claude mengisi aws.json → music.track + lisensinya.</span>` : ""}
+      </div>`;
+    },
     aset: () => {
       const g = (title, items, vid) => items.length ? `<div class="eyebrow sub">${title}</div><div class="gal">${items.map((u) => vid ? `<video src="${u}" muted controls preload="metadata"></video>` : `<a href="${u}" target="_blank"><img src="${u}" alt="" loading="lazy"></a>`).join("")}</div>` : "";
       const html = g("Key visual", v.keyvisuals) + g("Video referensi", v.reference, true) + g("Screenshot", v.screens) + g("Footage", v.footage, true) + (v.sheet ? g("Contact sheet render", [v.sheet]) : "");
@@ -1928,6 +2017,34 @@ async function viewEditor(slug, startTab) {
       } catch (err) { msg.textContent = err.message; ["#kvSave", "#kvRender"].forEach((s) => ($(s).disabled = false)); }
     };
     if ($("#kvSave")) { $("#kvSave").onclick = () => kvSend(false); $("#kvRender").onclick = () => kvSend(true); }
+    if (t === "aws") {
+      const watch = () => { const w = setInterval(async () => { const j = await (await fetch(`/api/videos/${slug}`)).json(); if (!j.awsJob) { clearInterval(w); await loadVideos(); viewEditor(slug, "aws"); toast("Selesai. Cek hasilnya di daftar Hasil."); } }, 5000); };
+      for (const [id, k] of [["#awsRender", "render"], ["#awsFormats", "formats"], ["#awsAe", "ae"]]) {
+        const b = $(id); if (!b) continue;
+        b.onclick = async () => {
+          b.disabled = true;
+          const r = await fetch(`/api/videos/${slug}/aws-${k}`, { method: "POST" });
+          if (!r.ok) { b.disabled = false; return alert((await r.json()).error); }
+          toast({ render: "Render berjalan di laptop.", formats: "Menyusun dan merender 9:16 + 1:1.", ae: "Membuat paket After Effects (dua render ProRes)." }[k]);
+          await viewEditor(slug, "aws"); watch();
+        };
+      }
+      if (v.awsJob) watch();
+      $("#tabBody").querySelectorAll("[data-awsslot]").forEach((inp) => (inp.onchange = async () => {
+        const file = inp.files[0]; if (!file) return;
+        toast(`Mengunggah ${file.name}…`);
+        const r = await fetch(`/api/videos/${slug}/upload?kind=footage&slot=${encodeURIComponent(inp.dataset.awsslot)}&name=${encodeURIComponent(file.name)}`, { method: "PUT", body: file });
+        if (!r.ok) return alert((await r.json()).error);
+        toast("Footage tersimpan di slotnya. Klik Render untuk melihatnya."); await loadVideos(); viewEditor(slug, "aws");
+      }));
+      for (const [id, k] of [["#awsLogo", "logos"], ["#awsMusic", "music"]]) {
+        const inp = $(id); if (!inp) continue;
+        inp.onchange = async () => {
+          for (const f of inp.files) await fetch(`/api/videos/${slug}/upload?kind=${k}&name=${encodeURIComponent(f.name)}`, { method: "PUT", body: f });
+          toast(k === "logos" ? "Logo tersimpan di assets/logos." : "Lagu tersimpan di assets/music. Minta Claude memasangnya."); await loadVideos(); viewEditor(slug, "aws");
+        };
+      }
+    }
     $("#tabBody").querySelectorAll("[data-copy]").forEach((b) => (b.onclick = () => toast(copyText(b.dataset.copy) ? "Prompt tersalin" : "Browser menolak menyalin. Salin manual.")));
     document.querySelectorAll("[data-goto]").forEach((b) => (b.onclick = () => openTab(b.dataset.goto)));
     document.querySelectorAll("[data-pick]").forEach((b) => (b.onclick = () => { $("#vSpeaker").value = b.dataset.pick; $("#vSpeaker").focus(); }));
@@ -2474,7 +2591,7 @@ async function viewEditor(slug, startTab) {
       box.remove(); if (r.ok) { toast("Preset: " + id); await loadVideos(); viewEditor(slug); }
     };
   };
-  openTab(startTab || (v.clone ? "clone" : isM ? (v.waiting === "Setujui draft" || v.musafo.draftApproval.needed && !v.musafo.draftApproval.approved ? "draft" : v.waiting === "Setujui storyline" || !v.musafo.storylineApproval.approved && !v.musafo.shots.length ? "storyline" : v.scriptState === "waiting" || v.scriptState === "stale" ? "naskah" : v.beats.length ? "beat" : "shot") : hasRef && !v.concept && v.scriptState === "none" ? "konsep" : v.scriptState === "waiting" || v.scriptState === "stale" ? "naskah" : !v.oneTake && v.approval.approved && (!v.flowCheck.shots.length || v.flowCheck.errors.length) && !v.beats.length ? "flow" : "beat"));
+  openTab(startTab || (v.aws ? "aws" : v.clone ? "clone" : isM ? (v.waiting === "Setujui draft" || v.musafo.draftApproval.needed && !v.musafo.draftApproval.approved ? "draft" : v.waiting === "Setujui storyline" || !v.musafo.storylineApproval.approved && !v.musafo.shots.length ? "storyline" : v.scriptState === "waiting" || v.scriptState === "stale" ? "naskah" : v.beats.length ? "beat" : "shot") : hasRef && !v.concept && v.scriptState === "none" ? "konsep" : v.scriptState === "waiting" || v.scriptState === "stale" ? "naskah" : !v.oneTake && v.approval.approved && (!v.flowCheck.shots.length || v.flowCheck.errors.length) && !v.beats.length ? "flow" : "beat"));
   paintWork(); // banner if Claude is working on this project
 }
 

@@ -1,0 +1,169 @@
+{
+  "id": "aws",
+  "type": "cinematic",
+  "label": "AWS",
+  "description": "Khusus Cinematic look AWS (bukan pilihan explainer): film rekap sinematik + motion graphic data. Footage asli di-grade lewat media-treatment, angka besar dan visualisasi data di atasnya, teks Thai + subtitle Inggris. Aturan di cinematic/aws/style.md.",
+  "formats": [
+    "horizontal",
+    "vertical",
+    "square"
+  ],
+  "colors": {
+    "ground": "#0B1033",
+    "ink": "#F5F7FA",
+    "muted": "#9AA6B8",
+    "accent": "#FF9900",
+    "alert": "#FF5A4E",
+    "card": "#141A44",
+    "cool": "#38D5F2",
+    "deep": "#2A1460",
+    "line": "rgba(245,247,250,0.18)"
+  },
+  "tones": [
+    {
+      "label": "AWS Orange",
+      "accent": "#FF9900"
+    },
+    {
+      "label": "Amber",
+      "accent": "#FFB020"
+    },
+    {
+      "label": "Tosca",
+      "accent": "#2EE6C5"
+    },
+    {
+      "label": "Biru",
+      "accent": "#4C8DFF"
+    }
+  ],
+  "fonts": {
+    "display": "AWS Sans",
+    "body": "AWS Sans",
+    "caption": "AWS Sans",
+    "mono": "JetBrains Mono"
+  },
+  "fontFaces": [
+    {
+      "family": "IBM Plex Sans Thai",
+      "src": "assets/fonts/ibm-plex-sans-thai-thai-400-normal.woff2",
+      "weight": "400",
+      "style": "normal",
+      "range": "U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC"
+    },
+    {
+      "family": "IBM Plex Sans Thai",
+      "src": "assets/fonts/ibm-plex-sans-thai-latin-400-normal.woff2",
+      "weight": "400",
+      "style": "normal",
+      "range": "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD"
+    },
+    {
+      "family": "IBM Plex Sans Thai",
+      "src": "assets/fonts/ibm-plex-sans-thai-thai-500-normal.woff2",
+      "weight": "500",
+      "style": "normal",
+      "range": "U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC"
+    },
+    {
+      "family": "IBM Plex Sans Thai",
+      "src": "assets/fonts/ibm-plex-sans-thai-latin-500-normal.woff2",
+      "weight": "500",
+      "style": "normal",
+      "range": "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD"
+    },
+    {
+      "family": "IBM Plex Sans Thai",
+      "src": "assets/fonts/ibm-plex-sans-thai-thai-600-normal.woff2",
+      "weight": "600",
+      "style": "normal",
+      "range": "U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC"
+    },
+    {
+      "family": "IBM Plex Sans Thai",
+      "src": "assets/fonts/ibm-plex-sans-thai-latin-600-normal.woff2",
+      "weight": "600",
+      "style": "normal",
+      "range": "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD"
+    },
+    {
+      "family": "AWS Sans",
+      "src": "assets/fonts/inter-latin-300-normal.woff2",
+      "weight": "300",
+      "style": "normal",
+      "range": "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD"
+    },
+    {
+      "family": "AWS Sans",
+      "src": "assets/fonts/ibm-plex-sans-thai-thai-300-normal.woff2",
+      "weight": "300",
+      "style": "normal",
+      "range": "U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC"
+    },
+    {
+      "family": "AWS Sans",
+      "src": "assets/fonts/inter-latin-700-normal.woff2",
+      "weight": "700",
+      "style": "normal",
+      "range": "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD"
+    },
+    {
+      "family": "AWS Sans",
+      "src": "assets/fonts/ibm-plex-sans-thai-thai-700-normal.woff2",
+      "weight": "700",
+      "style": "normal",
+      "range": "U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC"
+    }
+  ],
+  "captions": {
+    "enabled": false,
+    "y": 1180,
+    "size": 54,
+    "weight": 600,
+    "maxWords": 3,
+    "uppercase": false,
+    "color": "#F5F7FA",
+    "activeColor": "#070B14",
+    "activeBg": "#FF9900",
+    "pill": "rgba(7,11,20,0.8)",
+    "radius": 12
+  },
+  "css": "",
+  "grade": {
+    "preset": "deep-contrast",
+    "intensity": 0.55,
+    "wheels": {
+      "shadows": {
+        "hue": 205,
+        "amount": 0.12,
+        "level": -0.02
+      },
+      "highlights": {
+        "hue": 36,
+        "amount": 0.1,
+        "level": 0
+      }
+    },
+    "details": {
+      "vignette": 0.32,
+      "grain": 0.16
+    }
+  },
+  "music": {
+    "bpm": 120,
+    "key": "E",
+    "mode": "major",
+    "prog": [
+      1,
+      5,
+      6,
+      4
+    ],
+    "lead": "pluck",
+    "bass": "sub",
+    "pad": "glasspad",
+    "drums": "pop",
+    "density": 0.45,
+    "gain": 0.95
+  }
+}

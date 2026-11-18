@@ -87,3 +87,10 @@ videos/.trash/
 .studio-chat.json
 .studio-chat.json.tmp
 .studio-chat/
+
+# AWS (Cinematic): licensed Amazon Ember files, client briefs/references and client logos/music stay local (public repo)
+presets/aws/fonts/ember/*
+!presets/aws/fonts/ember/README.txt
+cinematic/*/reference/
+videos/*/assets/logos/
+videos/*/assets/music/

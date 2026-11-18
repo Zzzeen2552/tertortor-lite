@@ -3,6 +3,7 @@
 //   explainer      (no type)                        sub = preset   (presets/<id>, draft presets shown as "belum didesain")
 //   storytelling   (type berakitkehulu | bumidipijak)     sub = channel  (musafo/library/channels.json; a channel's type = project type)
 //   advertisement  (type advertisement)              sub = product  (advertisement/products.json)
+//   cinematic      (type cinematic)                  sub = look     (cinematic/looks.json; AWS: recap film with data motion graphics)
 //
 // A new sub made in TERTORTOR ("+ Tambah") is a draft with the user's brief: name, workflow, visual style, references.
 // It lives in subDir(): presets/<id>/ (explainer), musafo/channels/<id>/ (storytelling), advertisement/<id>/
@@ -16,14 +17,17 @@ import { listChannels, CHANNELS } from "./stories.mjs";
 
 const PRODUCTS = join(ROOT, "advertisement", "products.json");
 export const listProducts = () => (existsSync(PRODUCTS) ? readJSON(PRODUCTS) : []);
+const LOOKS = join(ROOT, "cinematic", "looks.json");
+export const listLooks = () => (existsSync(LOOKS) ? readJSON(LOOKS) : []);
 
 export const CATEGORIES = [
   { id: "explainer", label: "Video Explainer", subKind: "preset", subLabel: "Preset", desc: "Motion graphic yang mengajarkan langkah: naskah lisan, beat, scene HyperFrames." },
   { id: "storytelling", label: "Storytelling", subKind: "channel", subLabel: "Channel", desc: "Kisah lisan per shot: storyline, satu gambar + satu klip per shot, caption dua bahasa. Berakit ke Hulu dan BumiDiPijak." },
   { id: "advertisement", label: "Advertisement", subKind: "product", subLabel: "Product", desc: "Video iklan produk." },
+  { id: "cinematic", label: "Cinematic", subKind: "look", subLabel: "Gaya", desc: "Film rekap sinematik: footage asli di-grade dengan visualisasi data. Edit, grade, dan mix lewat kode." },
 ];
 
-const SUB_ROOT = { explainer: "presets", storytelling: join("musafo", "channels"), advertisement: "advertisement" };
+const SUB_ROOT = { explainer: "presets", storytelling: join("musafo", "channels"), advertisement: "advertisement", cinematic: "cinematic" };
 export const subDir = (category, id) => join(ROOT, SUB_ROOT[category], id);
 const rel = (p) => relative(ROOT, p).replace(/\\/g, "/");
 const briefOf = (category, id) => (existsSync(join(subDir(category, id), "brief.md")) ? readFileSync(join(subDir(category, id), "brief.md"), "utf8") : "");
@@ -33,7 +37,8 @@ export function structure() {
   const presets = listPresets({ drafts: true }).filter((p) => !p.type).map(({ id, label, description, colors, fonts, tones, draft, formats, oneTake }) => ({ id, label, description, colors, fonts, tones: tones ?? [], formats: formats ?? ["vertical"], oneTake: !!oneTake, draft: !!draft })).sort((a, b) => a.draft - b.draft);
   const channels = listChannels().map((c) => ({ id: c.id, label: c.label, description: c.description, type: c.type ?? "musafo", draft: !!c.draft }));
   const products = listProducts().map(({ id, label, description, draft, form }) => ({ id, label, description, form: form ?? "photos", draft: !!draft }));
-  const subs = { explainer: presets, storytelling: channels, advertisement: products };
+  const looks = listLooks().map(({ id, label, description, draft }) => ({ id, label, description, draft: !!draft }));
+  const subs = { explainer: presets, storytelling: channels, advertisement: products, cinematic: looks };
   // logo: the watermark of every video in that sub (tools/brandmark.mjs), as a cache-busting version number
   const logo = (cat, id) => { const f = join(subDir(cat, id), "logo.png"); return existsSync(f) ? Math.round(statSync(f).mtimeMs) : null; };
   // cover: a still of the style from one of its own videos (tools/sub-covers.mjs), shown before the user picks it
@@ -46,6 +51,7 @@ export function placeOf(dir) {
   const meta = existsSync(join(dir, "meta.json")) ? JSON.parse(readFileSync(join(dir, "meta.json"), "utf8")) : {};
   if (STORY_TYPES[meta.type]) return { category: "storytelling", sub: meta.channel ?? meta.type };
   if (meta.type === "advertisement") return { category: "advertisement", sub: meta.product ?? null };
+  if (meta.type === "cinematic") return { category: "cinematic", sub: meta.look ?? null };
   return { category: "explainer", sub: presetOf(dir) };
 }
 
@@ -70,7 +76,7 @@ export function addSub(category, { label, description = "", workflow = "", visua
   if (structure().find((c) => c.id === category).subs.some((s) => s.id === id) || existsSync(dir)) throw new Error(`"${label}" sudah ada.`);
   description = String(description).trim().slice(0, 200) || "Belum didesain. Brief dari user ada di brief.md.";
   mkdirSync(join(dir, "reference"), { recursive: true });
-  const design = { explainer: "preset (preset.json, style.md, scenes/)", storytelling: "channel (aturan, gaya gambar, prompt Library Cerita; tipe proyek sendiri bila alurnya beda dari Musafo)", advertisement: "product (alur, gaya, alat)" }[category];
+  const design = { explainer: "preset (preset.json, style.md, scenes/)", storytelling: "channel (aturan, gaya gambar, prompt Library Cerita; tipe proyek sendiri bila alurnya beda dari Musafo)", advertisement: "product (alur, gaya, alat)", cinematic: "gaya (alur, grade, grafis, edit/mix)" }[category];
   const links = String(refLink).trim().split(/\s+/).filter(Boolean);
   writeFileSync(join(dir, "brief.md"), `# Brief ${cat.subLabel.toLowerCase()} baru: ${label}
 
@@ -100,6 +106,7 @@ ${links.length ? links.map((l) => `- ${l}`).join("\n") : "- (belum ada link)"}
     if (category === "explainer") writeJSON(join(dir, "preset.json"), { id, label, draft: true, description });
     if (category === "storytelling") writeJSON(CHANNELS, [...listChannels(), { id, label, draft: true, description }]);
     if (category === "advertisement") writeJSON(PRODUCTS, [...listProducts(), { id, label, draft: true, description }]);
+    if (category === "cinematic") { mkdirSync(join(ROOT, "cinematic"), { recursive: true }); writeJSON(LOOKS, [...listLooks(), { id, label, draft: true, description }]); }
   } catch (e) {
     rmSync(dir, { recursive: true, force: true });
     throw new Error(`Gagal menyimpan: ${e.message}`);
