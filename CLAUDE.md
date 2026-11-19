@@ -140,6 +140,9 @@ ditolak. Butuh Claude Code CLI terpasang dan sudah login di PC ini (`claude --ve
   [s01,s02]`** (satu adegan per generate, identitas tokoh disebut persis, tanpa close-up wajah); adegan berorang sesudah cut =
   gambar `assets/frames/<shot>-b.png` + generate sendiri, disambung `node tools/musafo.mjs join <slug> <shot> a.mp4 b.mp4`
   (mengisi `scenes[].clipAt`). Tokoh yang berulang ganti baju per shot/episode: `characters[].desc` hanya wajah.
+  **Setiap klip Muse morphing di ±0,5 s awal**: `add clip` dan `join` memotong 0,5 s awal tiap generate otomatis bila
+  `videoTool` berisi "Muse" (`--head <s>` bila lebih lama, `--head 0` untuk klip Flow/RunningHub); di luar engine itu potong
+  manual dengan `node tools/prep-footage.mjs <in> <out> --start 0.5`.
 - **BumiDiPijak** (BDP, `type: "bumidipijak"`): sejarah dan legenda Jawa dari Babad Tanah Jawa (Library Cerita BDP).
   Engine Musafo, **lebih dari 2 menit = series**, preset `presets/bumidipijak` (Merriweather, Inggris italic terakota), suara
   default **Kira**, gaya lukisan minyak gelap (`brand.json → bumidipijak`), isi adegan dari `/babad-tanah-jawa-prompt`

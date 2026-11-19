@@ -1078,7 +1078,13 @@ function addMultiClip(dir, m, c, file) {
 }
 
 // ---------- add a generated image / clip ----------
-function add(dir, kind, id, file) {
+// Meta Muse clips always open with a morph (user 2026-11-19 "video bikinan muse selalu ada morphing di awal video, cut
+// pada saat edit"): the key visual melts into Muse's own redraw (face, angle, hands shift) over about the first 0.5 s
+// (measured on two BKH clips). Every Muse generate is cut from its start when it is added; --head <s>
+// overrides it per clip (--head 0 = keep, e.g. a fallback clip from Flow/RunningHub in a project whose videoTool is Muse).
+export const MUSE_HEAD = 0.5;
+const museHead = (m, head) => (head != null ? head : /muse/i.test(m?.videoTool ?? "") ? MUSE_HEAD : 0);
+function add(dir, kind, id, file, { head } = {}) {
   const m = loadMusafo(dir);
   if (kind === "character") {
     const c = m?.characters?.find((x) => x.id === id);
@@ -1104,11 +1110,13 @@ function add(dir, kind, id, file) {
     run("ffmpeg", ["-y", "-v", "error", "-i", file, "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920", "-frames:v", "1", join(dir, frame(id))]);
     source(dir, frame(id), `AI-generated illustration (${tool || "image model"}), shot ${id}; not a photograph`);
   } else {
-    const r = prepFootage(file, join(dir, clip(id)));
+    const cut = museHead(m, head);
+    if (cut && probeDuration(file) < cut + 1) die(`${file}: terlalu pendek untuk dipotong ${cut} s di awal (morphing Muse); pakai --head 0 bila klip ini bukan dari Muse`);
+    const r = prepFootage(file, join(dir, clip(id)), { start: cut });
     const a = run("ffprobe", ["-v", "error", "-show_entries", "stream=codec_type", "-of", "csv=p=0", r.out]).stdout;
     if (/audio/.test(a)) die(`${clip(id)} masih punya audio`);
-    source(dir, clip(id), `AI-generated dramatisation (${tool || "image-to-video"} from ${frame(id)}), shot ${id}; not real footage`);
-    console.log(`  ${r.duration.toFixed(2)} s`);
+    source(dir, clip(id), `AI-generated dramatisation (${tool || "image-to-video"} from ${frame(id)}), shot ${id}${cut ? `, first ${cut} s (morph) cut` : ""}; not real footage`);
+    console.log(`  ${r.duration.toFixed(2)} s${cut ? `  (${cut} s awal dipotong: morphing Muse)` : ""}`);
   }
   console.log(`✔ ${kind} ${id} → ${kind === "image" ? frame(id) : clip(id)}`);
 }
@@ -1160,14 +1168,17 @@ export function musePlan(dir, id) {
   return parts;
 }
 // join the parts of one shot (a, b, ...) into assets/footage/<shot>.mp4 via `add`; scenes[].clipAt = where each part starts
-export function joinParts(dir, id, files) {
+export function joinParts(dir, id, files, { head } = {}) {
   const m = readJSON(join(dir, "musafo.json")), s = m.shots.find((x) => x.id === id), plan = musePlan(dir, id);
   if (files.length !== plan.length) throw new Error(`${id}: ${plan.length} bagian (${plan.map((p) => p.part).join(", ")}), file ${files.length}`);
   const tmp = join(dir, "build", `${id}.joined.mp4`);
   mkdirSync(join(dir, "build"), { recursive: true });
-  const lens = files.map((f) => probeDuration(f));
+  // every part is its own Muse generate, so every part opens with the morph: cut each one (MUSE_HEAD)
+  const cut = museHead(m, head);
+  const lens = files.map((f) => probeDuration(f) - cut);
+  lens.forEach((l, i) => { if (l < 1) throw new Error(`${files[i]}: terlalu pendek untuk dipotong ${cut} s di awal (morphing Muse)`); });
   run("ffmpeg", ["-y", "-v", "error", ...files.flatMap((f) => ["-i", f]), "-filter_complex",
-    files.map((_, i) => `[${i}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,fps=30[v${i}]`).join(";") + ";" + files.map((_, i) => `[v${i}]`).join("") + `concat=n=${files.length}:v=1:a=0[v]`,
+    files.map((_, i) => `[${i}:v]trim=start=${cut},setpts=PTS-STARTPTS,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,fps=30[v${i}]`).join(";") + ";" + files.map((_, i) => `[v${i}]`).join("") + `concat=n=${files.length}:v=1:a=0[v]`,
     "-map", "[v]", "-an", "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p", tmp]);
   // part starts become the clipAt of the scenes that open them (inner no-people cuts keep their own clipAt)
   let t = 0;
@@ -1231,9 +1242,10 @@ if (process.argv[1]?.endsWith("musafo.mjs")) {
       die(e.message);
     }
   } else if (cmd === "add") {
+    const hi = rest.indexOf("--head"), head = hi >= 0 ? +rest.splice(hi, 2)[1] : undefined;
     const [kind, id, file] = rest;
-    if (!["image", "clip", "character"].includes(kind) || !id || !file) die("Usage: node tools/musafo.mjs add <slug> image <shotId> <file> | clip <clipId|shotId> <file> | character <characterId> <file>");
-    add(dir, kind, id, file);
+    if (!["image", "clip", "character"].includes(kind) || !id || !file) die("Usage: node tools/musafo.mjs add <slug> image <shotId> <file> | clip <clipId|shotId> <file> [--head <s>] | character <characterId> <file>");
+    add(dir, kind, id, file, { head });
   } else if (cmd === "muse") {
     // node tools/musafo.mjs muse <slug> [s01,s02]: Muse prompt per part -> build/muse/<shot>-<part>.txt (+ which images exist)
     const ids = rest[0] ? rest[0].split(",") : readJSON(join(dir, "musafo.json")).shots.map((s) => s.id);
@@ -1244,8 +1256,10 @@ if (process.argv[1]?.endsWith("musafo.mjs")) {
     }
   } else if (cmd === "join") {
     // node tools/musafo.mjs join <slug> <shot> a.mp4 b.mp4 ...: parts of one shot -> one clip (add) with clipAt per part
+    const hi = rest.indexOf("--head"), head = hi >= 0 ? +rest.splice(hi, 2)[1] : undefined;
     const [id, ...files] = rest;
-    try { const r = joinParts(dir, id, files); add(dir, "clip", id, r.file); console.log(`  bagian ${r.lens.map((x) => x.toFixed(1)).join(" + ")} s`); } catch (e) { die(e.message); }
+    // the parts are already cut in joinParts: the joined file is not cut again
+    try { const r = joinParts(dir, id, files, { head }); add(dir, "clip", id, r.file, { head: 0 }); console.log(`  bagian ${r.lens.map((x) => x.toFixed(1)).join(" + ")} s`); } catch (e) { die(e.message); }
   } else if (cmd === "orb-kv") {
     const [id, ...o] = rest;
     if (!id) die("Usage: node tools/musafo.mjs orb-kv <slug> <shotId> [--at x,y] [--size px] [--end]");

@@ -151,6 +151,9 @@ dicek manual dulu.
   berhenti. Adegan berorang sesudah cut = gambar sendiri `assets/frames/<shot>-b.png` + generate sendiri, lalu
   `node tools/musafo.mjs join <slug> <shot> a.mp4 b.mp4` (mengisi `clipAt`). Wajah masih berubah → buat klip itu di Flow;
   adegan kena sensor/review Muse → RunningHub H3.
+- **Potong morphing awal klip Muse** (user 2026-11-19): setiap klip Muse dibuka dengan morphing ±0,5 s (key visual berubah
+  jadi versi Muse). `add clip` dan `join` memotongnya otomatis (0,5 s per generate, `--head <s>` bila lebih lama,
+  `--head 0` untuk klip Flow/RunningHub). Detail di skill `/musafo` § klip.
 - Caption ID + EN, `npm run check`, contact sheet lewat `frame-checker` sebelum menyerahkan.
 - Event dari TERTORTOR: `berakitkehulu-new` (proyek baru → storyline), `characters` (foto tokoh baru), `storyline-approved`
   (character sheet bila ada foto, lalu `series` bila perlu, lalu naskah), `script-approved`, `production`.

@@ -240,6 +240,11 @@ Hemat: ±6 generate per video 90 detik, bukan ±18. Tampil di TERTORTOR tab Shot
   dan koin terpakai, tulis di `costs.md`.
 - App `brand.json → musafo.video` (MiniMax H3 di RunningHub), satu generate per job lewat agen `runninghub-operator`:
   LOAD IMAGE = `assets/frames/<shot pertama>.png`, PROMPT = `clips[].prompt`, RATIO 9:16, DURASI = `clips[].seconds`.
+- **Klip Meta Muse selalu morphing di awal** (user 2026-11-19): key visual meleleh jadi gambar versi Muse (wajah, sudut,
+  tangan bergeser) di ±0,5 s pertama. `add <slug> clip <shotId> <file>` dan `join` memotong 0,5 s awal setiap generate
+  otomatis bila `videoTool` berisi "Muse" (`MUSE_HEAD` di `tools/musafo.mjs`, tercatat di `sources.txt`). Morphing lebih
+  lama → `--head <detik>`; klip cadangan Flow/RunningHub di proyek Muse → `--head 0`. Lihat frame awal tiap klip Muse
+  sebelum `add`; jangan pernah pakai frame awal Muse di edit, juga di luar engine ini (B-roll, library, Premiere).
 - `node tools/musafo.mjs add <slug> clip <clipId> <file>`: MP4 dinormalisasi (1080×1920 30 fps, audio dibuang dan dicek),
   disimpan di `assets/clips/<clipId>.mp4`, lalu dipotong per shot ke `assets/footage/<shotId>.mp4`. Waktu cut rencana
   diskalakan ke panjang asli lalu ditempel ke scene change terdekat (±1,5 s); cut yang tidak terdeteksi memakai waktu
