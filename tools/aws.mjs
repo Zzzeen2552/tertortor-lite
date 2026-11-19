@@ -295,6 +295,13 @@ export function build(slug, { pass = "full" } = {}) {
       if (s.line) parts.push(`<div class="mkline" id="${id}-line" style="top:${Y0 + H0 + 46}px">${thEn("", `${id}-lt`, s.line)}</div>`);
       const names = s.names ?? [];
       if (names.length) parts.push(`<div class="mkp" id="${id}-p" style="top:${Y0 + H0 + (s.line ? 190 : 70)}px">${names.map((x, q) => `<span id="${id}-p${q}">${esc(x)}</span>`).join("")}</div>`);
+      // logoStrip (user 2026-11-19): one partner lock-up image under the line, in place of names
+      const ls = s.logoStrip;
+      if (ls) {
+        // full-width row, centred by text-align (a translate on the img itself is overwritten by GSAP's transform)
+        parts.push(`<div class="mkls" id="${id}-ls" style="top:${Y0 + H0 + (s.line ? 190 : 70)}px"><img src="${esc(ls.src)}" alt="" style="height:${ls.h ?? 84}px"></div>`);
+        tl.push(`T.fromTo("#${id}-ls", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "expo.out" }, ${r1(start + 0.8)}); T.to("#${id}-ls", { opacity: 0, duration: 0.25, ease: "power2.in" }, ${r1(zAt - 0.25)});`);
+      }
       tl.push(`T.fromTo("#${id}-line", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "expo.out" }, ${r1(start + 0.6)});`);
       if (names.length) {
         tl.push(`T.fromTo("#${id}-p", { opacity: 0 }, { opacity: 1, duration: 0.5 }, ${r1(start + 0.8)});`);
@@ -323,9 +330,10 @@ export function build(slug, { pass = "full" } = {}) {
       const st = keys.map((k, j) => `<div class="stat" id="${id}-st${j}">${numHtml(`${id}-n${j}`, k)}${thEn("lab", `${id}-l${j}`, label(k))}</div>`).join("");
       parts.push(`<div class="viz stats n${keys.length}${s.viz === "cloud" ? " hero" : ""}" id="${id}-viz"${s.vizStyle ? ` style="${esc(s.vizStyle)}"` : ""}>${st}</div>`);
       keys.forEach((k, j) => {
-        const at = start + 0.9 + j * 1.6;
+        // statAt (absolute s): the moment the count lands, so it meets the VO word (user 2026-11-19)
+        const land = s.statAt?.[j], at = land != null ? land - 0.9 : start + 0.9 + j * 1.6;
         tl.push(`T.fromTo("#${id}-st${j}", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "expo.out" }, ${at - 0.2});`);
-        count(`${id}-n${j}`, k, at);
+        count(`${id}-n${j}`, k, at, land != null ? 0.9 : 1.4);
         // fadeAt (user 2026-11-18): { "<stat index>": absolute seconds } = that number fades away while the shot goes on
         const fo = s.fadeAt?.[j]; if (fo != null) tl.push(`T.to("#${id}-st${j}", { opacity: 0, y: -24, filter: "blur(8px)", duration: 0.9, ease: "power2.inOut" }, ${r1(fo)});`);
         sub(at, end, `${enNum(k)} ${label(k).en}`);
@@ -387,9 +395,11 @@ export function build(slug, { pass = "full" } = {}) {
       // screen never fills (user 2026-11-18). Rows get a fixed height so the slide is exact.
       const win = s.window, RH = L.k === "s" ? 110 : L.k === "v" ? 150 : 150, stepT = win ? s.step ?? 1.4 : 0.55;
       parts.push(`<div class="viz funnel${win ? " win" : ""}" id="${id}-viz"${win ? ` style="--rh:${RH}px"` : ""}>${rows.join("")}</div>`);
-      if (win) steps.forEach((_, j) => { if (j < win) return; const at = start + 0.8 + j * stepT; tl.push(`T.to("#${id}-r${j - win}", { opacity: 0, duration: 0.45, ease: "power2.out" }, ${r1(at)}); T.to("#${id}-viz .frow", { y: ${-(j - win + 1) * RH}, duration: 0.6, ease: "expo.inOut" }, ${r1(at)});`); });
+      // stepAt (absolute s): each row comes in on its VO word (user 2026-11-19)
+      const stepAt = (j) => s.stepAt?.[j] ?? start + 0.8 + j * stepT;
+      if (win) steps.forEach((_, j) => { if (j < win) return; const at = stepAt(j); tl.push(`T.to("#${id}-r${j - win}", { opacity: 0, duration: 0.45, ease: "power2.out" }, ${r1(at)}); T.to("#${id}-viz .frow", { y: ${-(j - win + 1) * RH}, duration: 0.6, ease: "expo.inOut" }, ${r1(at)});`); });
       steps.forEach((k, j) => {
-        const at = start + 0.8 + j * stepT;
+        const at = stepAt(j);
         tl.push(`T.fromTo("#${id}-r${j}", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, ${at}); T.fromTo("#${id}-b${j}", { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: "expo.out" }, ${at + 0.1});`);
         count(`${id}-n${j}`, k, at + 0.1, 0.9);
       });
@@ -457,15 +467,61 @@ export function build(slug, { pass = "full" } = {}) {
       // every cell lit by the end, even when fewer clips than finalists
       if (!circ) tl.push(`lit("#${id}-board i", ${r1(end - 1)});`);
       sfx.riser.push(Math.max(0, start - 1.2));
+    } else if (s.kind === "plain") {
+      // footage only, no graphics (user 2026-11-19: a closing illustration over the VO)
+    } else if (s.kind === "banner") {
+      // (user 2026-11-19, ref: AWS blog banners) deep blue to warm gradient, a halftone dot field on the right, the white
+      // aws mark top left, a spaced kicker, a big white headline that changes on the VO (heads[].at, absolute seconds),
+      // a footer line bottom left ("Read the blog ›") and a counted figure bottom right ("In collaboration with")
+      const heads = s.heads ?? [];
+      parts.push(`<div class="bnbg" id="${id}-bg"></div><div class="bnlight" id="${id}-lt"></div><div class="bndots" id="${id}-dots"><i></i><b></b></div>`);
+      if (s.mark) parts.push(`<img class="bnmark" id="${id}-mk" src="${esc(s.mark)}" alt="">`);
+      if (s.kicker) parts.push(`<div class="bnkick" id="${id}-kc">${esc(s.kicker)}</div>`);
+      heads.forEach((h, q) => parts.push(`<div class="bnhead" id="${id}-h${q}"><div class="bnen">${String(h.en ?? "").split("\n").map((l, k) => `<span id="${id}-h${q}l${k}">${esc(l)}</span>`).join("")}</div>${h.th ? `<div class="bnth" id="${id}-h${q}t">${esc(h.th)}</div>` : ""}</div>`));
+      // timeline (user 2026-11-19): keep the banner background but show the old "next stop" text instead of VO headlines:
+      // kicker, the rail with its dated nodes (the highlight), then the prize counted up; nothing follows the VO word by word
+      const tlItems = s.timeline ?? [];
+      if (tlItems.length) {
+        parts.push(`<div class="next bnnext" id="${id}-next" style="top:${Math.round(H * (s.timelineTop ?? 0.27))}px"><div class="nxl"><span>${esc(s.kickerTl?.th ?? "ต่อไป")}</span><i>${esc(s.kickerTl?.en ?? "Next")}</i></div><div class="rail"><div class="railln" id="${id}-rl"></div>${tlItems.map((x, q) => `<div class="node" id="${id}-nd${q}"><span class="dot"></span><div class="nd-date">${esc(x.date?.th ?? "")}</div><div class="nd-th">${esc(x.th)}</div><div class="nd-en">${esc([x.en, x.date?.en].filter(Boolean).join(" · "))}</div></div>`).join("")}</div></div>`);
+        tl.push(`T.fromTo("#${id}-next", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, ${start + 0.3}); T.fromTo("#${id}-rl", { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: "power2.inOut" }, ${start + 0.6});`);
+        tlItems.forEach((x, q) => { const at = start + 0.8 + q * 0.9; tl.push(`T.fromTo("#${id}-nd${q}", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.8)" }, ${at});`); sfx.pop.push(at + 0.05); });
+        sub(start + 0.6, start + 4.6, `Next: ${tlItems.map((x) => [x.en, x.date?.en].filter(Boolean).join(" ")).join(" → ")}`);
+        if (s.prize) {
+          const pAt = start + 0.8 + tlItems.length * 0.9 + 0.3;
+          parts.push(`<div class="prize" id="${id}-pz">${numHtml(`${id}-pn`, s.prize)}${thEn("lab", `${id}-pl`, label(s.prize))}</div>`);
+          tl.push(`T.fromTo("#${id}-pz", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.6, ease: "expo.out" }, ${pAt - 0.1});`);
+          count(`${id}-pn`, s.prize, pAt, 1.5);
+        }
+      }
+      if (s.footer) parts.push(`<div class="bnfoot" id="${id}-ft">${esc(s.footer)} <b>›</b></div>`);
+      if (s.prize && !tlItems.length) parts.push(`<div class="bnprize" id="${id}-pz"><span>${esc(s.prizeLabel ?? label(s.prize).en)}</span>${numHtml(`${id}-pn`, s.prize)}</div>`);
+      tl.push(`T.fromTo("#${id}-bg", { scale: 1.08 }, { scale: 1, duration: ${r1(dur)}, ease: "none" }, ${start});`);
+      tl.push(`T.fromTo("#${id}-dots", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "expo.out" }, ${start + 0.1}); T.fromTo("#${id}-dots", { x: 0 }, { x: -60, duration: ${r1(dur)}, ease: "none" }, ${start});`);
+      tl.push(`T.fromTo("#${id}-lt", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 2.2, ease: "power2.out" }, ${start});`);
+      if (s.mark) tl.push(`T.fromTo("#${id}-mk", { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, ${start + 0.2});`);
+      if (s.kicker) tl.push(`T.fromTo("#${id}-kc", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, ${start + 0.3});`);
+      heads.forEach((h, q) => {
+        const at = h.at ?? start + 0.4, nx = heads[q + 1]?.at, n = String(h.en ?? "").split("\n").length;
+        tl.push(`T.fromTo("#${id}-h${q} .bnen span", { y: 70, opacity: 0, filter: "blur(12px)" }, { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "expo.out", stagger: 0.12 }, ${r1(at)});`);
+        if (h.th) tl.push(`T.fromTo("#${id}-h${q}t", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "expo.out" }, ${r1(at + 0.2 + n * 0.12)});`);
+        if (nx != null) tl.push(`T.to("#${id}-h${q}", { y: -50, opacity: 0, filter: "blur(10px)", duration: 0.4, ease: "power2.in" }, ${r1(nx - 0.4)});`);
+        if (q) sfx.pop.push(at);
+      });
+      if (s.footer) tl.push(`T.fromTo("#${id}-ft", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, ${start + (s.footerIn ?? 1.2)});`);
+      if (s.prize && !tlItems.length) { const pAt = start + (s.prizeIn ?? 1.6); tl.push(`T.fromTo("#${id}-pz", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, ${pAt - 0.2});`); count(`${id}-pn`, s.prize, pAt, 1.4); }
+      sfx.hit.push(start);
     } else if (s.kind === "end") {
       // what comes next: two dates on a line, the prize counted up, then the logo card
       const tlItems = s.timeline ?? [];
       parts.push(`<div class="endbg" id="${id}-bg"></div>`);
-      parts.push(`<div class="next" id="${id}-next"><div class="nxl"><span>${esc(s.kicker?.th ?? "ต่อไป")}</span><i>${esc(s.kicker?.en ?? "Next")}</i></div><div class="rail"><div class="railln" id="${id}-rl"></div>${tlItems.map((x, q) => `<div class="node" id="${id}-nd${q}"><span class="dot"></span><div class="nd-date">${esc(x.date?.th ?? "")}</div><div class="nd-th">${esc(x.th)}</div><div class="nd-en">${esc([x.en, x.date?.en].filter(Boolean).join(" · "))}</div></div>`).join("")}</div></div>`);
-      tl.push(`T.fromTo("#${id}-bg", { opacity: 0 }, { opacity: 1, duration: 0.5 }, ${start}); T.fromTo("#${id}-next", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, ${start + 0.2}); T.fromTo("#${id}-rl", { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: "power2.inOut" }, ${start + 0.5});`);
+      const hasNext = tlItems.length > 0 || !!s.kicker;
+      if (hasNext) parts.push(`<div class="next" id="${id}-next"><div class="nxl"><span>${esc(s.kicker?.th ?? "ต่อไป")}</span><i>${esc(s.kicker?.en ?? "Next")}</i></div><div class="rail"><div class="railln" id="${id}-rl"></div>${tlItems.map((x, q) => `<div class="node" id="${id}-nd${q}"><span class="dot"></span><div class="nd-date">${esc(x.date?.th ?? "")}</div><div class="nd-th">${esc(x.th)}</div><div class="nd-en">${esc([x.en, x.date?.en].filter(Boolean).join(" · "))}</div></div>`).join("")}</div></div>`);
+      if (!hasNext) tl.push(`T.fromTo("#${id}-bg", { opacity: 0 }, { opacity: 1, duration: 0.5 }, ${start});`);
+      if (hasNext) tl.push(`T.fromTo("#${id}-bg", { opacity: 0 }, { opacity: 1, duration: 0.5 }, ${start}); T.fromTo("#${id}-next", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, ${start + 0.2}); T.fromTo("#${id}-rl", { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: "power2.inOut" }, ${start + 0.5});`);
       tlItems.forEach((x, q) => { const at = start + 0.6 + q * 0.9; tl.push(`T.fromTo("#${id}-nd${q}", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.8)" }, ${at});`); sfx.pop.push(at + 0.05); });
-      sub(start + 0.6, start + 4.6, `Next: ${tlItems.map((x) => [x.en, x.date?.en].filter(Boolean).join(" ")).join(" → ")}`);
-      const logoAt = start + Math.max(4, dur - 4);
+      if (hasNext) sub(start + 0.6, start + 4.6, `Next: ${tlItems.map((x) => [x.en, x.date?.en].filter(Boolean).join(" ")).join(" → ")}`);
+      // logoIn (s from the scene start) brings the logo card in on a VO word instead of the last 4 s
+      const logoAt = start + (s.logoIn ?? Math.max(4, dur - 4));
       if (s.prize) {
         const pAt = start + 0.6 + tlItems.length * 0.9 + 0.3;
         parts.push(`<div class="prize" id="${id}-pz">${numHtml(`${id}-pn`, s.prize)}${thEn("lab", `${id}-pl`, label(s.prize))}</div>`);
@@ -473,7 +529,8 @@ export function build(slug, { pass = "full" } = {}) {
         count(`${id}-pn`, s.prize, pAt, 1.5);
         sub(pAt, logoAt, `${label(s.prize).en} ${enNum(s.prize)}`);
       }
-      tl.push(`T.to(["#${id}-next", "#${id}-pz"], { opacity: 0, y: -30, duration: 0.5, ease: "power2.in" }, ${logoAt - 0.5});`);
+      const outs = [hasNext && `#${id}-next`, s.prize && `#${id}-pz`].filter(Boolean);
+      if (outs.length) tl.push(`T.to(${JSON.stringify(outs)}, { opacity: 0, y: -30, duration: 0.5, ease: "power2.in" }, ${logoAt - 0.5});`);
       // logo card: the main event logo big, partners in one row, "Powered by AWS" set apart (lock-up rules come from the partners)
       const logos = s.logos ?? [];
       const logoHtml = (l, cls, lid) => {
@@ -482,6 +539,14 @@ export function build(slug, { pass = "full" } = {}) {
         return `<div class="${cls} ph" id="${lid}"><span>${esc(l.name ?? "logo")}</span></div>`;
       };
       const [main, ...partners] = logos;
+      // lockup (user 2026-11-19): the partners + "Powered by AWS" as one supplied image
+      if (s.lockup) {
+        parts.push(`<div class="logos lk" id="${id}-logos" style="gap:${s.lockup.gap ?? 80}px;--lkw:${s.lockup.mainW ?? Math.round(W * 0.52)}px">${main ? logoHtml(main, "lg main", `${id}-lg0`) : ""}${s.tagline ? thEn("blk tagline", `${id}-tag`, s.tagline) : ""}<img class="lockup" id="${id}-lk" src="${esc(s.lockup.src)}" alt="" style="height:${s.lockup.h ?? 300}px"></div>`);
+        tl.push(`T.fromTo("#${id}-lg0", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.7, ease: "expo.out" }, ${logoAt}); T.fromTo("#${id}-lk", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, ${logoAt + 0.5});`);
+        if (s.tagline) tl.push(`T.fromTo("#${id}-tag", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, ${logoAt + 0.3});`);
+        sfx.hit.push(logoAt);
+        sub(logoAt, end, logos.map((l) => l.name).filter(Boolean).join(" · ") + (s.powered ? ` · ${s.powered.label ?? "Powered by"} ${s.powered.name ?? ""}` : ""));
+      } else {
       parts.push(`<div class="logos${s.logoPanel ? " panel" : ""}${s.logoPanel === "clear" ? " clear" : ""}" id="${id}-logos">${main ? logoHtml(main, "lg main", `${id}-lg0`) : ""}${s.tagline ? thEn("blk tagline", `${id}-tag`, s.tagline) : ""}<div class="lrow">${partners.map((l, q) => logoHtml(l, "lg", `${id}-lg${q + 1}`)).join("")}</div>${s.powered ? `<div class="pw"><span>${esc(s.powered.label ?? "Powered by")}</span>${logoHtml(s.powered, "lg pwl", `${id}-pw`)}</div>` : ""}</div>`);
       tl.push(`T.fromTo("#${id}-lg0", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.7, ease: "expo.out" }, ${logoAt}); T.fromTo("#${id}-logos .lrow .lg", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.1 }, ${logoAt + 0.5});`);
       if (s.logoPanel) tl.push(`T.fromTo("#${id}-logos .lrow", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, ${logoAt + 0.4});`);
@@ -489,7 +554,8 @@ export function build(slug, { pass = "full" } = {}) {
       if (s.powered) tl.push(`T.fromTo("#${id}-logos .pw", { opacity: 0 }, { opacity: 1, duration: 0.5 }, ${logoAt + 0.6 + partners.length * 0.1});`);
       sfx.hit.push(logoAt);
       sub(logoAt, end, logos.map((l) => l.name).filter(Boolean).join(" · ") + (s.powered ? ` · ${s.powered.label ?? "Powered by"} ${s.powered.name ?? ""}` : ""));
-    } else die(`${id}: kind "${s.kind}" tidak dikenal (photowall|maskopen|triptych|open|stat|funnel|statement|burst|montage|end)`);
+      }
+    } else die(`${id}: kind "${s.kind}" tidak dikenal (photowall|maskopen|triptych|open|stat|funnel|statement|burst|montage|plain|banner|end)`);
 
     if (["stat", "funnel"].includes(s.kind) && (aws.source?.th || aws.source?.en)) parts.push(`<div class="src" id="${id}-src">${esc([aws.source.th, aws.source.en].filter(Boolean).join(" · "))}</div>`);
     dom.push(`<section class="scene" id="${id}">\n${parts.join("\n")}\n</section>`);
@@ -548,6 +614,9 @@ export function build(slug, { pass = "full" } = {}) {
       -webkit-mask-composite: xor; mask-composite: exclude; }
     .mkw { background: #fff; clip-path: inset(0% 100% 0% 0%); -webkit-mask-size: var(--mw) auto; mask-size: var(--mw) auto; -webkit-mask-position: var(--mx) var(--my); mask-position: var(--mx) var(--my); }
     .mkline { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; }
+    .mkls { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; }
+    .mkls img { display: inline-block; width: auto; vertical-align: top; }
+    .logos .lockup { width: auto; max-width: ${W - 2 * L.pad}px; object-fit: contain; opacity: 0; }
     .mkline .th { font: 700 ${Math.round(Math.min(W, H) * 0.05)}px/1.15 var(--font-display); color: #fff; }
     .mkline .en { font: 400 ${Math.round(Math.min(W, H) * 0.024)}px/1.3 var(--font-body); color: rgba(255,255,255,.75); margin-top: 6px; }
     .mkp { position: absolute; left: 0; right: 0; display: flex; justify-content: center; gap: ${Math.round(W * 0.03)}px; opacity: 0;
@@ -624,6 +693,24 @@ export function build(slug, { pass = "full" } = {}) {
     .tag { position: absolute; left: ${L.blk.left}px; ${L.k === "h" ? `bottom: ${L.blk.bottom + 230}px;` : L.k === "v" ? "top: 560px;" : "top: 360px;"} display: inline-flex; align-items: baseline; gap: 12px; padding: 12px 22px; border-radius: 10px; background: var(--accent); opacity: 0; }
     .tag b { font: 700 ${Math.round(L.en * 1.15)}px/1 var(--font-display); color: var(--on-accent); }
     .tag i { font: 300 ${Math.max(28, Math.round(L.en * 0.75))}px/1 var(--font-body); font-style: normal; color: var(--on-accent); opacity: .8; }
+    .bnbg { position: absolute; inset: 0; background: radial-gradient(70% 90% at 100% 100%, rgba(255,153,0,.85) 0%, rgba(255,153,0,0) 60%), radial-gradient(60% 70% at 100% 0%, rgba(214,196,170,.75) 0%, rgba(214,196,170,0) 65%), linear-gradient(100deg, #061A6B 0%, #0A2FB0 34%, #1F63D6 58%, #4E8FE0 74%, #C9B48E 92%); transform-origin: 20% 50%; }
+    .bnlight { position: absolute; inset: 0; background: linear-gradient(118deg, transparent 52%, rgba(255,255,255,.10) 58%, transparent 66%); mix-blend-mode: screen; }
+    .bndots { position: absolute; top: 0; bottom: 0; right: -60px; width: ${Math.round(W * 0.55)}px; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 45%); mask-image: linear-gradient(90deg, transparent 0%, #000 45%); }
+    .bndots i, .bndots b { position: absolute; inset: 0; }
+    .bndots i { background: radial-gradient(circle, rgba(255,255,255,.55) 0 3px, transparent 3.6px) 0 0 / 26px 26px; opacity: .55; }
+    .bndots b { background: radial-gradient(circle, transparent 0 6px, rgba(255,255,255,.45) 6.5px 7.6px, transparent 8.2px) 13px 13px / 52px 52px; opacity: .5; }
+    .bnmark { position: absolute; left: ${L.pad}px; top: ${Math.round(H * 0.075)}px; height: ${Math.round(H * 0.09)}px; width: auto; opacity: 0; }
+    .bnkick { position: absolute; left: ${L.pad}px; top: ${Math.round(H * 0.26)}px; font: 700 ${Math.max(28, Math.round(L.en * 0.95))}px/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.92); opacity: 0; }
+    .bnhead { position: absolute; left: ${L.pad}px; top: ${Math.round(H * 0.26) + 64}px; max-width: ${Math.round(W * 0.62)}px; }
+    .bnen span { display: block; font: 700 ${Math.round(L.th * 1.35)}px/1.06 var(--font-display); color: #fff; letter-spacing: -.01em; opacity: 0; }
+    .bnth { margin-top: 22px; font: 500 ${Math.round(L.en * 1.25)}px/1.3 var(--font-body); color: rgba(255,255,255,.85); opacity: 0; }
+    .bnnext .railln { background: rgba(255,255,255,.55); }
+    .bnnext .nd-date { color: #fff; } .bnnext .nd-th { color: #fff; }
+    .bnfoot { position: absolute; left: ${L.pad}px; bottom: ${Math.round(H * 0.125)}px; font: 600 ${Math.max(28, Math.round(L.en * 1.05))}px/1.2 var(--font-body); color: #fff; opacity: 0; }
+    .bnfoot b { font-weight: 700; }
+    .bnprize { position: absolute; right: ${L.pad}px; bottom: ${Math.round(H * 0.115)}px; text-align: right; color: #fff; opacity: 0; }
+    .bnprize > span { display: block; font: 500 ${Math.max(28, Math.round(L.en * 0.85))}px/1.2 var(--font-body); color: rgba(255,255,255,.9); margin-bottom: 6px; }
+    .bnprize .num { font-size: ${Math.round(L.num * 0.42)}px; }
     .endbg { position: absolute; inset: 0; background: radial-gradient(ellipse at 85% 95%, #5A0F4A 0%, transparent 55%), linear-gradient(135deg, #141B6B 0%, #2A1460 55%, #3A0F4E 100%); }
     .next { position: absolute; left: ${L.pad}px; right: ${L.pad}px; top: ${L.k === "h" ? 170 : L.k === "v" ? 320 : 120}px; }
     .nxl { font: 700 ${Math.round(L.lab * 1.1)}px/1 var(--font-display); color: var(--accent); }
@@ -642,6 +729,7 @@ export function build(slug, { pass = "full" } = {}) {
     .lg img { max-height: 100%; max-width: ${L.k === "h" ? 260 : 220}px; object-fit: contain; }
     .lg.main { height: ${L.k === "h" ? 200 : 220}px; }
     .lg.main img { max-width: ${L.k === "h" ? 640 : 760}px; }
+    .logos.lk .lg.main { height: auto; } .logos.lk .lg.main img { width: var(--lkw); max-width: none; height: auto; max-height: none; }
     .lg.ph { border: 2px dashed var(--line); border-radius: 12px; padding: 0 24px; }
     .lg.ph span { font: 500 ${Math.max(28, Math.round(L.en * 0.85))}px/1.1 var(--font-mono); color: var(--muted); text-align: center; }
     .lg.main.ph span { font-size: ${L.en * 1.6}px; color: var(--ink); }
@@ -741,6 +829,7 @@ ${ftg.join("\n")}
   <div id="shade"></div>
 ${dom.join("\n")}
   <div id="flash"></div>
+${aws.corner ? `  <img id="corner" src="${esc(aws.corner.src)}" alt="" style="position:absolute;top:${L.hud + 4}px;right:${L.pad}px;height:${aws.corner.h ?? 40}px;width:auto;opacity:0">` : ""}
 ${aws.hud === false ? "" : `  <div id="hud"><span class="cn c1"></span><span class="cn c2"></span><span class="cn c3"></span><span class="cn c4"></span>
     <div class="tl"><i></i>${esc(String(aws.hudLabel ?? `${plain(aws.title ?? "")} / RECAP`).toUpperCase())}${dummy.length ? `<b class="dummy">ANGKA SEMENTARA · DUMMY DATA</b>` : ""}</div><div class="tr" id="hud-tc">00:00:00:00</div>
     <div class="bl">${hudSecs.join("")}</div><div class="br"><b id="hud-pb"></b></div></div>`}
@@ -770,6 +859,7 @@ ${aws.hud === false ? "" : `  <div id="hud"><span class="cn c1"></span><span cla
     // a warm light leak on every cut
     const flash = (at) => { T.fromTo("#flash", { opacity: 0 }, { opacity: 0.55, duration: 0.08, ease: "none", immediateRender: false }, at - 0.04); T.to("#flash", { opacity: 0, duration: 0.35, ease: "power2.out" }, at + 0.04); };
 ${js.join("\n")}
+${(aws.corner?.at ?? []).map(([a, b]) => `    T.fromTo("#corner", { opacity: 0, x: 12 }, { opacity: 0.9, x: 0, duration: 0.4, ease: "expo.out", immediateRender: false }, ${a}); T.to("#corner", { opacity: 0, duration: 0.3, ease: "power2.in" }, ${b - 0.3});`).join("\n")}
 ${aws.hud === false ? "" : `    // HUD: running timecode and the progress line over the whole film, one section label at a time
     { const tc = document.getElementById("hud-tc"), o = { v: 0 }, p2 = (n) => String(n).padStart(2, "0");
       T.fromTo(o, { v: 0 }, { v: ${total}, duration: ${total}, ease: "none", onUpdate: () => { const fr = Math.round(o.v * 30); tc.textContent = "00:" + p2(Math.floor(fr / 1800)) + ":" + p2(Math.floor(fr / 30) % 60) + ":" + p2(fr % 30); } }, 0);
@@ -831,10 +921,11 @@ ${aws.hud === false ? "" : `    // HUD: running timecode and the progress line o
       lines.push("assets/music.wav\tmusik sementara, dikomposisi dari matematika oleh tools/anim-music.mjs (seeded), bebas lisensi; ganti dengan lagu berlisensi (aws.json → music.track)");
     }
   }
-  const VOL = { whoosh: 0.14, hit: 0.32, tick: 0.18, pop: 0.2, riser: 0.22 };
+  // aws.json → sfxVol overrides per effect; 0 drops it (user 2026-11-19: no whoosh, louder music instead)
+  const VOL = { whoosh: 0.14, hit: 0.32, tick: 0.18, pop: 0.2, riser: 0.22, ...(aws.sfxVol ?? {}) };
   let k = 0, lane = 12;
   for (const [name, times] of Object.entries(sfx)) {
-    if (!times.length) continue;
+    if (!times.length || !VOL[name]) continue;
     copyFileSync(join(ROOT, "library", "sfx", `${name}.wav`), join(dir, "assets", "sfx", `${name}.wav`));
     const len = Math.floor(probeDuration(join(dir, "assets", "sfx", `${name}.wav`)) * 1000) / 1000;
     // one pair of lanes per effect, alternating, so no two sounds overlap on a lane
