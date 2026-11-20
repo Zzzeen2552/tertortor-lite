@@ -45,7 +45,8 @@ dari server → `--ar`), kartu tanpa thumbnail memakai `poster.jpg` kecil (bukan
 per folder (berubah = dihitung ulang) dan pindah menu menggambar dari daftar yang sudah dimuat lalu menyegarkan di belakang.
 **Layout satu halaman** (user 2026-11-20): tanpa sidebar. Baris atas = logo + tombol "Buat video" (dropdown: tipe video →
 preset/channel/product, plus link "Library" ke `#/s/<kategori>/<sub>`); ikon Sampah/tema di kanan. Editor video berupa kartu
-3 kolom: Naskah (plus tab tahap lain), Preview video, Thumbnail + Publikasi Tebar; baris bawah = HyperFrames Studio proyek
+3 kolom: Naskah (plus tab tahap lain), Preview video, Thumbnail + Publikasi Tebar; di bawahnya kartu Suara, Beat, Aset
+(`CARD_TABS`); baris paling bawah = HyperFrames Studio proyek
 itu dalam iframe (`/api/videos/<slug>/hf-preview`, GET status / POST nyalakan `npx hyperframes preview --background`).
 
 **Video referensi** dianalisis `npm run ref` (yt-dlp, shot, gerak, transkrip). Claude menulis `analysis.md` dan 2-3 konsep

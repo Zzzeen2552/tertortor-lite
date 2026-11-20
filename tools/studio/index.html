@@ -526,15 +526,21 @@ a.preset:hover{border-color:var(--rule)}
 #thumbBody > .pad > div:first-child > div:first-child{max-width:240px}
 .teb-acts{display:flex;flex-direction:column;gap:8px;padding:14px}
 .teb-acts .btn{justify-content:center}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px;align-items:start}
+.trio.duo{grid-template-columns:repeat(2,minmax(0,1fr))}
+.trio .ocard-b{max-height:640px;overflow:auto}
 .c-hf{margin-top:14px}
 .c-hf .hf-body{padding:14px}
 .c-hf iframe{display:block;width:100%;height:min(78vh,820px);border:1px solid var(--rule);background:#0b0b0f}
 @media (max-width:1180px){
   .one,.one.cine{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .c-script{grid-column:1/-1;position:static;max-height:none}
+  .trio{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .trio > .ocard:last-child:nth-child(odd){grid-column:1/-1}
 }
 @media (max-width:720px){
   .one,.one.cine{grid-template-columns:minmax(0,1fr)}
+  .trio,.trio.duo{grid-template-columns:minmax(0,1fr)}
+  .trio .ocard-b{max-height:none}
   .top{flex-wrap:wrap}
   .top .brand{padding:10px 14px} .top .brand b{font-size:19px} .top .brand small{display:none}
   .mk{padding:0 10px} .top-r{padding:0 10px;gap:6px}
@@ -1692,16 +1698,13 @@ async function viewEditor(slug, startTab) {
           ${v.type === "berakitkehulu" || v.musafo.charRefs.length || v.musafo.characters.length ? `<button data-t="tokoh">Tokoh <span>${v.musafo.characters.length ? v.musafo.characters.filter((c) => c.sheetUrl).length + "/" + v.musafo.characters.length : v.musafo.charRefs.length || "–"}</span></button>` : ""}
           <button data-t="naskah">Naskah ${v.approval.approved && v.scriptState !== "old" ? "<span>✓</span>" : ""}</button>
           <button data-t="shot">Shot <span>${v.musafo.shots.length}</span></button>
-          <button data-t="suara">Suara <span>${v.voice.seconds ? fmt(v.voice.seconds) : "–"}</span></button>
-          <button data-t="beat">Beat <span>${v.beats.length}</span></button>` : `<button data-t="brief">Brief</button>
+` : `<button data-t="brief">Brief</button>
           ${v.aws ? `<button data-t="aws">AWS <span>${v.awsData?.tbc.length ? v.awsData.tbc.length + " TBC" : "✓"}</span></button>` : ""}
           ${v.clone ? `<button data-t="clone">Clone <span>${v.cloneData?.shots.length || "–"}${v.cloneData?.approval?.approved ? " ✓" : ""}</span></button>` : ""}
           ${hasRef ? `<button data-t="konsep">Konsep <span>${v.concept ? esc(v.concept.id) : v.concepts.concepts.length || "–"}</span></button>` : ""}
           ${isA ? "" : `<button data-t="naskah">Naskah</button>`}
           ${isA || v.oneTake ? "" : `<button data-t="flow">Prompt Flow <span>${v.flowCheck.shots.length}</span></button>`}
-          ${isA ? "" : `<button data-t="suara">Suara <span>${v.voice.seconds ? fmt(v.voice.seconds) : "–"}</span></button>`}
-          <button data-t="beat"${v.clone || v.aws ? "" : ' class="on"'}>Beat <span>${v.beats.length}</span></button>`}
-          <button data-t="aset">Aset <span>${v.keyvisuals.length + v.screens.length + v.footage.length + v.reference.length}</span></button>
+`}
         </div>
         <div id="tabBody"></div>
       </div>
@@ -1712,6 +1715,11 @@ async function viewEditor(slug, startTab) {
             ${v.sub ? `<a class="btn sm" href="#/s/${v.category}/${esc(v.sub)}">Atur akun Tebar ${esc(subOf(v)?.label ?? v.sub)}</a>` : ""}
             <span class="muted" style="font-size:12px">${v.video ? "Caption ditulis dan akun dipilih di jendela Kirim ke Tebar." : "Aktif setelah video selesai dirender."}</span></div></div>
       </div>
+    </div>
+    <div class="trio${isA ? " duo" : ""}">
+      ${isA ? "" : `<div class="ocard" id="suaraCard"><div class="ocard-h">Suara<small>${v.voice.seconds ? fmt(v.voice.seconds) + (v.voice.draft ? " · draft" : "") : "belum ada"}</small></div><div class="ocard-b" id="suaraBody"></div></div>`}
+      <div class="ocard" id="beatCard"><div class="ocard-h">Beat<small>${v.beats.length ? v.beats.length + " beat" : "belum ada"}</small></div><div class="ocard-b" id="beatBody"></div></div>
+      <div class="ocard" id="asetCard"><div class="ocard-h">Aset<small>${v.keyvisuals.length + v.screens.length + v.footage.length + v.reference.length} file</small></div><div class="ocard-b" id="asetBody"></div></div>
     </div>
     <div class="ocard c-hf" id="hfCard"><div class="ocard-h">Preview HyperFrames<small id="hfState">memeriksa…</small></div><div class="hf-body" id="hfBody"></div></div>`;
   let sel = 0;
@@ -2088,10 +2096,16 @@ async function viewEditor(slug, startTab) {
   };
   const openTab = (t) => {
     // layout satu halaman: Thumbnail selalu tampil di kartunya sendiri (kolom 3), tab lain di kartu Naskah (kolom 1)
+    // Suara, Beat, dan Aset juga punya kartu sendiri (user 2026-11-20), di baris di bawah tiga kolom
     if (t === "thumb") { $("#thumbBody").innerHTML = body.thumb(); bindThumb(); $("#thumbBody").querySelectorAll("[data-copy]").forEach((b) => (b.onclick = () => toast(copyText(b.dataset.copy) ? "Tersalin" : "Browser menolak menyalin. Salin manual."))); return; }
-    document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.t === t));
-    document.querySelector(".one")?.classList.toggle("wide", t === "draft" || (t === "storyline" && !!v.musafo?.sourceText));
-    $("#tabBody").innerHTML = body[t]();
+    const card = CARD_TABS[t] ? $(CARD_TABS[t]) : null;
+    if (CARD_TABS[t] && !card) return;
+    const host = card || $("#tabBody");
+    if (!card) {
+      document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.t === t));
+      document.querySelector(".one")?.classList.toggle("wide", t === "draft" || (t === "storyline" && !!v.musafo?.sourceText));
+    }
+    host.innerHTML = body[t]();
     document.querySelectorAll(".blist li").forEach((li) => (li.onclick = () => showBeat(+li.dataset.i, true)));
     // BRI-style ad: beat durations (retime.mjs on the laptop, then optionally a fresh render)
     document.querySelectorAll(".kvdur").forEach((x) => {
@@ -2138,8 +2152,8 @@ async function viewEditor(slug, startTab) {
         };
       }
     }
-    $("#tabBody").querySelectorAll("[data-copy]").forEach((b) => (b.onclick = () => toast(copyText(b.dataset.copy) ? "Prompt tersalin" : "Browser menolak menyalin. Salin manual.")));
-    document.querySelectorAll("[data-goto]").forEach((b) => (b.onclick = () => openTab(b.dataset.goto)));
+    host.querySelectorAll("[data-copy]").forEach((b) => (b.onclick = () => toast(copyText(b.dataset.copy) ? "Prompt tersalin" : "Browser menolak menyalin. Salin manual.")));
+    document.querySelectorAll("[data-goto]").forEach((b) => (b.onclick = () => { openTab(b.dataset.goto); if (CARD_TABS[b.dataset.goto]) $(CARD_TABS[b.dataset.goto])?.closest(".ocard")?.scrollIntoView({ behavior: "smooth", block: "start" }); }));
     document.querySelectorAll("[data-pick]").forEach((b) => (b.onclick = () => { $("#vSpeaker").value = b.dataset.pick; $("#vSpeaker").focus(); }));
     const vs = $("#vSave");
     if (vs) vs.onclick = async () => {
@@ -2289,6 +2303,7 @@ async function viewEditor(slug, startTab) {
     // script editor
     if ($("#sEdit")) $("#sEdit").onclick = () => { editing = true; openTab("naskah"); };
     if ($("#sCancel")) $("#sCancel").onclick = () => { editing = false; openTab("naskah"); };
+    if (card) { if (t === "beat") showBeat(sel); return; }
     if (t === "naskah" && editing) $("#tabBody").onclick = (e) => {
       const del = e.target.closest("[data-del]"), add = e.target.closest("[data-add]");
       if (del) { const rows = del.closest("[data-rows]"); if (rows.querySelectorAll(".lrow").length > 1) del.closest(".lrow").remove(); else toast("Minimal satu kalimat"); }
@@ -2683,14 +2698,17 @@ async function viewEditor(slug, startTab) {
       box.remove(); if (r.ok) { toast("Preset: " + id); await loadVideos(); viewEditor(slug); }
     };
   };
-  const firstTab = v.aws ? "aws" : v.clone ? "clone" : isM ? (v.waiting === "Setujui draft" || v.musafo.draftApproval.needed && !v.musafo.draftApproval.approved ? "draft" : v.waiting === "Setujui storyline" || !v.musafo.storylineApproval.approved && !v.musafo.shots.length ? "storyline" : "naskah") : hasRef && !v.concept && v.scriptState === "none" ? "konsep" : isA ? "beat" : "naskah";
-  openTab(startTab && startTab !== "thumb" && body[startTab] ? startTab : firstTab);
-  openTab("thumb");
-  if (startTab === "thumb") $("#thumbBody").scrollIntoView({ block: "start" });
+  const firstTab = v.aws ? "aws" : v.clone ? "clone" : isM ? (v.waiting === "Setujui draft" || v.musafo.draftApproval.needed && !v.musafo.draftApproval.approved ? "draft" : v.waiting === "Setujui storyline" || !v.musafo.storylineApproval.approved && !v.musafo.shots.length ? "storyline" : "naskah") : hasRef && !v.concept && v.scriptState === "none" ? "konsep" : isA ? "brief" : "naskah";
+  openTab(startTab && !CARD_TABS[startTab] && startTab !== "thumb" && body[startTab] ? startTab : firstTab);
+  ["thumb", ...Object.keys(CARD_TABS)].forEach(openTab);
+  const startCard = startTab === "thumb" ? $("#thumbBody") : CARD_TABS[startTab] ? $(CARD_TABS[startTab]) : null;
+  if (startCard) startCard.closest(".ocard").scrollIntoView({ block: "start" });
   hfPreview(slug);
   paintWork(); // banner if Claude is working on this project
 }
 
+// tab editor yang tampil sebagai kartu sendiri, bukan di kartu Naskah (user 2026-11-20)
+const CARD_TABS = { suara: "#suaraBody", beat: "#beatBody", aset: "#asetBody" };
 // Baris bawah editor (user 2026-11-20): HyperFrames Studio dari proyek ini (`npx hyperframes preview`, server lokal)
 // disematkan lewat iframe. GET = status; tombol menyalakannya. Proyek tanpa index.html (mis. iklan AE) tidak punya preview.
 async function hfPreview(slug, start = false) {
