@@ -535,6 +535,41 @@ createServer(async (req, res) => {
       }
       return send(res, 404, { error: "not found" });
     }
+    // API key Gemini (user 2026-11-20, tab "API Gemini" di kartu Suara): ditempel user sendiri, disimpan di .env (gitignored)
+    // dan langsung dipakai proses ini. Hanya dari halaman Studio di laptop ini; kuncinya tidak pernah dikirim balik utuh.
+    if (p === "/api/settings/gemini") {
+      const host = String(req.headers.host || "");
+      if (!/^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host) || (req.headers.origin && new URL(req.headers.origin).host !== host)) return send(res, 403, { error: "Kunci hanya bisa diatur dari Studio di laptop ini (localhost)." });
+      const ENV = join(ROOT, ".env");
+      const envText = () => (existsSync(ENV) ? readFileSync(ENV, "utf8") : "");
+      const writeKey = (v) => {
+        const lines = envText().split(/\r?\n/).filter((l, i, a) => !/^\s*GEMINI_API_KEY\s*=/.test(l) && !(i === a.length - 1 && l === ""));
+        if (v) lines.push(`GEMINI_API_KEY=${v}`);
+        writeFileSync(ENV, lines.join("\n") + "\n");
+        if (v) process.env.GEMINI_API_KEY = v; else delete process.env.GEMINI_API_KEY;
+      };
+      const info = () => { const k = process.env.GEMINI_API_KEY || ""; return { set: !!k, hint: k ? `…${k.slice(-4)}` : "" }; };
+      // one cheap call (list models) to tell the user whether Google accepts the key
+      const test = async (k) => {
+        try {
+          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1&key=${encodeURIComponent(k)}`, { signal: AbortSignal.timeout(15e3) });
+          if (r.ok) return { ok: true };
+          const j = await r.json().catch(() => ({}));
+          return { ok: false, error: j.error?.message || `Google menolak kunci ini (HTTP ${r.status}).` };
+        } catch (e) { return { ok: false, error: `Tidak bisa menghubungi Google untuk mengetes kunci: ${e.message}` }; }
+      };
+      if (req.method === "GET") return send(res, 200, info());
+      if (req.method === "DELETE") { writeKey(""); return send(res, 200, info()); }
+      if (req.method === "POST") {
+        const body = JSON.parse((await readBody(req)).toString() || "{}");
+        if (body.test) { const k = process.env.GEMINI_API_KEY; return send(res, 200, { ...info(), ...(k ? await test(k) : { ok: false, error: "Belum ada kunci." }) }); }
+        const v = String(body.key ?? "").trim();
+        if (!/^[\x21-\x7e]{20,200}$/.test(v)) return send(res, 400, { error: "API key Gemini tidak terbaca. Tempel utuh tanpa spasi (biasanya diawali AIza)." });
+        writeKey(v);
+        return send(res, 200, { ...info(), ...(await test(v)) });
+      }
+      return send(res, 405, { error: "method" });
+    }
     // what Claude is doing after the user's clicks, with estimates, and whether a Claude session is listening at all
     if (p === "/api/working" && req.method === "GET") return send(res, 200, { claude: claudeWaiting(), items: working() });
     if (p === "/api/videos" && req.method === "GET") {

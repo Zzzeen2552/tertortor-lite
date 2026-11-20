@@ -529,6 +529,9 @@ a.preset:hover{border-color:var(--rule)}
 .trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px;align-items:start}
 .trio.duo{grid-template-columns:repeat(2,minmax(0,1fr))}
 .trio .ocard-b{max-height:640px;overflow:auto}
+.ctabs{padding:0 10px;margin:0;border-bottom:1px solid var(--rule)}
+.ctabs button span{color:var(--accent-text);font-weight:700}
+.ocard-b[hidden]{display:none}
 .c-hf{margin-top:14px}
 .c-hf .hf-body{padding:14px}
 .c-hf iframe{display:block;width:100%;height:min(78vh,820px);border:1px solid var(--rule);background:#0b0b0f}
@@ -1717,7 +1720,7 @@ async function viewEditor(slug, startTab) {
       </div>
     </div>
     <div class="trio${isA ? " duo" : ""}">
-      ${isA ? "" : `<div class="ocard" id="suaraCard"><div class="ocard-h">Suara<small>${v.voice.seconds ? fmt(v.voice.seconds) + (v.voice.draft ? " · draft" : "") : "belum ada"}</small></div><div class="ocard-b" id="suaraBody"></div></div>`}
+      ${isA ? "" : `<div class="ocard" id="suaraCard"><div class="ocard-h">Suara<small>${v.voice.seconds ? fmt(v.voice.seconds) + (v.voice.draft ? " · draft" : "") : "belum ada"}</small></div><div class="tabs ctabs" role="tablist"><button type="button" role="tab" data-ct="suara" class="on" aria-selected="true">Suara</button><button type="button" role="tab" data-ct="gemini" aria-selected="false">API Gemini <span id="gemTabMark"></span></button></div><div class="ocard-b" id="suaraBody"></div><div class="ocard-b" id="geminiBody" hidden></div></div>`}
       <div class="ocard" id="beatCard"><div class="ocard-h">Beat<small>${v.beats.length ? v.beats.length + " beat" : "belum ada"}</small></div><div class="ocard-b" id="beatBody"></div></div>
       <div class="ocard" id="asetCard"><div class="ocard-h">Aset<small>${v.keyvisuals.length + v.screens.length + v.footage.length + v.reference.length} file</small></div><div class="ocard-b" id="asetBody"></div></div>
     </div>
@@ -2704,9 +2707,51 @@ async function viewEditor(slug, startTab) {
   const startCard = startTab === "thumb" ? $("#thumbBody") : CARD_TABS[startTab] ? $(CARD_TABS[startTab]) : null;
   if (startCard) startCard.closest(".ocard").scrollIntoView({ block: "start" });
   hfPreview(slug);
+  if ($("#suaraCard")) {
+    const tabs = $("#suaraCard").querySelectorAll("[data-ct]");
+    tabs.forEach((b) => (b.onclick = () => {
+      tabs.forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-selected", x === b); });
+      $("#suaraBody").hidden = b.dataset.ct !== "suara"; $("#geminiBody").hidden = b.dataset.ct !== "gemini";
+    }));
+    geminiPanel($("#geminiBody"));
+  }
   paintWork(); // banner if Claude is working on this project
 }
 
+// Tab "API Gemini" di kartu Suara (user 2026-11-20): user menempel kuncinya sendiri; server menyimpannya di .env (gitignored)
+// dan mengetesnya ke Google. Kunci tidak pernah ditampilkan balik, hanya 4 karakter terakhir.
+async function geminiPanel(host) {
+  const mark = (st) => { const m = $("#gemTabMark"); if (m) m.textContent = st.set ? "✓" : "!"; };
+  const draw = (st, msg) => {
+    mark(st);
+    host.innerHTML = `<div class="pad">
+      ${st.set ? `<div class="notice ok"><span><b>API key Gemini tersimpan</b> · berakhiran <span class="mono">${esc(st.hint)}</span></span></div>`
+        : `<div class="notice"><span><b>Belum ada API key Gemini.</b> Dipakai untuk suara Gemini TTS, sampel suara, thumbnail, caption posting, dan Library Cerita.</span></div>`}
+      <div class="fld"><label for="gemKey">${st.set ? "Ganti API key" : "API key"}</label>
+        <input type="password" id="gemKey" autocomplete="off" spellcheck="false" placeholder="AIza…" style="font-family:var(--f-mono)"></div>
+      <p class="muted" style="font-size:12.5px;margin:0 0 12px">Buat di <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio → Get API key</a>, lalu tempel di sini. Kunci disimpan di file <span class="mono">.env</span> di laptop ini (tidak ikut git) dan langsung dipakai tanpa restart Studio.</p>
+      <div class="meta-row" style="gap:8px"><button class="btn pri sm" id="gemSave">Simpan</button>${st.set ? `<button class="btn sm" id="gemTest">Tes kunci</button><button class="btn sm" id="gemDel">Hapus</button>` : ""}</div>
+      ${msg ? `<p style="font-size:12.5px;margin:12px 0 0;color:${msg.ok ? "var(--ok)" : "var(--bad)"}">${esc(msg.text)}</p>` : ""}</div>`;
+    const call = async (btn, opts, label) => {
+      const old = btn.textContent; btn.disabled = true; btn.textContent = label;
+      const r = await fetch("/api/settings/gemini", opts).catch(() => null);
+      const j = r ? await r.json().catch(() => ({})) : { error: "Server Studio tidak menjawab." };
+      if (!r?.ok) { btn.disabled = false; btn.textContent = old; return draw(st, { ok: false, text: j.error || "Gagal." }); }
+      draw(j, "ok" in j ? { ok: j.ok, text: j.ok ? "Kunci diterima Google dan siap dipakai." : `Tersimpan, tapi tes gagal: ${j.error}` } : { ok: true, text: j.set ? "" : "API key dihapus dari .env." });
+    };
+    $("#gemSave", host).onclick = () => {
+      const key = $("#gemKey", host).value.trim();
+      if (!key) return $("#gemKey", host).focus();
+      call($("#gemSave", host), { method: "POST", body: JSON.stringify({ key }) }, "Menyimpan & mengetes…");
+    };
+    $("#gemKey", host).onkeydown = (e) => { if (e.key === "Enter") $("#gemSave", host).click(); };
+    if ($("#gemTest", host)) $("#gemTest", host).onclick = () => call($("#gemTest", host), { method: "POST", body: JSON.stringify({ test: true }) }, "Mengetes…");
+    if ($("#gemDel", host)) $("#gemDel", host).onclick = () => { if (confirm("Hapus API key Gemini dari laptop ini?")) call($("#gemDel", host), { method: "DELETE" }, "Menghapus…"); };
+  };
+  const r = await fetch("/api/settings/gemini").catch(() => null);
+  if (!r?.ok) { host.innerHTML = `<div class="pad"><div class="notice"><span>API key hanya bisa diatur dari Studio di laptop ini (http://localhost:4331).</span></div></div>`; return; }
+  draw(await r.json());
+}
 // tab editor yang tampil sebagai kartu sendiri, bukan di kartu Naskah (user 2026-11-20)
 const CARD_TABS = { suara: "#suaraBody", beat: "#beatBody", aset: "#asetBody" };
 // Baris bawah editor (user 2026-11-20): HyperFrames Studio dari proyek ini (`npx hyperframes preview`, server lokal)
