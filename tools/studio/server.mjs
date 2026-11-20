@@ -748,6 +748,24 @@ createServer(async (req, res) => {
       if (url.searchParams.get("later") === "1") emit("characters", up[1]);
       return send(res, 200, { ok: true });
     }
+    // HyperFrames Studio preview (user 2026-11-20, baris bawah layout satu halaman): GET = status, POST = nyalakan.
+    // `npx hyperframes preview <dir> --background --no-open --json`; Studio menyematkan studioUrl-nya dalam iframe.
+    const hfp = p.match(/^\/api\/videos\/([a-z0-9-]+)\/hf-preview$/);
+    if (hfp && (req.method === "GET" || req.method === "POST")) {
+      const d = join(VIDEOS, hfp[1]);
+      if (!existsSync(join(d, "index.html"))) return send(res, 200, { state: "none" });
+      const args = ["hyperframes", "preview", d, ...(req.method === "POST" ? ["--background", "--no-open"] : ["--status"]), "--json"];
+      const out = await new Promise((ok) => {
+        const c = spawn("npx", args, { cwd: ROOT, windowsHide: true, shell: process.platform === "win32" });
+        let s = ""; c.stdout.on("data", (b) => (s += b)); c.on("close", () => ok(s)); c.on("error", () => ok(s));
+        setTimeout(() => c.kill(), 120000);
+      });
+      const line = out.split(/\r?\n/).reverse().find((l) => l.trim().startsWith("{"));
+      let j = null; try { j = JSON.parse(line); } catch {}
+      const r = j?.result;
+      if (r?.ready && r.studioUrl) return send(res, 200, { state: "running", url: r.studioUrl, port: r.port });
+      return send(res, 200, { state: "stopped", error: req.method === "POST" ? (j?.error?.message || "Preview HyperFrames gagal dinyalakan.") : undefined });
+    }
     const ready = p.match(/^\/api\/videos\/([a-z0-9-]+)\/ready$/);
     if (ready && req.method === "POST" && isMusafo(join(VIDEOS, ready[1]))) {
       const d = join(VIDEOS, ready[1]), t = storyType(d), dr = draftApproval(d);

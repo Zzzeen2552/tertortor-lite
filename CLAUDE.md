@@ -43,6 +43,10 @@ bagian = kotak hitam + garis, item besar dengan kotak warna. Token di `:root`, o
 di akhir `<style>` `tools/studio/index.html`; komponen baru ikut token itu. Kartu video mengikuti rasio videonya (`ratio`
 dari server → `--ar`), kartu tanpa thumbnail memakai `poster.jpg` kecil (bukan `<video preload>`). `/api/videos` di-cache
 per folder (berubah = dihitung ulang) dan pindah menu menggambar dari daftar yang sudah dimuat lalu menyegarkan di belakang.
+**Layout satu halaman** (user 2026-11-20): tanpa sidebar. Baris atas = logo + tombol "Buat video" (dropdown: tipe video →
+preset/channel/product, plus link "Library" ke `#/s/<kategori>/<sub>`); ikon Sampah/tema di kanan. Editor video berupa kartu
+3 kolom: Naskah (plus tab tahap lain), Preview video, Thumbnail + Publikasi Tebar; baris bawah = HyperFrames Studio proyek
+itu dalam iframe (`/api/videos/<slug>/hf-preview`, GET status / POST nyalakan `npx hyperframes preview --background`).
 
 **Video referensi** dianalisis `npm run ref` (yt-dlp, shot, gerak, transkrip). Claude menulis `analysis.md` dan 2-3 konsep
 di `concepts.json`; user memilih di tab "Konsep" sebelum naskah. Alurnya di `.claude/skills/video-vertikal/reference.md`.
