@@ -818,6 +818,11 @@ createServer(async (req, res) => {
       emit("cinematic-new", ready[1], { look: JSON.parse(readFileSync(join(VIDEOS, ready[1], "meta.json"), "utf8")).look || "aws" });
       return send(res, 200, { ok: true });
     }
+    // Video Explainer (user 2026-11-22): the brief is in → wake Claude to complete it and write the script (or concepts)
+    if (ready && req.method === "POST" && existsSync(join(VIDEOS, ready[1])) && !isAd(join(VIDEOS, ready[1]))) {
+      emit("explainer-new", ready[1]);
+      return send(res, 200, { ok: true });
+    }
     if (ready && req.method === "POST") {
       if (!isAd(join(VIDEOS, ready[1]))) return send(res, 400, { error: "bukan proyek Advertisement" });
       emit("ad-new", ready[1]);

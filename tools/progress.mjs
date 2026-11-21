@@ -35,7 +35,16 @@ export const PROCESSES = {
   "storyline-approved": { label: "Claude menulis naskah per shot", eta: [5, 12], out: () => "script.md", next: "naskah siap disetujui" },
   "docucine-new": { label: "Claude menulis naskah dari sumber dan idemu", eta: [4, 10], out: () => "script.md", next: "naskah siap kamu edit dan setujui" },
   "beats-approved": { label: "Claude membangun dunia, mengecek still dan gerak kamera, lalu thumbnail", eta: [20, 45], out: () => "compositions/world.html", next: "dunia siap; setujui thumbnail lalu render" },
-  concept: { label: "Claude menulis naskah dari konsep pilihanmu", eta: [5, 10], out: () => "script.md", next: "naskah siap disetujui" },
+  // Video Explainer baru (user 2026-11-22: progres sesudah brief): Studio memanggil /ready → Claude melengkapi brief, lalu
+  // naskah; dengan video referensi Claude berhenti di 2-3 konsep (concepts.json) dan user memilih dulu (event concept)
+  "explainer-new": {
+    label: (d) => (explainerWithRef(d) ? "Claude membaca brief dan video referensi, lalu menyusun 2-3 konsep" : "Claude melengkapi brief dan menulis naskah"),
+    eta: (d) => (explainerWithRef(d) ? [8, 20] : [5, 12]),
+    done: (d, at) => { const f = explainerWithRef(d) ? "concepts.json" : "script.md"; const t = mtime(d, f); return t > at && (f !== "script.md" || realScript(d)) ? t : 0; },
+    steps: (d, at) => explainerNewSteps(d, at),
+    next: (d) => (explainerWithRef(d) ? "konsep siap; pilih satu di tab Konsep" : "naskah siap kamu edit dan setujui"),
+  },
+  concept: { label: "Claude menulis naskah dari konsep pilihanmu", eta: [5, 10], out: () => "script.md", steps: (d, at) => [{ label: "Konsep dipilih", done: 1 }, { label: "Naskah", done: mtime(d, "script.md") > at && realScript(d) ? 1 : 0 }], next: "naskah siap disetujui" },
   "script-approved": {
     // Storytelling (user 2026-11-07): approving the script starts nothing; voice and images wait for the Production button
     skip: (d) => isStory(d),
@@ -83,6 +92,30 @@ function explainerSteps(d) {
     { label: "Lolos check", done: chk && chk >= Math.max(tl, lastScene) ? 1 : 0 },
   ];
 }
+// script.md with real lines (the template has only # notes), same rule as the Studio's explainerStage
+const realScript = (d) => existsSync(join(d, "script.md")) && readFileSync(join(d, "script.md"), "utf8").split(/\r?\n/).filter((l) => l.trim() && !/^\s*[#>]/.test(l)).length > 2;
+const reqOf = (d) => (existsSync(join(d, "request.json")) ? readJSON(join(d, "request.json")) : {});
+const refDir = (d) => join(d, "assets", "reference");
+const refList = (d) => (existsSync(refDir(d)) ? readdirSync(refDir(d)) : []);
+const explainerWithRef = (d) => refList(d).some((f) => /\.(mp4|mov|webm|m4v)$/i.test(f)) || !!reqOf(d).refLink;
+function explainerNewSteps(d, at) {
+  // "Diisi Claude" in brief.md: done once its first field has text after the click
+  const brief = existsSync(join(d, "brief.md")) ? readFileSync(join(d, "brief.md"), "utf8") : "";
+  const briefDone = mtime(d, "brief.md") > at && /\*\*Penonton:\*\*[ \t]*\S/.test(brief) ? 1 : 0;
+  if (explainerWithRef(d)) {
+    const files = refList(d);
+    return [
+      { label: "Brief dilengkapi", done: briefDone },
+      { label: "Video referensi diukur", done: files.some((f) => f.endsWith(".ref.md")) ? 1 : 0 },
+      { label: "Analisis referensi", done: files.includes("analysis.md") ? 1 : 0 },
+      { label: "2-3 konsep", done: mtime(d, "concepts.json") > at ? 1 : 0 },
+    ];
+  }
+  return [
+    { label: "Brief dilengkapi", done: briefDone },
+    { label: "Naskah ditulis", done: mtime(d, "script.md") > at && realScript(d) ? 1 : 0 },
+  ];
+}
 function storySteps(d) {
   const st = productionState(d);
   return [
@@ -94,7 +127,7 @@ function progressOf(type, d, at, eta) {
   const P = PROCESSES[type];
   if (P.steps) {
     let steps;
-    try { steps = P.steps(d); } catch { steps = null; }
+    try { steps = P.steps(d, at); } catch { steps = null; }
     if (steps?.length) {
       const sum = steps.reduce((a, s) => a + s.done, 0);
       const now = steps.find((s) => s.done < 1);

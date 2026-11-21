@@ -1288,12 +1288,12 @@ function viewNew(presetId) {
       go.textContent = "Mengunggah file…";
       const up = (f, kind) => fetch(`/api/videos/${j.slug}/upload?kind=${kind}&name=${encodeURIComponent(f.name)}`, { method: "PUT", body: f });
       await Promise.all([...files.ref.map((f) => up(f, "reference")), ...files.kv.map((f) => up(f, "keyvisuals"))]);
-      // Docucine: files are in, now wake Claude to write the script (event docucine-new)
-      if (preset.oneTake) await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
+      // files are in, now wake Claude (Docucine: docucine-new; Video Explainer: explainer-new, user 2026-11-22)
+      await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      if (preset.oneTake) showWorking(j.slug, true);
-      toast(preset.oneTake ? "Video dibuat. Claude menulis naskahnya." : "Video dibuat. Salin perintahnya ke Claude.");
+      showWorking(j.slug);
+      toast("Video dibuat. Claude menulis naskahnya.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat video"; }
   };
 }
