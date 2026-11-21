@@ -552,7 +552,9 @@ a.preset:hover{border-color:var(--rule)}
 .ctabs button span{color:var(--accent-text);font-weight:700}
 .ocard-b[hidden]{display:none}
 .c-hf{margin-top:14px}
-.c-hf .hf-body{padding:14px}
+.c-hf .hf-body{padding:0}
+.ed2 .c-hf{background:transparent;border:0}
+.ed2 .c-hf .empty{margin:0}
 .c-hf iframe{display:block;width:100%;height:min(78vh,820px);border:1px solid var(--rule);background:#0b0b0f}
 @media (max-width:1180px){
   .one{grid-template-columns:minmax(0,1fr) minmax(280px,320px)}
@@ -1924,7 +1926,7 @@ async function viewEditor(slug, startTab) {
           <div class="legend">${Object.values(REG).map(([c, n]) => `<span><i style="--rc:${c}"></i>${n}</span>`).join("")}</div>` : ""}
         ${v.draftVoice ? `<div class="vnav"><span class="pill warn">Suara masih draft (bisu)</span><span>timing akan menyesuaikan suara asli</span></div>` : ""}
       </div></div>
-      <div class="ocard c-hf" id="hfCard"><div class="ocard-h">Preview HyperFrames<small id="hfState">memeriksa…</small></div><div class="hf-body" id="hfBody"></div></div>
+      <div class="ocard c-hf" id="hfCard"><div class="hf-body" id="hfBody"></div></div>
     </section>
     </div>`;
   let sel = 0;
@@ -3002,7 +3004,7 @@ const CARD_TABS = { suara: "#suaraBody", beat: "#beatBody", aset: "#asetBody" };
 // Baris bawah editor (user 2026-11-20): HyperFrames Studio dari proyek ini (`npx hyperframes preview`, server lokal)
 // disematkan lewat iframe. GET = status; tombol menyalakannya. Proyek tanpa index.html (mis. iklan AE) tidak punya preview.
 async function hfPreview(slug, start = false) {
-  const body = $("#hfBody"), st = $("#hfState");
+  const body = $("#hfBody"), st = { set textContent(_) {} }; // tanpa kepala kartu (user 2026-11-21)
   if (!body) return;
   const show = (j) => {
     if ($("#hfBody") !== body || !location.hash.startsWith(`#/v/${slug}`)) return;
@@ -3010,7 +3012,7 @@ async function hfPreview(slug, start = false) {
     if (j.state === "running") {
       const u = new URL(j.url); if (["127.0.0.1", "localhost"].includes(u.hostname)) u.hostname = location.hostname;
       st.textContent = `jalan · port ${j.port}`;
-      body.innerHTML = `<div class="meta-row" style="justify-content:flex-end;margin-bottom:10px"><a class="btn sm" href="${esc(u.href)}" target="_blank" rel="noopener">Buka di tab baru</a></div><iframe src="${esc(u.href)}" title="Preview HyperFrames ${esc(slug)}" loading="lazy" allow="autoplay; fullscreen"></iframe>`;
+      body.innerHTML = `<iframe src="${esc(u.href)}" title="Preview HyperFrames ${esc(slug)}" loading="lazy" allow="autoplay; fullscreen"></iframe>`;
       return;
     }
     st.textContent = "mati";
