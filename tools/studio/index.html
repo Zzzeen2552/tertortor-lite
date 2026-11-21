@@ -1048,7 +1048,6 @@ $("#mkMenu").onclick = (e) => e.stopPropagation();
 document.addEventListener("click", () => { if (!$("#mkMenu").hidden) mkOpen(false); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#mkMenu").hidden) { mkOpen(false); $("#mkBtn").focus(); } });
 const stepPills = (v) => v.steps.map((s) => `<span class="pill ${s.ok ? "ok" : s.name === "Suara" && v.draftVoice ? "warn" : ""}">${s.name}${s.name === "Suara" && v.draftVoice ? " · draft" : ""}</span>`).join("");
-const cmdBox = (slug, skill = "video-vertikal") => `<span class="cmd">/${skill} ${esc(slug)}<button class="btn sm" onclick="copy('/${skill} ${esc(slug)}')">Salin</button></span>`;
 // "Buat video" path: Buat video › category › sub
 const crumb = (cat, sub) => `<div class="crumb"><a href="#/baru">Buat video</a>${cat ? ` › <a href="#/baru/${cat.id}">${esc(cat.label)}</a>` : ""}${sub ? ` › <b>${esc(sub.label)}</b>` : ""}</div>`;
 // story project types sharing the Musafo flow (tools/musafo.mjs → STORY_TYPES): label + slash command
@@ -1460,7 +1459,7 @@ function viewNewMusafo(channelId) {
       }
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast(j.library?.error ? `Proyek dibuat, tapi gagal masuk Library Cerita: ${j.library.error}` : j.library ? `Proyek dibuat${j.library.existed ? "; sumbernya sudah ada di Library Cerita dan kini tertaut" : "; sumbernya masuk Library Cerita"}${j.library.scanning === false ? " (pemindaian menunggu sumber lain selesai)" : ""}.` : "Proyek dibuat. Claude dibangunkan bila sesi sedang menunggu; kalau tidak, salin perintahnya.");
+      toast(j.library?.error ? `Proyek dibuat, tapi gagal masuk Library Cerita: ${j.library.error}` : j.library ? `Proyek dibuat${j.library.existed ? "; sumbernya sudah ada di Library Cerita dan kini tertaut" : "; sumbernya masuk Library Cerita"}${j.library.scanning === false ? " (pemindaian menunggu sumber lain selesai)" : ""}.` : "Proyek dibuat. Claude mulai bekerja.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat proyek"; }
   };
 }
@@ -1748,7 +1747,7 @@ function viewNewKvAd(cat, pr) {
       await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast("Iklan dibuat. Claude dibangunkan bila sesi sedang menunggu; kalau tidak, salin perintahnya.");
+      toast("Iklan dibuat. Claude mulai bekerja.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat iklan"; }
   };
 }
@@ -1818,7 +1817,7 @@ function viewNewAppDemo(cat, pr) {
       await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast("Demo dibuat. Claude dibangunkan bila sesi sedang menunggu; kalau tidak, salin perintahnya.");
+      toast("Demo dibuat. Claude mulai bekerja.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat demo"; }
   };
 }
@@ -1914,7 +1913,7 @@ function viewNewAd(productId) {
       await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast("Iklan dibuat. Claude dibangunkan bila sesi sedang menunggu; kalau tidak, salin perintahnya.");
+      toast("Iklan dibuat. Claude mulai bekerja.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat iklan"; }
   };
 }
@@ -1970,7 +1969,7 @@ async function viewEditor(slug, startTab) {
       <div class="ocard c-video"><div class="ocard-h">Preview video<small>${v.video ? (v.duration ? fmt(v.duration) : "render") : "belum dirender"}</small></div>
       <div class="viewer">
         <div class="stage-wrap">
-          ${v.video ? `<video class="stage" id="stage" src="${v.video}"${v.cinematic && v.cover ? ` poster="${v.cover}"` : ""} controls playsinline preload="metadata"></video>` : `<div class="stage ph">Belum ada render.<br>Tempel perintah di atas ke Claude Code.</div>`}
+          ${v.video ? `<video class="stage" id="stage" src="${v.video}"${v.cinematic && v.cover ? ` poster="${v.cover}"` : ""} controls playsinline preload="metadata"></video>` : `<div class="stage ph">Belum ada render.</div>`}
           ${v.video || me?.role !== "viewer" ? `<div class="vmenu">
             <button type="button" class="vmenu-btn" id="vmBtn" aria-label="Opsi video" title="Opsi video" aria-haspopup="menu" aria-expanded="false" aria-controls="vmList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg></button>
             <div class="vmenu-list" id="vmList" role="menu" hidden>
@@ -2089,14 +2088,14 @@ async function viewEditor(slug, startTab) {
         ${(s.samples.length ? s.samples : s.voices.filter((v) => v.sample).map((v) => ({ name: v.name, url: v.sample }))).length ? `<div class="eyebrow sub">Sampel suara${s.samples.length ? "" : " (kalimat contoh yang sama untuk semua speaker)"}</div><div style="display:grid;gap:8px;margin-bottom:16px">${(s.samples.length ? s.samples : s.voices.filter((v) => v.sample).map((v) => ({ name: v.name, url: v.sample }))).map((x) => { const nm = x.name.replace(/^\d+-/, ""); return `<div style="display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center"><b style="font-size:13px">${esc(x.name)}</b><audio controls preload="none" src="${x.url}" style="width:100%;height:34px"></audio><button class="btn sm" data-pick="${esc(nm.charAt(0).toUpperCase() + nm.slice(1))}">Pakai</button></div>`; }).join("")}</div>` : ""}
         <div class="eyebrow sub">Teks untuk AI Studio (satu blok = satu take)</div>
         <div class="prompt"><span class="lb">${s.text.length} karakter</span><button class="btn sm" data-copy="${esc(s.text)}">Salin</button>${esc(s.text) || '<span class="muted">Naskah belum ditulis.</span>'}</div>
-        <div class="meta-row" style="margin-top:14px"><a class="btn sm" href="${esc(s.page)}" target="_blank" rel="noopener">Buka AI Studio ↗</a>${cmdBox(slug)}</div>
+        <div class="meta-row" style="margin-top:14px"><a class="btn sm" href="${esc(s.page)}" target="_blank" rel="noopener">Buka AI Studio ↗</a></div>
         <p class="muted" style="font-size:12.5px;margin-top:12px">Setelah WAV diunduh: <span class="mono">npm run voice -- ${esc(slug)} --audio "&lt;file.wav&gt;" --source gemini-tts</span>. Kata diambil dari naskah, whisper hanya untuk waktu.</p>
       </div>`;
     },
     flow: () => {
       const f = v.flowCheck;
       if (!v.approval.approved) return `<div class="pad"><div class="empty"><b>Setujui naskah dulu</b>Prompt Flow ditulis untuk naskah yang sudah kamu setujui, supaya tidak ada kredit terbuang untuk naskah yang masih berubah.<br><button class="btn pri" data-goto="naskah">Buka naskah</button></div></div>`;
-      if (!f.shots.length) return `<div class="pad"><div class="empty"><b>Naskah sudah disetujui</b>Tempel perintah ini ke Claude untuk menulis prompt Flow:<br><br>${cmdBox(slug)}</div></div>`;
+      if (!f.shots.length) return `<div class="pad"><div class="empty"><b>Naskah sudah disetujui</b>Claude menulis prompt Flow dari naskah ini; hasilnya muncul di sini.<br><br><small class="muted">Claude mengerjakannya otomatis. Kalau lama tidak muncul, ketik “lanjut” di Claude Code.</small></div></div>`;
       const issues = f.errors.map((e) => `<li class="e">✗ ${esc(e)}</li>`).join("") + f.warns.map((w) => `<li class="w">⚠ ${esc(w)}</li>`).join("");
       const st = { draft: "Draft", generated: "Sudah dibuat", library: "Di library" };
       return `<div class="pad">
@@ -2122,14 +2121,14 @@ async function viewEditor(slug, startTab) {
       const right = a.written
         ? `<textarea id="drText" class="drtext" spellcheck="false">${esc(m.draft)}</textarea>
            <div class="meta-row" style="justify-content:flex-end;gap:8px;margin-top:10px"><span class="muted" id="drNote" style="margin-right:auto;font-size:12.5px">${a.editedAt ? "Terakhir kamu edit " + new Date(a.editedAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "Draft dari Claude"}</span><button class="btn" id="drSave" disabled>Simpan draft</button></div>`
-        : `<div class="empty"><b>Draft belum ditulis</b>Claude menceritakan ulang kisah ini utuh dan berurutan dari teks bukunya.<br><br><button class="btn pri" data-start-story>Tulis draft</button><br><br><small class="muted">atau tempel ke Claude:</small> ${cmdBox(slug, STORY[v.type]?.skill ?? "musafo")}</div>`;
+        : `<div class="empty"><b>Draft belum ditulis</b>Claude menceritakan ulang kisah ini utuh dan berurutan dari teks bukunya.<br><br><button class="btn pri" data-start-story>Tulis draft</button></div>`;
       return `<div class="pad">${bar}<div class="drgrid">
         <div><div class="eyebrow sub">Teks buku</div><div class="doc drsrc">${m.sourceText ? esc(m.sourceText) : '<span class="muted">Tidak ada teks sumber (bahan mentah ada di tab Brief).</span>'}</div></div>
         <div><div class="eyebrow sub">Draft cerita · bisa kamu edit</div>${right}</div></div></div>`;
     },
     storyline: () => {
       const m = v.musafo, a = m.storylineApproval;
-      if (!a.written) return `<div class="pad"><div class="empty"><b>Storyline belum ditulis</b>Claude menyusunnya dari ${m.draftApproval.needed ? "draft yang kamu setujui" : "bahan mentahmu (lihat tab Brief)"}.<br><br>${m.draftApproval.needed && !m.draftApproval.approved ? "" : `<button class="btn pri" data-start-story>Tulis storyline</button><br><br><small class="muted">atau tempel ke Claude:</small> `}${cmdBox(slug, STORY[v.type]?.skill ?? "musafo")}</div></div>`;
+      if (!a.written) return `<div class="pad"><div class="empty"><b>Storyline belum ditulis</b>Claude menyusunnya dari ${m.draftApproval.needed ? "draft yang kamu setujui" : "bahan mentahmu (lihat tab Brief)"}.<br><br>${m.draftApproval.needed && !m.draftApproval.approved ? `<small class="muted">Setujui draft dulu.</small>` : `<button class="btn pri" data-start-story>Tulis storyline</button>`}</div></div>`;
       const bar = a.approved
         ? `<div class="notice ok"><span><b>Storyline disetujui</b> · hook ${esc(a.hook ?? "–")} · ${new Date(a.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}. Claude menulis naskah per shot.</span></div>`
         : `<div class="notice"><span>${a.stale ? "<b>Storyline berubah setelah disetujui.</b>" : "<b>Storyline menunggu persetujuanmu.</b>"} Edit langsung di bawah bila perlu, simpan, pilih satu hook, lalu setujui.</span><span class="sp"><button class="btn pri sm" id="slApprove" ${m.hooks?.options?.length && !m.hooks.chosen ? "disabled" : ""}>${m.hooks?.options?.length && !m.hooks.chosen ? "Pilih hook di bawah dulu" : "Setujui storyline"}</button></span></div>`;
@@ -2170,7 +2169,7 @@ async function viewEditor(slug, startTab) {
     shot: () => {
       const m = v.musafo;
       const lookBar = m.looks?.length ? `<div class="notice" style="margin-bottom:14px"><span><b>Gaya visual</b> · ${esc(m.looks.find((l) => l.id === m.look)?.description ?? "")}</span><span class="sp"><select class="sel" id="lookSel">${m.looks.map((l) => `<option value="${esc(l.id)}" ${l.id === m.look ? "selected" : ""}>${esc(l.label)}</option>`).join("")}</select></span></div>` : "";
-      if (!m.shots.length) return `<div class="pad">${lookBar}<div class="empty"><b>Belum ada shot</b>Claude memecah cerita jadi shot (kalimat + terjemahan + prompt gambar dan gerak).<br><br>${cmdBox(slug, STORY[v.type]?.skill ?? "musafo")}</div></div>`;
+      if (!m.shots.length) return `<div class="pad">${lookBar}<div class="empty"><b>Belum ada shot</b>Claude memecah cerita jadi shot (kalimat + terjemahan + prompt gambar dan gerak) setelah storyline disetujui.<br><br><small class="muted">Claude mengerjakannya otomatis. Kalau lama tidak muncul, ketik “lanjut” di Claude Code.</small></div></div>`;
       const issues = m.errors.map((e) => `<li class="e">✗ ${esc(e)}</li>`).join("") + m.warns.map((w) => `<li class="w">⚠ ${esc(w)}</li>`).join("");
       const prodBar = prodBarHtml();
       return `<div class="pad">${lookBar}${prodBar}
@@ -2219,7 +2218,7 @@ async function viewEditor(slug, startTab) {
             <dt>Hook</dt><dd>“${esc(k.hook)}”</dd><dt>Visual</dt><dd>${esc(k.visual)}</dd><dt>Audio</dt><dd>${esc(k.audio)}</dd>
             <dt>Biaya</dt><dd>${k.cost.map((x) => `${esc(x.item)}: $${(+x.usd).toFixed(2)}`).join("<br>")}</dd>
             <dt>Jujurnya</dt><dd>${esc(k.honest)}</dd></dl></div></div>`).join("")}`
-        : `<div class="empty" style="margin:10px 0"><b>Konsep belum ditulis</b>${c.errors.length && c.errors[0] !== "concepts.json belum ada" ? esc(c.errors.join("; ")) : "Setelah analisis selesai, Claude membaca hasilnya dan menawarkan 2-3 konsep di sini."}<br><br>${cmdBox(slug)}</div>`;
+        : `<div class="empty" style="margin:10px 0"><b>Konsep belum ditulis</b>${c.errors.length && c.errors[0] !== "concepts.json belum ada" ? esc(c.errors.join("; ")) : "Setelah analisis selesai, Claude membaca hasilnya dan menawarkan 2-3 konsep di sini."}<br><br><small class="muted">Claude mengerjakannya otomatis. Kalau lama tidak muncul, ketik “lanjut” di Claude Code.</small></div>`;
       const g = (title, items) => items.length ? `<div class="eyebrow sub">${title}</div><div class="gal">${items.map((u) => `<a href="${u}" target="_blank"><img src="${u}" alt="" loading="lazy"></a>`).join("")}</div>` : "";
       return `<div class="pad">${run}${cards}
         ${v.refAnalysis ? `<div class="eyebrow sub">Analisis Claude (5 aspek)</div><div class="doc" style="font-size:13px">${esc(v.refAnalysis)}</div>` : ""}
