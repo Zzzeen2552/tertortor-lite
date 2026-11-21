@@ -506,7 +506,7 @@ a.preset:hover{border-color:var(--rule)}
 /* editor satu halaman */
 .one-h{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--rule)}
 .one-h h1{font-size:clamp(24px,3vw,38px);font-weight:800;letter-spacing:-.045em;line-height:1;margin:6px 0 10px}
-.one{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.8fr) minmax(0,1fr);gap:14px;align-items:start}
+.one{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,1fr) minmax(300px,340px);gap:14px;align-items:start}
 /* video horizontal (meta.json format "horizontal" → v.wide): pemutar 16:9 mendapat kolom tengah paling lebar */
 .one.cine{grid-template-columns:minmax(0,.85fr) minmax(0,1.7fr) minmax(0,.85fr)}
 .one.cine .c-video .viewer{max-width:none}
@@ -523,7 +523,7 @@ a.preset:hover{border-color:var(--rule)}
 .c-script > .ocard-h,.c-script > [data-workbar],.c-script > .tabs{flex:none}
 .c-script .tabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}
 .c-script .tabs button{flex:none}
-.c-video .viewer{position:static;padding:14px}
+.c-video .viewer{position:static;padding:14px;max-width:none}
 .one.cine .stage{aspect-ratio:16/9}
 .c-pub{display:flex;flex-direction:column;gap:14px;background:none;border:0}
 .c-pub > .ocard{border:1px solid var(--line)}
@@ -541,7 +541,8 @@ a.preset:hover{border-color:var(--rule)}
 .c-hf .hf-body{padding:14px}
 .c-hf iframe{display:block;width:100%;height:min(78vh,820px);border:1px solid var(--rule);background:#0b0b0f}
 @media (max-width:1180px){
-  .one,.one.cine{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .one{grid-template-columns:minmax(0,1fr) minmax(280px,320px)}
+  .one.cine{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .c-script{grid-column:1/-1;position:static;max-height:none}
   .one.cine .c-video{grid-column:1/-1;order:0}
   .trio{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .trio > .ocard:last-child:nth-child(odd){grid-column:1/-1}
