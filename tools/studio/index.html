@@ -507,7 +507,10 @@ a.preset:hover{border-color:var(--rule)}
 .one-h{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--rule)}
 .one-h h1{font-size:clamp(24px,3vw,38px);font-weight:800;letter-spacing:-.045em;line-height:1;margin:6px 0 10px}
 .one{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.8fr) minmax(0,1fr);gap:14px;align-items:start}
-.one.cine{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) minmax(0,1fr)}
+/* video horizontal (meta.json format "horizontal" → v.wide): pemutar 16:9 mendapat kolom tengah paling lebar */
+.one.cine{grid-template-columns:minmax(0,.85fr) minmax(0,1.7fr) minmax(0,.85fr)}
+.one.cine .c-video .viewer{max-width:none}
+.one.cine #thumbBody > .pad > div:first-child > div:first-child{max-width:none}
 .one.wide{grid-template-columns:minmax(0,1fr)} .one.wide > .c-video,.one.wide > .c-pub{display:none}
 .ocard{background:var(--panel);border:1px solid var(--line);min-width:0;display:flex;flex-direction:column}
 .ocard > .ocard-h{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--rule);font-weight:800;letter-spacing:-.02em;font-size:15px}
@@ -516,6 +519,8 @@ a.preset:hover{border-color:var(--rule)}
 .c-script{order:1} .c-video{order:2} .c-pub{order:3}
 .c-script{max-height:calc(100vh - 150px);position:sticky;top:84px}
 .c-script #tabBody{overflow:auto;flex:1;min-height:0}
+/* kepala kartu, workbar, dan baris tab tidak boleh menyusut saat isi tab panjang (Prompt Flow, Storyline) */
+.c-script > .ocard-h,.c-script > [data-workbar],.c-script > .tabs{flex:none}
 .c-script .tabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}
 .c-script .tabs button{flex:none}
 .c-video .viewer{position:static;padding:14px}
@@ -538,6 +543,7 @@ a.preset:hover{border-color:var(--rule)}
 @media (max-width:1180px){
   .one,.one.cine{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .c-script{grid-column:1/-1;position:static;max-height:none}
+  .one.cine .c-video{grid-column:1/-1;order:0}
   .trio{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .trio > .ocard:last-child:nth-child(odd){grid-column:1/-1}
 }
 @media (max-width:720px){
@@ -1957,7 +1963,7 @@ async function viewEditor(slug, startTab) {
       const opt = (o, i) => `<button class="shot" data-opt="${i}" style="text-align:left;display:block;width:100%;cursor:pointer;margin-bottom:8px;padding:10px 12px"><b>${hl(o.headline)}</b><br><span class="muted">${esc(o.sub)}</span></button>`;
       const ring = (on) => (on ? "3px solid var(--acc,#e5b84a)" : "1px solid #0003");
       return `<div class="pad"><div style="display:grid;grid-template-columns:minmax(180px,280px) 1fr;gap:20px;align-items:start">
-        <div>${t.url ? `<a href="${t.url}" target="_blank"><img src="${t.url}" alt="thumbnail" style="width:100%;border-radius:10px;display:block"></a>` : '<div class="empty" style="aspect-ratio:9/16"><b>Belum ada thumbnail</b>Isi teksnya lalu klik Render.</div>'}
+        <div>${t.url ? `<a href="${t.url}" target="_blank"><img src="${t.url}" alt="thumbnail" style="width:100%;border-radius:10px;display:block"></a>` : `<div class="empty" style="aspect-ratio:${v.wide ? "16/9" : "9/16"}"><b>Belum ada thumbnail</b>Isi teksnya lalu klik Render.</div>`}
           ${t.url ? `<a class="btn sm" href="${t.url}" download="${slug}-thumbnail.png" style="margin-top:8px;width:100%;justify-content:center">Unduh thumbnail</a>` : ""}
           ${t.stale && t.url ? '<p class="muted" style="font-size:12.5px;margin-top:6px">Pengaturan berubah sejak render terakhir.</p>' : ""}</div>
         <div>
