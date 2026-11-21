@@ -540,6 +540,10 @@ a.preset:hover{border-color:var(--rule)}
 #thumbBody > .pad > div:first-child{grid-template-columns:minmax(0,1fr)!important}
 #thumbBody > .pad > div:first-child > div:first-child{max-width:240px}
 .teb-acts{display:flex;flex-direction:column;gap:8px;padding:14px}
+.pub-teb{border-top:1px solid var(--line);margin-top:4px}
+.pub-teb .sec-t{display:flex;align-items:center;gap:10px;padding:16px 18px 0;font-weight:600}
+.pub-teb .sec-t small{margin-left:auto;font-weight:400;color:var(--muted);font-size:12px}
+.pub-teb .teb-acts{padding:12px 18px 18px}
 .teb-acts .btn{justify-content:center}
 .trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px;align-items:start}
 .trio.duo{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -1867,7 +1871,7 @@ async function viewEditor(slug, startTab) {
     <nav class="rail" aria-label="Panel editor">
       <button type="button" data-rail="naskah" aria-pressed="false" title="Naskah"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg><span>Naskah</span></button>
       ${isA ? "" : `<button type="button" data-rail="suara" aria-pressed="false" title="Suara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Suara</span></button>`}
-      <button type="button" data-rail="beat" aria-pressed="false" title="Beat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18V10M9 18V6M14 18v-8M19 18V4"/></svg><span>Beat</span></button><button type="button" data-rail="aset" aria-pressed="false" title="Aset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg><span>Aset</span></button><button type="button" data-rail="thumb" aria-pressed="false" title="Thumbnail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg><span>Thumbnail</span></button><button type="button" data-rail="tebar" aria-pressed="false" title="Tebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l16-8-6 16-3-7z"/></svg><span>Tebar</span></button>
+      <button type="button" data-rail="beat" aria-pressed="false" title="Beat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18V10M9 18V6M14 18v-8M19 18V4"/></svg><span>Beat</span></button><button type="button" data-rail="aset" aria-pressed="false" title="Aset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg><span>Aset</span></button><button type="button" data-rail="thumb" aria-pressed="false" title="Thumbnail dan Tebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg><span>Publikasi</span></button>
     </nav>
     <aside class="ed2-panel" id="edPanel">
       <div class="ocard c-script" data-panel="naskah"><div class="ocard-h">Naskah<small>dan tahap produksi</small></div>
@@ -1889,11 +1893,12 @@ async function viewEditor(slug, startTab) {
         </div>
         <div id="tabBody"></div>
       </div>
-        <div class="ocard" data-panel="thumb"><div class="ocard-h">Thumbnail<small>${v.thumbnail?.url ? (v.thumbnail.stale ? "perlu render ulang" : "✓ siap") : "belum ada"}</small></div><div id="thumbBody"></div></div>
-        <div class="ocard" data-panel="tebar"><div class="ocard-h">Publikasi · Tebar<small>${v.buffered?.length ? "terbit: " + esc(v.buffered.join(", ")) : v.tebar?.job ? esc(v.tebar.job.phase) : ""}</small></div>
+        <div class="ocard" data-panel="thumb"><div class="ocard-h">Thumbnail &amp; Tebar<small>${v.thumbnail?.url ? (v.thumbnail.stale ? "perlu render ulang" : "✓ siap") : "belum ada"}</small></div><div id="thumbBody"></div>
+        <div class="pub-teb"><div class="sec-t">Kirim ke Tebar<small>${v.buffered?.length ? "terbit: " + esc(v.buffered.join(", ")) : v.tebar?.job ? esc(v.tebar.job.phase) : ""}</small></div>
           <div class="teb-acts">${(() => { const ready = !!v.video && !v.thumbnail?.videoRendering; const why = v.video ? "Tunggu render selesai" : "Aktif setelah video selesai dirender"; return `<button class="btn" id="tebBtn" ${ready ? "" : "disabled"} title="${ready ? "Unggah ke Tebar dan posting ke akun channel ini" : why}" style="background:#16a34a;border-color:#16a34a;color:#fff${ready ? "" : ";opacity:.45;cursor:not-allowed"}">${v.tebar?.job && !["done", "error"].includes(v.tebar.job.phase) ? "Mengirim ke Tebar…" : "Kirim ke Tebar"}</button>`; })()}
             ${v.sub ? `<a class="btn sm" href="#/s/${v.category}/${esc(v.sub)}">Atur akun Tebar ${esc(subOf(v)?.label ?? v.sub)}</a>` : ""}
             <span class="muted" style="font-size:12px">${v.video ? "Caption ditulis dan akun dipilih di jendela Kirim ke Tebar." : "Aktif setelah video selesai dirender."}</span></div></div>
+        </div>
 
       ${isA ? "" : `<div class="ocard" id="suaraCard" data-panel="suara"><div class="ocard-h">Suara<small>${v.voice.seconds ? fmt(v.voice.seconds) + (v.voice.draft ? " · draft" : "") : "belum ada"}</small></div><div class="tabs ctabs" role="tablist"><button type="button" role="tab" data-ct="suara" class="on" aria-selected="true">Suara</button><button type="button" role="tab" data-ct="gemini" aria-selected="false">API Gemini <span id="gemTabMark"></span></button></div><div class="ocard-b" id="suaraBody"></div><div class="ocard-b" id="geminiBody" hidden></div></div>`}
       <div class="ocard" id="beatCard" data-panel="beat"><div class="ocard-h">Beat<small>${v.beats.length ? v.beats.length + " beat" : "belum ada"}</small></div><div class="ocard-b" id="beatBody"></div></div>
@@ -2928,6 +2933,7 @@ async function viewEditor(slug, startTab) {
   // editor bergaya aplikasi edit video (user 2026-11-21): rel ikon kiri membuka/menyembunyikan satu panel, video besar di tengah
   const ed2 = $("#ed2");
   const setPanel = (pnl) => {
+    if (pnl === "tebar") pnl = "thumb";
     if (pnl && !ed2.querySelector(`[data-panel="${pnl}"]`)) pnl = "";
     ed2.dataset.p = pnl;
     ed2.querySelectorAll("[data-panel]").forEach((c) => c.classList.toggle("on", c.dataset.panel === pnl));
