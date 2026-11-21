@@ -987,7 +987,7 @@ $("#mkBtn").onclick = (e) => { e.stopPropagation(); mkOpen(); };
 $("#mkMenu").onclick = (e) => e.stopPropagation();
 document.addEventListener("click", () => { if (!$("#mkMenu").hidden) mkOpen(false); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#mkMenu").hidden) { mkOpen(false); $("#mkBtn").focus(); } });
-const stepPills = (v) => v.steps.map((s) => `<span class="pill ${s.ok ? "ok" : s.name === "Suara" && v.draftVoice ? "warn" : ""}">${s.ok ? "✓ " : ""}${s.name}${s.name === "Suara" && v.draftVoice ? " · draft" : ""}</span>`).join("");
+const stepPills = (v) => v.steps.map((s) => `<span class="pill ${s.ok ? "ok" : s.name === "Suara" && v.draftVoice ? "warn" : ""}">${s.name}${s.name === "Suara" && v.draftVoice ? " · draft" : ""}</span>`).join("");
 const cmdBox = (slug, skill = "video-vertikal") => `<span class="cmd">/${skill} ${esc(slug)}<button class="btn sm" onclick="copy('/${skill} ${esc(slug)}')">Salin</button></span>`;
 // "Buat video" path: Buat video › category › sub
 const crumb = (cat, sub) => `<div class="crumb"><a href="#/baru">Buat video</a>${cat ? ` › <a href="#/baru/${cat.id}">${esc(cat.label)}</a>` : ""}${sub ? ` › <b>${esc(sub.label)}</b>` : ""}</div>`;
