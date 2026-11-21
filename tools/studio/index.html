@@ -889,6 +889,7 @@ const progressHtml = (w) => {
   const p = w.progress;
   if (!p) return "";
   const steps = p.steps.length ? `<span class="wsteps">${p.steps.map((st) => `<span class="${st.done ? "on" : st.label === p.step ? "now" : ""}">${st.done ? "✓ " : ""}${esc(st.label)}</span>`).join("")}</span>` : "";
+  if (p.idle) return `<span class="wprog"><span class="wbar"><i style="width:0"></i></span><b>Belum mulai</b> · ${esc(p.step)}</span>`;
   return `<span class="wprog"><span class="wbar"><i style="width:${p.pct}%"></i></span><b>${p.estimated ? "±" : ""}${p.pct}%</b>${p.step ? ` · sekarang: ${esc(p.step)}` : p.estimated ? " · perkiraan dari waktu" : ""}</span>${steps}`;
 };
 function paintWork() {

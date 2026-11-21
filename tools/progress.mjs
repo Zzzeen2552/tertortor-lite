@@ -8,8 +8,8 @@
 import { existsSync, readFileSync, writeFileSync, statSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT, readJSON, sceneTemplate } from "./lib.mjs";
-import { productionDone, productionState, storylineApproval, draftApproval } from "./musafo.mjs";
-import { approval } from "./flow.mjs";
+import { productionDone, productionState, storylineApproval, draftApproval, checkHooks, loadMusafo, charSheet } from "./musafo.mjs";
+import { approval, checkFlow } from "./flow.mjs";
 import { isAws } from "./aws.mjs";
 
 const EVENTS = join(ROOT, ".events.jsonl"), TIMES = join(ROOT, ".process-times.json"), BEAT = join(ROOT, ".waiting");
@@ -54,6 +54,10 @@ export const PROCESSES = {
     label: (d) => (isStory(d) ? "Claude membuat suara (Gemini TTS)" : isOneTake(d) ? "Claude membuat suara (Gemini TTS), lalu beat table" : "Claude menulis prompt Google Flow"),
     eta: (d) => (isStory(d) ? [10, 20] : isOneTake(d) ? [12, 25] : [5, 10]),
     out: (d) => (isStory(d) ? "voice/words.json" : isOneTake(d) ? "build/timeline.json" : "flow.json"),
+    // measurable steps (user 2026-11-22: "berhenti di 95 %" while nothing had been written)
+    steps: (d, at) => (isOneTake(d)
+      ? [{ label: "Suara", done: mtime(d, "voice/words.json") > at ? 1 : 0 }, { label: "Beat table", done: mtime(d, "build/timeline.json") > Math.max(at, mtime(d, "voice/words.json") - 1) ? 1 : 0 }]
+      : [{ label: "Prompt Flow ditulis", done: mtime(d, "flow.json") > at ? 1 : 0 }, { label: "Prompt Flow lolos check", done: mtime(d, "flow.json") > at && flowOk(d) ? 1 : 0 }]),
     next: (d) => (isStory(d) ? "suara selesai; gambar dan klip menyusul" : isOneTake(d) ? "beat table siap kamu setujui" : "prompt Flow siap"),
   },
   // done(d, at) → end time in ms (0 = not yet), for processes with more than one output file
@@ -66,6 +70,61 @@ export const PROCESSES = {
   // AWS (Cinematic, user 2026-11-17) answers with aws.json (data + scenes) and a first build: the animatic with slates and TBC chips
   "cinematic-new": { label: "Claude menyusun data, adegan, dan animatic rekap", eta: [5, 15], done: (d, at) => { if (!isAws(d)) return 0; const f = join(d, "build", "timeline.json"); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; }, next: "animatic dan daftar footage siap di tab AWS" },
 };
+
+// ---------- measured steps for every process (user 2026-11-22: "cek di semua preset dan channel") ----------
+// Each workflow is done when the file its NEXT user step needs is there, not when the first file appears:
+//  - a story storyline can only be approved with 3 valid hooks (checkHooks), so storyline + hooks.json;
+//  - a character sheet is assets/characters/<id>.png (musafo.json also changes for other reasons);
+//  - every ad (Flashcut, BRI, App Demo) ends with a rendered MP4 the user watches; BRI never writes ad.json.
+const hooksOk = (d) => { try { return checkHooks(d).length === 0; } catch { return false; } };
+const newestFile = (d, sub, re) => { const dir = join(d, sub); if (!existsSync(dir)) return 0; let t = 0; for (const f of readdirSync(dir)) if (re.test(f)) t = Math.max(t, statSync(join(dir, f)).mtimeMs); return t; };
+const mp4At = (d) => newestFile(d, "out", /\.mp4$/i);
+const storylineSteps = (d, at) => [
+  { label: "Storyline ditulis", done: mtime(d, "storyline.md") > at ? 1 : 0 },
+  { label: "3 pilihan hook", done: mtime(d, "storyline.md") > at && hooksOk(d) ? 1 : 0 },
+];
+const storylineDone = (d, at) => { const t = mtime(d, "storyline.md"); return t > at && hooksOk(d) ? Math.max(t, mtime(d, "hooks.json")) : 0; };
+for (const k of ["berakitkehulu-new", "bumidipijak-new", "miracleofhajj-new", "draft-approved"]) Object.assign(PROCESSES[k], { steps: storylineSteps, done: storylineDone });
+// Musafo with a source text writes a draft first; without one it goes straight to the storyline
+const musafoDraft = (d) => val(PROCESSES["musafo-new"].out, d) === "draft.md";
+Object.assign(PROCESSES["musafo-new"], {
+  steps: (d, at) => (musafoDraft(d) ? [{ label: "Draft cerita ditulis", done: mtime(d, "draft.md") > at ? 1 : 0 }] : storylineSteps(d, at)),
+  done: (d, at) => (musafoDraft(d) ? (mtime(d, "draft.md") > at ? mtime(d, "draft.md") : 0) : storylineDone(d, at)),
+});
+const chars = (d) => loadMusafo(d)?.characters ?? [];
+const sheetsNew = (d, at) => chars(d).filter((c) => mtime(d, charSheet(c.id)) > at).length;
+Object.assign(PROCESSES.characters, {
+  steps: (d, at) => [{ label: `Character sheet ${sheetsNew(d, at)}/${chars(d).length || "?"}`, done: chars(d).length ? sheetsNew(d, at) / chars(d).length : 0 }],
+  // photos of one age → only that sheet is remade: done once a sheet is new and every age has one
+  done: (d, at) => (sheetsNew(d, at) > 0 && chars(d).every((c) => existsSync(join(d, charSheet(c.id)))) ? Math.max(...chars(d).map((c) => mtime(d, charSheet(c.id)))) : 0),
+});
+const hasPhotos = (d) => existsSync(join(d, "assets", "reference", "tokoh")) && readdirSync(join(d, "assets", "reference", "tokoh")).some((f) => /\.(png|jpe?g|webp)$/i.test(f));
+PROCESSES["storyline-approved"].steps = (d, at) => [
+  ...(hasPhotos(d) ? [{ label: "Character sheet", done: chars(d).length && chars(d).every((c) => existsSync(join(d, charSheet(c.id)))) ? 1 : 0 }] : []),
+  { label: "Naskah per shot", done: mtime(d, "script.md") > at ? 1 : 0 },
+];
+PROCESSES["format-new"].steps = (d, at) => [
+  { label: "Gambar dan klip", done: Math.max(newestFile(d, "assets/frames", /./), newestFile(d, "assets/footage", /./), newestFile(d, "assets/keyvisuals", /./)) > at ? 1 : 0 },
+  { label: "Tata letak", done: newestFile(d, "compositions", /\.html$/) > at ? 1 : 0 },
+  { label: "Render", done: mp4At(d) > at ? 1 : 0 },
+];
+PROCESSES["cinematic-new"].steps = (d, at) => [
+  { label: "Data dan adegan (aws.json)", done: mtime(d, "aws.json") > at ? 1 : 0 },
+  { label: "Animatic", done: mtime(d, "build/timeline.json") > at ? 1 : 0 },
+];
+const productOf = (d) => (existsSync(join(d, "meta.json")) ? readJSON(join(d, "meta.json")).product : null) ?? (existsSync(join(d, "demo.json")) ? "appdemo" : "flashcut");
+Object.assign(PROCESSES["ad-new"], {
+  label: (d) => ({ appdemo: "Claude menyusun storyboard demo aplikasi, membangun, lalu merender", bri: "Claude menggerakkan key visual, menyusun iklan BRI, lalu merender" }[productOf(d)] ?? "Claude menyusun iklan, lalu merender"),
+  eta: (d) => ({ appdemo: [8, 20], bri: [20, 45] }[productOf(d)] ?? [10, 25]),
+  steps: (d, at) => {
+    const render = { label: "Render MP4", done: mp4At(d) > at ? 1 : 0 };
+    if (productOf(d) === "bri") return [{ label: "Klip key visual", done: newestFile(d, "assets/footage", /\.mp4$/i) > at ? 1 : 0 }, { label: "Komposisi", done: mtime(d, "compositions/kv.html") > at ? 1 : 0 }, render];
+    if (productOf(d) === "appdemo") return [{ label: "Storyboard (demo.json)", done: mtime(d, "demo.json") > at ? 1 : 0 }, render];
+    return [{ label: "Susunan iklan (ad.json)", done: mtime(d, "ad.json") > at ? 1 : 0 }, render];
+  },
+  done: (d, at) => (mp4At(d) > at ? mp4At(d) : 0),
+  next: (d) => (productOf(d) === "appdemo" ? "demo aplikasi siap ditonton" : "iklan siap ditonton dan disetujui"),
+});
 const val = (v, d) => (typeof v === "function" ? v(d) : v);
 
 // ---------- progress (user 2026-11-22 "keliatan progress berapa persennya") ----------
@@ -88,7 +147,7 @@ function explainerSteps(d) {
   const designed = beats.filter((b) => sceneDesigned(d, b)).length;
   const lastScene = Math.max(0, ...beats.map((b) => mtime(d, `compositions/${b.id}.html`)));
   return [
-    { label: "Prompt Flow", done: existsSync(join(d, "flow.json")) ? 1 : 0 },
+    { label: "Prompt footage", done: existsSync(join(d, "flow.json")) ? 1 : 0 },
     { label: "Suara", done: words ? 1 : 0 },
     { label: "Beat", done: words && tl >= words ? 1 : 0 },
     { label: `Scene ${designed}/${beats.length || "?"}`, done: beats.length ? designed / beats.length : 0 },
@@ -143,8 +202,31 @@ function progressOf(type, d, at, eta) {
       return { pct: Math.min(99, Math.round((100 * sum) / steps.length)), step: now?.label ?? steps.at(-1).label, steps: steps.map((s) => ({ label: s.label, done: s.done >= 1 })), estimated: false };
     }
   }
+  // time-based estimate only once Claude has visibly started: a click nobody picked up must not crawl to 95 %
+  if (!activitySince(d, at)) return { pct: 0, step: claudeWaiting() ? "Claude mulai sebentar lagi" : "Menunggu Claude (ketik “lanjut” di Claude Code)", steps: [], estimated: true, idle: true };
   const mid = ((eta[0] + eta[1]) / 2) * 60e3;
-  return { pct: Math.min(95, Math.round((100 * (Date.now() - at)) / mid)), step: null, steps: [], estimated: true };
+  return { pct: Math.min(90, Math.round((100 * (Date.now() - at)) / mid)), step: null, steps: [], estimated: true };
+}
+
+// flow.json passes `npm run flow -- check` (no errors)
+function flowOk(d) {
+  try { return checkFlow(d).errors.length === 0; } catch { return false; }
+}
+// any file Claude wrote in the project after the click; Studio's own writes (approval, captions, edits, caches) don't count
+const STUDIO_FILES = new Set(["request.json", "caption.md", "script-edits.json", ".status.json", "tebar.json", "share.json"]);
+const STUDIO_DIRS = new Set([".thumbnails", ".waveform-cache", ".hyperframes", "node_modules", ".trash"]);
+function activitySince(d, at, depth = 0) {
+  let names = [];
+  try { names = readdirSync(d, { withFileTypes: true }); } catch { return false; }
+  for (const e of names) {
+    if (e.isDirectory()) {
+      if (STUDIO_DIRS.has(e.name) || depth > 3) continue;
+      if (activitySince(join(d, e.name), at, depth + 1)) return true;
+    } else if (!STUDIO_FILES.has(e.name)) {
+      try { if (statSync(join(d, e.name)).mtimeMs > at) return true; } catch {}
+    }
+  }
+  return false;
 }
 
 
