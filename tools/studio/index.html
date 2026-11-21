@@ -947,9 +947,6 @@ $("#theme").onclick = () => {
   const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   document.documentElement.dataset.theme = t;
   try { localStorage.setItem("tt_theme", t); } catch {}
-  // HyperFrames Studio di bawah video ikut ganti tema (proxy Studio menyuntikkan pendengarnya)
-  const hf = document.querySelector("#hfBody iframe[data-origin]");
-  if (hf) hf.contentWindow?.postMessage({ tt_theme: t }, hf.dataset.origin);
 };
 
 // style tree from /api/structure: Video Explainer → preset, Storytelling → channel, Advertisement → product
@@ -3014,10 +3011,8 @@ async function hfPreview(slug, start = false) {
     if (j.state === "none") { $("#hfCard").hidden = true; return; }
     if (j.state === "running") {
       const u = new URL(j.url); if (["127.0.0.1", "localhost"].includes(u.hostname)) u.hostname = location.hostname;
-      // lewat proxy Studio (port tetap) supaya tema HyperFrames ikut tombol bulan TERTORTOR
-      if (j.proxyPort) { u.port = j.proxyPort; u.pathname = "/"; u.search = `?hfport=${j.port}&tt_theme=${document.documentElement.dataset.theme === "light" ? "light" : "dark"}`; }
       st.textContent = `jalan · port ${j.port}`;
-      body.innerHTML = `<iframe data-origin="${esc(u.origin)}" src="${esc(u.href)}" title="Preview HyperFrames ${esc(slug)}" loading="lazy" allow="autoplay; fullscreen"></iframe>`;
+      body.innerHTML = `<iframe src="${esc(u.href)}" title="Preview HyperFrames ${esc(slug)}" loading="lazy" allow="autoplay; fullscreen"></iframe>`;
       return;
     }
     st.textContent = "mati";

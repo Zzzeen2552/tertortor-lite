@@ -2,7 +2,7 @@
 // Enter an idea/storyline + a reference video + key visuals -> a new videos/<slug>/ ready for Claude.
 // Also lists every video's stage and plays finished renders, and browses the reusable footage library.
 //   npm run studio   ->  http://localhost:4331
-import { createServer, request as httpRequest } from "node:http";
+import { createServer } from "node:http";
 import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync, readdirSync, statSync, createReadStream, createWriteStream, renameSync, unlinkSync, rmSync } from "node:fs";
 import { join, extname, normalize, basename } from "node:path";
 import { tmpdir } from "node:os";
@@ -798,7 +798,7 @@ createServer(async (req, res) => {
       const line = out.split(/\r?\n/).reverse().find((l) => l.trim().startsWith("{"));
       let j = null; try { j = JSON.parse(line); } catch {}
       const r = j?.result;
-      if (r?.ready && r.studioUrl) return send(res, 200, { state: "running", url: r.studioUrl, port: r.port, proxyPort: HF_PROXY_PORT });
+      if (r?.ready && r.studioUrl) return send(res, 200, { state: "running", url: r.studioUrl, port: r.port });
       return send(res, 200, { state: "stopped", error: req.method === "POST" ? (j?.error?.message || "Preview HyperFrames gagal dinyalakan.") : undefined });
     }
     const ready = p.match(/^\/api\/videos\/([a-z0-9-]+)\/ready$/);
@@ -1527,40 +1527,3 @@ createServer(async (req, res) => {
   // style covers for subs that have none yet (a new sub gets one once it has a render): tools/sub-covers.mjs
   runTool([join(ROOT, "tools", "sub-covers.mjs")]).then((r) => { const made = r.out.split(/\r?\n/).filter((l) => l.startsWith("✔")); if (made.length) console.log(`cover gaya baru: ${made.length}`); });
 });
-
-// Proxy HyperFrames Studio (user 2026-11-21): the preview runs on its own port (3002, 3003, …), so its theme cannot be
-// set from Studio. Through this proxy it always lives on one origin (PORT + 1) and a small script injected into its
-// page applies Studio's theme: ?tt_theme=dark|light on load, and postMessage({ tt_theme }) from the parent page live.
-// The target port comes from ?hfport= on the page load and is kept in a cookie for its assets, API calls and SSE.
-const HF_PROXY_PORT = PORT + 1;
-let hfLastPort = 0; // the preview opened last, for requests that carry neither query, referer nor cookie
-const HF_THEME_JS = `<script>(function(){var K="hf-studio-ui-preferences";function a(t){if(t!=="dark"&&t!=="light")return;try{var p=JSON.parse(localStorage.getItem(K)||"{}");p.theme=t;localStorage.setItem(K,JSON.stringify(p))}catch(e){}if(t==="dark")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme="paper"}a(new URLSearchParams(location.search).get("tt_theme"));addEventListener("message",function(e){if(e.source===parent&&e.data&&e.data.tt_theme)a(e.data.tt_theme)})})();</script>`;
-createServer((req, res) => {
-  const url = new URL(req.url, "http://x");
-  const fromQuery = url.searchParams.get("hfport");
-  const cookie = /(?:^|;\s*)tt_hfport=(\d+)/.exec(req.headers.cookie || "")?.[1];
-  let viaRef = null; try { viaRef = new URL(req.headers.referer || "").searchParams.get("hfport"); } catch {}
-  const port = +(fromQuery || viaRef || cookie || hfLastPort || 0);
-  if (fromQuery && +fromQuery >= 3000 && +fromQuery <= 3999) hfLastPort = +fromQuery;
-  if (!(port >= 3000 && port <= 3999)) { res.writeHead(400, { "content-type": "text/plain; charset=utf-8" }); return res.end("Preview HyperFrames belum dipilih."); }
-  const headers = { ...req.headers, host: `127.0.0.1:${port}` };
-  delete headers["accept-encoding"]; // plain bodies, so the HTML page can be edited
-  delete headers.origin; delete headers.referer;
-  const up = httpRequest({ host: "127.0.0.1", port, method: req.method, path: req.url, headers }, (r) => {
-    const h = { ...r.headers };
-    if (fromQuery) h["set-cookie"] = [`tt_hfport=${port}; Path=/; SameSite=Lax`];
-    if (/text\/html/.test(h["content-type"] || "") && (url.pathname === "/" || url.pathname === "/index.html")) {
-      const chunks = []; r.on("data", (c) => chunks.push(c));
-      r.on("end", () => {
-        const html = Buffer.concat(chunks).toString("utf8").replace(/<head>/i, `<head>${HF_THEME_JS}`);
-        delete h["content-length"]; delete h["transfer-encoding"];
-        res.writeHead(r.statusCode, h); res.end(html);
-      });
-      return;
-    }
-    res.writeHead(r.statusCode, h); r.pipe(res); // assets, API and the SSE streams stay streamed
-  });
-  up.on("error", () => { if (!res.headersSent) { res.writeHead(502, { "content-type": "text/plain; charset=utf-8" }); res.end("Preview HyperFrames tidak menjawab. Nyalakan lagi dari Studio."); } else res.end(); });
-  req.pipe(up);
-  res.on("close", () => up.destroy());
-}).listen(HF_PROXY_PORT, "127.0.0.1").on("error", (e) => console.log(`proxy HyperFrames (port ${HF_PROXY_PORT}) tidak jalan: ${e.message}`));

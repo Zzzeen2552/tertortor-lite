@@ -50,9 +50,6 @@ kanan atas pemutar (link, ubah format, unduh, hapus). Kartu Naskah berisi tab ta
 dan Publikasi masing-masing panel sendiri. Tombol **Production** juga muncul di tab Naskah setelah naskah disetujui
 (Storytelling: event `production`; Explainer: event `explainer-production`). Di bawah video selalu ada
 HyperFrames Studio proyek itu dalam iframe (`/api/videos/<slug>/hf-preview`, GET status / POST nyalakan `npx hyperframes preview --background`).
-Iframe itu lewat **proxy Studio di port 4332** (`PORT + 1`, `?hfport=<port preview>`; port dicari dari query, Referer, cookie
-`tt_hfport`, lalu preview terakhir) yang menyuntikkan script kecil ke halaman utama HyperFrames: tema HyperFrames
-(`hf-studio-ui-preferences.theme`) ikut tombol bulan TERTORTOR (`?tt_theme=` saat dimuat, `postMessage({ tt_theme })` saat diganti).
 
 **Video referensi** dianalisis `npm run ref` (yt-dlp, shot, gerak, transkrip). Claude menulis `analysis.md` dan 2-3 konsep
 di `concepts.json`; user memilih di tab "Konsep" sebelum naskah. Alurnya di `.claude/skills/video-vertikal/reference.md`.
