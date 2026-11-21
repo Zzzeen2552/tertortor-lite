@@ -36,11 +36,10 @@ Cinematic selain AWS (Escapement, Sandekala), Cinema Clone, Animation, dan City 
 dan menampilkan perintah untuk Claude. Ruang Produksi dan sidebar mengelompokkan video per kategori. Pohon kategori dari
 `tools/categories.mjs` (`/api/structure`). Halaman `#/s/<kategori>/<sub>` punya tab Video, Library footage, dan
 (Storytelling) Library cerita. Footage: `npm run library -- add … --for <kategori>/<sub>` (selalu isi `--for`).
-**Tampilan** (ikut MOTION 2026-11-17/18): Swiss/editorial, aksen oranye-kuning `#FFA114` (juga `theme-color`), panel abu
-terang + hairline hitam, Inter tebal rapat, sudut tajam tanpa bayangan, tombol utama hitam dengan panah garis. Sidebar gaya
-"IMMERSIVE FACTORY": blok wordmark **TERTORTOR LITE®** oranye-kuning dengan subjudul + garis bertitik, panel terang, judul
-bagian = kotak hitam + garis, item besar dengan kotak warna. Token di `:root`, override di blok "Gaya Swiss" dan blok sidebar
-di akhir `<style>` `tools/studio/index.html`; komponen baru ikut token itu. Kartu video mengikuti rasio videonya (`ratio`
+**Tampilan** (user 2026-11-21, acuan editor video Clideo): **tema gelap default** (`tt_theme` di localStorage, tombol bulan
+untuk terang), panel membulat lembut (radius 12-22 px), tombol pil, tombol utama gradasi teal `#19C2CD → #2BDDB0`, ikon rel
+editor dalam lingkaran (aktif = gradasi), logo segitiga play gradasi + wordmark TERTORTOR LITE. Token di `:root` /
+`[data-theme="dark"]` dan blok "Gaya Clideo" di akhir `<style>` `tools/studio/index.html` (menimpa gaya Swiss lama di atasnya); komponen baru ikut token itu. Kartu video mengikuti rasio videonya (`ratio`
 dari server → `--ar`), kartu tanpa thumbnail memakai `poster.jpg` kecil (bukan `<video preload>`). `/api/videos` di-cache
 per folder (berubah = dihitung ulang) dan pindah menu menggambar dari daftar yang sudah dimuat lalu menyegarkan di belakang.
 **Layout satu halaman** (user 2026-11-20): tanpa sidebar. Baris atas = logo + tombol "Buat video" (dropdown: tipe video →

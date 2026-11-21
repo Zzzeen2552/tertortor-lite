@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id" data-theme="light">
+<html lang="id" data-theme="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -7,13 +7,13 @@
 <link rel="icon" href="/favicon.ico" sizes="any" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png" />
-<meta name="theme-color" content="#FFA114" />
+<meta name="theme-color" content="#0E1014" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="TERTORTOR" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
-<script>try { const t = localStorage.getItem("motion_theme"); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<script>try { const t = localStorage.getItem("tt_theme"); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
 <style>
 /* Bahasa visual TERTORTOR (user 2026-11-17, acuan "LIQUID ACADEMY"): Swiss/editorial. Blok oranye penuh, hairline hitam,
    panel abu sangat terang, grotesk tebal rapat (Inter), sudut tajam, tanpa bayangan lembut. Override komponen di akhir <style>. */
@@ -283,7 +283,6 @@ select.sel,input[list]{width:100%;background:var(--panel);border:1px solid var(-
 .chat-f{display:flex;gap:8px;padding:10px 12px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
 .chat-f textarea{flex:1;resize:none;min-height:44px;max-height:160px;font:14px/1.45 inherit;padding:10px 12px;border-radius:14px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--fg)}
 /* ===== Gaya Swiss/editorial (user 2026-11-17): menimpa komponen di atas. Fungsi tidak berubah. ===== */
-*:not(.tone):not(.live):not(.chat-fab):not(.chat-fab .dot):not([style*="50%"]){border-radius:0!important}
 body{letter-spacing:-.005em}
 ::selection{background:var(--accent);color:#111}
 :focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -613,6 +612,129 @@ a.preset:hover{border-color:var(--rule)}
   .ed2 .stage{height:auto;width:100%;min-height:0}
   .ed2 .stage-wrap{width:100%}
 }
+/* ===== Gaya "Clideo" (user 2026-11-21): editor video gelap, panel membulat lembut, tombol pil, aksen teal bergradasi,
+   ikon rel dalam lingkaran. Menimpa gaya Swiss di atas; tema terang tetap tersedia lewat tombol bulan. ===== */
+:root{
+  --bg:#F2F4F5; --panel:#FFFFFF; --panel-2:#EBEEF0; --line:#E0E4E7; --line-2:#CBD1D6; --rule:#D5DADF;
+  --fg:#12161A; --muted:#5F6B76; --dim:#8D98A2;
+  --accent:#17B8C4; --accent-2:#22D3A6; --accent-ink:#061214; --accent-text:#0B8F99; --accent-soft:rgba(23,184,196,.12);
+  --sel:#12161A; --sel-ink:#FFFFFF; --grad:linear-gradient(90deg,#17B8C4,#22D3A6);
+  --r:20px; --r-sm:12px; color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0E1014; --panel:#181B20; --panel-2:#20242A; --line:#272B31; --line-2:#353A42; --rule:#2B3036;
+  --fg:#E8EDF1; --muted:#98A2AC; --dim:#6B747D;
+  --accent:#19C2CD; --accent-2:#2BDDB0; --accent-text:#4FD6DF; --accent-soft:rgba(25,194,205,.14);
+  --sel:#E8EDF1; --sel-ink:#0E1014; color-scheme:dark;
+}
+body{background:var(--bg);letter-spacing:0}
+.eyebrow{color:var(--muted)}
+/* baris atas */
+.top{background:var(--bg);border-bottom:0;padding:10px 16px;gap:16px;align-items:center}
+.top .brand{background:none;border:0;padding:4px 6px;flex-direction:row;align-items:center;gap:10px;color:var(--fg)}
+.top .brand::before{content:"";width:34px;height:34px;border-radius:9px;background:var(--grad);clip-path:polygon(18% 8%,92% 50%,18% 92%);flex:none}
+.top .brand b{color:var(--fg);font-size:21px;font-weight:700;letter-spacing:-.03em}
+.top .brand sup{display:none}
+.top .brand small{display:none}
+.mk{padding:0}
+.top-r{padding:0}
+.top-r .icon-btn,.icon-btn{border:0;background:var(--panel-2);border-radius:999px;width:38px;height:38px;color:var(--fg)}
+.top-r .icon-btn:hover{background:var(--line-2);color:var(--fg)}
+.live{box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
+/* tombol */
+.btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--fg);border-radius:999px;font-weight:500;padding:9px 18px}
+.btn:hover{background:var(--line-2);color:var(--fg);border-color:var(--line-2)}
+.btn.pri{background:var(--grad);color:#fff;border:0;font-weight:600;box-shadow:0 6px 20px -8px rgba(25,194,205,.6)}
+.btn.pri::after{content:none}
+.btn.pri:hover{filter:brightness(1.08);background:var(--grad);color:#fff}
+.btn.sm{padding:6px 13px}
+.cmd{border:1px solid var(--line-2);background:var(--panel);border-radius:999px;padding:5px 5px 5px 14px}
+.cmd .btn{padding:5px 12px}
+.pill{border-radius:999px;border-color:var(--line-2)}
+.pill.acc{background:var(--accent-soft);border-color:transparent;color:var(--accent-text)}
+.pill.ok{background:color-mix(in srgb,var(--ok) 12%,transparent);border-color:transparent}
+/* menu Buat video */
+.mk-menu{border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 24px 60px -20px rgba(0,0,0,.6);top:calc(100% + 10px)}
+.mk-cats{border-right:1px solid var(--line)}
+.mk-cats button{border-bottom:0;border-radius:12px;margin:2px 6px;width:calc(100% - 12px)}
+.mk-cats button.on{box-shadow:none;background:var(--accent-soft);color:var(--accent-text)}
+.mk-sub{border-bottom:0;border-radius:12px;margin:2px 6px}
+.mk-sub img,.mk-sub .ph{border-radius:10px;border:0}
+/* kepala halaman, kartu, panel */
+.one-h{border-bottom:0;padding-bottom:4px}
+.one-h h1{font-weight:700;letter-spacing:-.03em}
+.vh{border-bottom:0} .vh::before,.vh::after{content:none}
+.vh h1{font-weight:700;letter-spacing:-.04em}
+.grp-h{border-top:0} .grp-h h2::before{border-radius:3px;background:var(--grad)}
+.panel,.card,.ocard,.empty,.notice,.stats,.stat,.preset,.shot,.prompt,.drop,#fmtBody,.mk-menu{border-radius:var(--r)}
+.panel,.card,.empty{border:1px solid var(--line);background:var(--panel)}
+.panel-h{border-bottom:1px solid var(--line)}
+.stats{background:transparent;border:0;gap:14px}
+.stats .stat{border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.card{overflow:hidden}
+.card:hover{border-color:var(--accent)}
+.card-b{border-top:0}
+.cover{border-radius:0}
+.cnt,.wip,.buffered{border-radius:999px}
+.prog{border-radius:99px;overflow:hidden} .prog i{background:var(--grad)}
+.notice,.notice.ok,.notice.work{border:1px solid var(--line);border-left-width:1px;background:var(--panel-2)}
+.notice{box-shadow:inset 3px 0 0 var(--warn)} .notice.ok{box-shadow:inset 3px 0 0 var(--ok)} .notice.work{box-shadow:inset 3px 0 0 var(--accent)}
+.preset{border-radius:16px;overflow:hidden}
+.preset .cov{border-radius:0}
+.tabs{border-bottom:1px solid var(--line)}
+.tabs button,.tabs a{border-radius:0}
+.tabs button.on,.tabs a.on{border-bottom-color:var(--accent);color:var(--fg)}
+textarea,input[type=text],input[type=password],select,select.sel,input[list],input[type=number]{border:1px solid var(--line-2);background:var(--panel-2);border-radius:10px;color:var(--fg)}
+textarea:focus,input[type=text]:focus,input[type=password]:focus,select:focus{border-color:var(--accent);outline:none}
+.seg{border-radius:999px;overflow:hidden;border-color:var(--line-2)}
+.seg label:has(input:checked){background:var(--accent);color:var(--accent-ink)}
+.chip{border-radius:999px}
+.toast,.donebox{border-radius:14px;border-left:0;background:var(--panel-2);color:var(--fg);box-shadow:0 18px 40px -16px rgba(0,0,0,.6)}
+.pop .box,.modal .panel{border-radius:22px;border:1px solid var(--line)}
+.pop .box{box-shadow:0 30px 80px -20px rgba(0,0,0,.7)}
+.modal,.pop{background:rgba(5,7,9,.65);backdrop-filter:blur(4px)}
+.chat-fab{background:var(--grad);border:0;color:#fff}
+.chat{border-left:1px solid var(--line);background:var(--bg)}
+.chat-h{background:var(--panel);color:var(--fg);border-bottom:1px solid var(--line)} .chat-h small{color:var(--muted)}
+.chat-h .btn,.chat-h .icon-btn{border-color:var(--line-2);color:var(--fg)}
+/* editor */
+.ed2{border:0;background:transparent;gap:16px;grid-template-columns:84px auto minmax(0,1fr)}
+.ed2[data-p=""]{grid-template-columns:84px minmax(0,1fr)}
+.rail{background:transparent;border:0;padding:4px 0;gap:6px}
+.rail button{color:var(--muted);font-size:12px;font-weight:500;gap:8px;padding:6px 0;border-radius:0}
+.rail button svg{width:46px;height:46px;padding:12px;border-radius:999px;background:var(--panel-2);color:var(--fg);transition:background .15s}
+.rail button:hover{background:none;color:var(--fg)} .rail button:hover svg{background:var(--line-2)}
+.rail button[aria-pressed="true"]{background:none;box-shadow:none;color:var(--accent-text)}
+.rail button[aria-pressed="true"] svg{background:var(--grad);color:#fff}
+.rail hr{border-top-color:var(--line);margin:4px 14px}
+.ed2-panel{border:1px solid var(--line);border-radius:22px;background:var(--panel);overflow:auto}
+.ed2-panel .ocard-h{background:var(--panel);border-bottom:1px solid var(--line);border-radius:22px 22px 0 0;padding:16px 18px}
+.ocard > .ocard-h{border-bottom:1px solid var(--line);font-weight:600;letter-spacing:-.01em}
+.pclose{border:0;background:var(--panel-2);border-radius:999px;width:30px;height:30px}
+.pclose:hover{background:var(--line-2);color:var(--fg)}
+.ed2-stage{background:transparent;padding:0}
+.ed2 .stage,.stage{border:0;border-radius:22px;background:#000;box-shadow:0 20px 60px -24px rgba(0,0,0,.65)}
+.stage.ph{color:var(--dim)}
+.vmenu{top:14px;right:14px}
+.vmenu-btn{border-radius:999px;border:0;background:rgba(14,16,20,.55)}
+.vmenu-btn:hover,.vmenu-btn[aria-expanded="true"]{background:var(--grad);color:#fff}
+.vmenu-list{border-radius:16px;overflow:hidden;background:#15181C;border-color:#2B3036;box-shadow:0 24px 60px -20px rgba(0,0,0,.7)}
+.vmenu-list [role=menuitem]{border-radius:10px;margin:0 6px}
+.tline{border-radius:14px;overflow:hidden}
+.tb{border-radius:8px}
+.c-hf{border-radius:22px;overflow:hidden}
+.c-hf iframe{border:0;border-radius:14px}
+.blist li.on{box-shadow:inset 3px 0 0 var(--accent);background:var(--accent-soft)}
+.btab th{color:var(--muted);border-bottom-color:var(--line)}
+@media (max-width:900px){
+  .ed2,.ed2[data-p=""]{grid-template-columns:minmax(0,1fr);gap:12px}
+  .rail{border:0}
+  .rail button{min-width:72px}
+  .rail button[aria-pressed="true"]{box-shadow:none}
+  .rail button svg{width:42px;height:42px;padding:11px}
+  .ed2-panel{border-top:1px solid var(--line)}
+  .top{padding:8px 12px}
+}
 </style>
 </head>
 <body>
@@ -819,7 +941,7 @@ pushSetup();
 $("#theme").onclick = () => {
   const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   document.documentElement.dataset.theme = t;
-  try { localStorage.setItem("motion_theme", t); } catch {}
+  try { localStorage.setItem("tt_theme", t); } catch {}
 };
 
 // style tree from /api/structure: Video Explainer → preset, Storytelling → channel, Advertisement → product
