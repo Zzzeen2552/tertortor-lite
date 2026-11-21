@@ -16,5 +16,11 @@
     "narration": false,
     "engine": "hyperframes",
     "description": "Film rekap sinematik + motion graphic data: footage asli acara di-grade, angka besar yang dihitung naik, funnel, papan Top 20, timeline, kartu logo mitra. Teks Thai + subtitle Inggris (SRT). Master 16:9, versi 9:16 dan 1:1 disusun ulang dari data yang sama."
+  },
+  {
+    "id": "sport-strava",
+    "label": "Sport Strava",
+    "draft": true,
+    "description": "video short kegiatan olahraga kalcer"
   }
 ]
