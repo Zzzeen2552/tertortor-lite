@@ -38,7 +38,7 @@ dan menampilkan perintah untuk Claude. Ruang Produksi dan sidebar mengelompokkan
 (Storytelling) Library cerita. Footage: `npm run library -- add … --for <kategori>/<sub>` (selalu isi `--for`).
 **Tampilan** (user 2026-11-21, acuan editor video Clideo): **tema gelap default** (`tt_theme` di localStorage, tombol bulan
 untuk terang), panel membulat lembut (radius 12-22 px), tombol pil, tombol utama gradasi teal `#19C2CD → #2BDDB0`, ikon rel
-editor dalam lingkaran (aktif = gradasi), logo segitiga play gradasi + wordmark TERTORTOR LITE. Token di `:root` /
+editor dalam lingkaran (aktif = gradasi), logo tulisan tangan "Tertortor." (user 2026-11-21: mask PNG transparen di `.ttlogo`, warnanya ikut tema, plus label kecil LITE). Token di `:root` /
 `[data-theme="dark"]` dan blok "Gaya Clideo" di akhir `<style>` `tools/studio/index.html` (menimpa gaya Swiss lama di atasnya); komponen baru ikut token itu. Kartu video mengikuti rasio videonya (`ratio`
 dari server → `--ar`), kartu tanpa thumbnail memakai `poster.jpg` kecil (bukan `<video preload>`). `/api/videos` di-cache
 per folder (berubah = dihitung ulang) dan pindah menu menggambar dari daftar yang sudah dimuat lalu menyegarkan di belakang.
