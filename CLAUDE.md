@@ -48,8 +48,8 @@ rel ikon kiri (Naskah, Suara, Beat, Aset, Thumbnail, Tebar) membuka satu panel s
 panel (diingat di `localStorage tt_panel`); video besar di tengah setinggi layar dengan timeline beat di bawahnya, menu ⋮ di
 kanan atas pemutar (link, ubah format, unduh, hapus). Kartu Naskah berisi tab tahap lain; Suara, Beat, Aset (`CARD_TABS`),
 Thumbnail, dan Tebar masing-masing panel sendiri. Tombol **Production** juga muncul di tab Naskah setelah naskah disetujui
-(Storytelling: event `production`; Explainer: event `explainer-production`). Ikon **HyperFrames** mengganti layar tengah
-dengan HyperFrames Studio proyek itu dalam iframe (`/api/videos/<slug>/hf-preview`, GET status / POST nyalakan `npx hyperframes preview --background`).
+(Storytelling: event `production`; Explainer: event `explainer-production`). Di bawah video selalu ada
+HyperFrames Studio proyek itu dalam iframe (`/api/videos/<slug>/hf-preview`, GET status / POST nyalakan `npx hyperframes preview --background`).
 
 **Video referensi** dianalisis `npm run ref` (yt-dlp, shot, gerak, transkrip). Claude menulis `analysis.md` dan 2-3 konsep
 di `concepts.json`; user memilih di tab "Konsep" sebelum naskah. Alurnya di `.claude/skills/video-vertikal/reference.md`.

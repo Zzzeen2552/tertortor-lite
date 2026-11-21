@@ -596,8 +596,7 @@ a.preset:hover{border-color:var(--rule)}
 .ed2 .stage{height:calc(100vh - 290px);min-height:380px;width:auto;max-width:100%;margin:0 auto}
 .ed2.cine .stage-wrap{width:100%}
 .ed2.cine .stage{width:100%;height:auto;aspect-ratio:16/9;max-height:calc(100vh - 290px);min-height:0}
-.ed2:not(.hfmode) .c-hf{display:none}
-.ed2.hfmode > .ed2-stage > .c-video{display:none}
+.ed2-stage > .c-video{order:0} .ed2-stage > .c-hf{order:1}
 .ed2 .c-hf{margin:0;border:1px solid var(--line)}
 .ed2 .c-hf iframe{height:calc(100vh - 300px)}
 @media (max-width:900px){
@@ -1869,8 +1868,6 @@ async function viewEditor(slug, startTab) {
       <button type="button" data-rail="naskah" aria-pressed="false" title="Naskah"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg><span>Naskah</span></button>
       ${isA ? "" : `<button type="button" data-rail="suara" aria-pressed="false" title="Suara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Suara</span></button>`}
       <button type="button" data-rail="beat" aria-pressed="false" title="Beat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18V10M9 18V6M14 18v-8M19 18V4"/></svg><span>Beat</span></button><button type="button" data-rail="aset" aria-pressed="false" title="Aset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg><span>Aset</span></button><button type="button" data-rail="thumb" aria-pressed="false" title="Thumbnail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg><span>Thumbnail</span></button><button type="button" data-rail="tebar" aria-pressed="false" title="Tebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l16-8-6 16-3-7z"/></svg><span>Tebar</span></button>
-      <hr>
-      <button type="button" data-hf aria-pressed="false" title="Ganti layar tengah ke HyperFrames Studio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span>HyperFrames</span></button>
     </nav>
     <aside class="ed2-panel" id="edPanel">
       <div class="ocard c-script" data-panel="naskah"><div class="ocard-h">Naskah<small>dan tahap produksi</small></div>
@@ -2941,8 +2938,6 @@ async function viewEditor(slug, startTab) {
   ed2.querySelectorAll("[data-rail]").forEach((b) => (b.onclick = () => setPanel(ed2.dataset.p === b.dataset.rail ? "" : b.dataset.rail)));
   ed2.querySelectorAll("[data-panel] > .ocard-h").forEach((h) => h.insertAdjacentHTML("beforeend", '<button type="button" class="pclose" aria-label="Sembunyikan panel" title="Sembunyikan panel">×</button>'));
   ed2.querySelectorAll(".pclose").forEach((b) => (b.onclick = () => setPanel("")));
-  const hfBtn = ed2.querySelector("[data-hf]");
-  if (hfBtn) hfBtn.onclick = () => { const on = !ed2.classList.contains("hfmode"); ed2.classList.toggle("hfmode", on); hfBtn.setAttribute("aria-pressed", String(on)); if (on) $("#stage")?.pause(); };
   let savedPanel = "naskah"; try { const x = localStorage.getItem("tt_panel"); if (x !== null) savedPanel = x; } catch {}
   setPanel(savedPanel);
   const firstTab = v.aws ? "aws" : v.clone ? "clone" : isM ? (v.waiting === "Setujui draft" || v.musafo.draftApproval.needed && !v.musafo.draftApproval.approved ? "draft" : v.waiting === "Setujui storyline" || !v.musafo.storylineApproval.approved && !v.musafo.shots.length ? "storyline" : "naskah") : hasRef && !v.concept && v.scriptState === "none" ? "konsep" : isA ? "brief" : "naskah";
