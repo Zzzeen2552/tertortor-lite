@@ -1415,7 +1415,7 @@ function viewNewMusafo(channelId) {
 // ---------- Advertisement (tools/ad.mjs): product angles + logo + optional model + CTA → Claude writes ad.json ----------
 // ---------- Cinematic (user 2026-11-09): procedural Blender short, no narration; Claude writes shotlist + scene ----------
 function viewNewCinematic(lookId) {
-  if (lookId === "aws") return viewNewAws();
+  return viewNewAws(lookId); // semua gaya Cinematic memakai alur AWS (user 2026-11-21)
   const cat = catOf("cinematic"), lk = cat.subs.find((s) => s.id === lookId);
   const files = [];
   $("#main").innerHTML = `
@@ -1475,8 +1475,8 @@ function viewNewCinematic(lookId) {
 
 // ---------- Animation (user 2026-11-12): one classic animation style, no narration, everything in code ($0) ----------
 // ---------- AWS (user 2026-11-17): cinematic recap + data motion graphics from a client brief, real footage, Thai + EN ----------
-function viewNewAws() {
-  const cat = catOf("cinematic"), lk = cat.subs.find((s) => s.id === "aws");
+function viewNewAws(lookId = "aws") {
+  const cat = catOf("cinematic"), lk = cat.subs.find((s) => s.id === lookId) ?? cat.subs.find((s) => s.id === "aws");
   const bins = { reference: [], footage: [], logos: [] };
   $("#main").innerHTML = `
     <div class="vh"><div><div class="eyebrow">Proyek baru · ${esc(cat.label)}</div><h1>${esc(lk.label)}</h1><p>${esc(lk.description || "")}</p></div></div>
@@ -1487,7 +1487,7 @@ function viewNewAws() {
         <div class="fld"><label for="idea">Brief · tujuan, alur, angka kunci</label><textarea id="idea" rows="7" placeholder="Tempel brief klien, atau tulis singkat: tujuan, penonton, alur per detik, angka yang tampil (boleh TBC), logo penutup, bahasa." required></textarea><span class="hint">Angka yang belum pasti tulis TBC: tampil sebagai kotak putus-putus sampai angkanya diisi.</span></div>
         <div class="fld"><span class="lb">Format master</span><div class="seg">
           <label><input type="radio" name="format" value="horizontal" checked>16:9</label><label><input type="radio" name="format" value="vertical">9:16</label><label><input type="radio" name="format" value="square">1:1</label></div>
-          <span class="hint">Versi rasio lain dibuat ulang dari data yang sama di tab AWS (bukan dipotong).</span></div>
+          <span class="hint">Versi rasio lain dibuat ulang dari data yang sama di tab ${esc(lk.label)} (bukan dipotong).</span></div>
         ${[["reference", "File brief (opsional)", ".docx,.pdf,.txt,.md,image/*", "Dokumen brief klien, storyboard, atau contoh gaya."], ["footage", "Footage (opsional, bisa nanti)", "video/*,image/*", "Video/foto asli acara. Bisa juga diunggah per slot di tab AWS setelah Claude menyusun adegan."], ["logos", "Logo (opsional)", "image/png,image/svg+xml,image/jpeg", "PNG transparan, satu file per mitra."]].map(([k, lb, acc, hint]) => `
         <div class="fld"><span class="lb">${lb}</span>
           <div class="drop" data-bin="${k}">Tarik file ke sini atau klik<input type="file" accept="${acc}" multiple></div>
@@ -1498,7 +1498,7 @@ function viewNewAws() {
         <div class="panel-h">Cara kerjanya</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
           <li><b>Claude</b> membaca brief, menyusun data (angka, label Thai + Inggris) dan adegan per detik, lalu membuat <b>animatic</b>: slot footage berlabel, angka TBC.</li>
-          <li><b>Kamu</b> mengunggah footage per slot dan mengisi angka final di tab AWS.</li>
+          <li><b>Kamu</b> mengunggah footage per slot dan mengisi angka final di tab ${esc(lk.label)}.</li>
           <li><b>Render</b> master, lalu 9:16 + 1:1 disusun ulang dari data yang sama. Subtitle Inggris jadi file SRT.</li>
           <li><b>Paket After Effects</b>: plate footage, grafis alpha, stem audio, dan skrip .jsx yang membuat semua teks dan angka jadi text layer yang bisa diedit.</li>
         </ol>
@@ -1517,7 +1517,7 @@ function viewNewAws() {
     e.preventDefault();
     const go = $("#go"); go.disabled = true; go.textContent = "Menyimpan…";
     try {
-      const r = await fetch("/api/videos", { method: "POST", body: JSON.stringify({ type: "cinematic", look: "aws", title: $("#title").value, idea: $("#idea").value, format: $("input[name=format]:checked").value, wait: true }) });
+      const r = await fetch("/api/videos", { method: "POST", body: JSON.stringify({ type: "cinematic", look: lk.id, title: $("#title").value, idea: $("#idea").value, format: $("input[name=format]:checked").value, wait: true }) });
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
       for (const [k, list] of Object.entries(bins)) for (const f of list) { go.textContent = `Mengunggah ${f.name}…`; await fetch(`/api/videos/${j.slug}/upload?kind=${k}&name=${encodeURIComponent(f.name)}`, { method: "PUT", body: f }); }
       await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
@@ -1893,7 +1893,7 @@ async function viewEditor(slug, startTab) {
           <button data-t="naskah">Naskah ${v.approval.approved && v.scriptState !== "old" ? "<span>✓</span>" : ""}</button>
           <button data-t="shot">Shot <span>${v.musafo.shots.length}</span></button>
 ` : `<button data-t="brief">Brief</button>
-          ${v.aws ? `<button data-t="aws">AWS <span>${v.awsData?.tbc.length ? v.awsData.tbc.length + " TBC" : "✓"}</span></button>` : ""}
+          ${v.aws ? `<button data-t="aws">${esc(v.lookLabel || "AWS")} <span>${v.awsData?.tbc.length ? v.awsData.tbc.length + " TBC" : "✓"}</span></button>` : ""}
           ${v.clone ? `<button data-t="clone">Clone <span>${v.cloneData?.shots.length || "–"}${v.cloneData?.approval?.approved ? " ✓" : ""}</span></button>` : ""}
           ${hasRef ? `<button data-t="konsep">Konsep <span>${v.concept ? esc(v.concept.id) : v.concepts.concepts.length || "–"}</span></button>` : ""}
           ${isA ? "" : `<button data-t="naskah">Naskah</button>`}

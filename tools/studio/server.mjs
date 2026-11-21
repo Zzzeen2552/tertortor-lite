@@ -20,7 +20,7 @@ import { VARIANT_KINDS } from "../lib.mjs";
 const formatJobs = new Map(); // slug -> running tools/formats.mjs child
 import { share, revoke, shareInfo } from "../share.mjs";
 import { listBooks, loadBook, useStory, readJob, listChannels, addChannel, channelOf, fetchArticle, sourceToLibrary } from "../stories.mjs";
-import { structure, placeOf, clipPlaces, addSub, subDir, listProducts } from "../categories.mjs";
+import { structure, placeOf, clipPlaces, addSub, subDir, listProducts, listLooks } from "../categories.mjs";
 import { isAd, loadAd, create as createAd, importAsset, ASSET_KINDS, importAudio, AUDIO_KINDS } from "../ad.mjs";
 import { isAws, awsInfo, setSlot as awsSetSlot } from "../aws.mjs";
 import { channelLogo, logoFile, saveLogo, removeLogo } from "../brandmark.mjs";
@@ -255,7 +255,8 @@ function awsStage(slug, d) {
     steps, progress: steps.filter((s) => s.ok).length / steps.length, next: steps.find((s) => !s.ok)?.name ?? "Selesai",
     video: f(`out/${slug}.mp4`), sheet: f("out/contact-sheet.png"), cover: f("out/cover.jpg"),
     keyvisuals: [], reference: [], idea: req.idea ?? "",
-    preset: "aws", draftVoice: false, scriptState: "none", waiting: null, ad: true, cinematic: true,
+    preset: meta.preset || "aws", draftVoice: false, scriptState: "none", waiting: null, ad: true, cinematic: true,
+    look: meta.look || "aws", lookLabel: listLooks().find((l) => l.id === (meta.look || "aws"))?.label ?? "AWS",
     aws: true, awsData: info, awsJob: awsJobs.get(slug)?.kind ?? null,
     wide: (meta.format ?? "vertical") === "horizontal",
   };
@@ -639,17 +640,18 @@ createServer(async (req, res) => {
         return send(res, 200, { slug, library });
       }
       if (body.type === "cinematic") {
-        // Cinematic form: only the AWS look here. tools/aws.mjs new makes the folder, brief/footage/logo files follow as
-        // uploads, then /ready wakes Claude (cinematic-new) to write aws.json and the first animatic
-        if (body.look !== "aws") return send(res, 400, { error: "Gaya Cinematic ini tidak ada." });
+        // Cinematic form: every look follows the AWS workflow (user 2026-11-21). tools/aws.mjs new --look makes the folder,
+        // brief/footage/logo files follow as uploads, then /ready wakes Claude (cinematic-new) to write aws.json and the animatic
+        const look = String(body.look || "aws");
+        if (!listLooks().some((l) => l.id === look)) return send(res, 400, { error: "Gaya Cinematic ini tidak ada." });
         const title = String(body.title || "").trim().slice(0, 100), idea = String(body.idea || "").trim().slice(0, 4000);
         if (!title || !idea) return send(res, 400, { error: "Judul dan ide wajib diisi." });
         let slug = slugify(title);
         for (let i = 2; existsSync(join(VIDEOS, slug)); i++) slug = `${slugify(title)}-${i}`;
         const fmt = ["horizontal", "vertical", "square"].includes(body.format) ? body.format : "horizontal";
-        const r = spawnSync("node", [join(ROOT, "tools", "aws.mjs"), "new", slug, title, "--format", fmt, "--idea", idea], { encoding: "utf8" });
+        const r = spawnSync("node", [join(ROOT, "tools", "aws.mjs"), "new", slug, title, "--format", fmt, "--idea", idea, "--look", look], { encoding: "utf8" });
         if (r.status !== 0) return send(res, 400, { error: (r.stderr || r.stdout || "gagal").trim() });
-        if (!body.wait) emit("cinematic-new", slug, { look: "aws" });
+        if (!body.wait) emit("cinematic-new", slug, { look });
         return send(res, 200, { slug });
       }
       if (body.type === "advertisement") {
@@ -813,7 +815,7 @@ createServer(async (req, res) => {
       return send(res, 200, { ok: true });
     }
     if (ready && req.method === "POST" && isAws(join(VIDEOS, ready[1]))) {
-      emit("cinematic-new", ready[1], { look: "aws" });
+      emit("cinematic-new", ready[1], { look: JSON.parse(readFileSync(join(VIDEOS, ready[1], "meta.json"), "utf8")).look || "aws" });
       return send(res, 200, { ok: true });
     }
     if (ready && req.method === "POST") {

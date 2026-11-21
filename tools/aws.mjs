@@ -38,25 +38,33 @@ const r1 = (n) => Math.round(n * 10) / 10;
 const esc = (s = "") => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const fmtN = (n) => Number(n).toLocaleString("en-US");
 const readMeta = (dir) => (existsSync(join(dir, "meta.json")) ? readJSON(join(dir, "meta.json")) : {});
-export const isAws = (dir) => { const m = readMeta(dir); return m.type === "cinematic" && m.look === "aws"; };
+// Semua gaya Cinematic memakai alur kerja AWS (user 2026-11-21): mesin, aws.json, tab, render, 9:16 + 1:1, paket After
+// Effects. Gaya baru punya preset sendiri di presets/<look>/ (disalin dari presets/aws saat dibuat); berkas yang tidak ada di
+// sana diambil dari presets/aws. Font Amazon Ember berlisensi tetap hanya di presets/aws/fonts/ember/.
+export const isAws = (dir) => readMeta(dir).type === "cinematic";
+const lookOfDir = (dir) => readMeta(dir).look || "aws";
+export const presetDirOf = (look) => (look && existsSync(join(ROOT, "presets", look, "preset.json")) ? join(ROOT, "presets", look) : join(ROOT, "presets", "aws"));
+const presetFile = (look, ...p) => { const own = join(presetDirOf(look), ...p); return existsSync(own) ? own : join(ROOT, "presets", "aws", ...p); };
 export const loadAws = (dir) => (existsSync(join(dir, "aws.json")) ? readJSON(join(dir, "aws.json")) : null);
 const VIDEO_EXT = new Set([".mp4", ".mov", ".webm", ".m4v"]);
 
 // ---------- new ----------
-export function create(slug, title, { format = "horizontal", idea = "" } = {}) {
+export function create(slug, title, { format = "horizontal", idea = "", look = "aws" } = {}) {
   if (!FRAMES[format]) die("--format harus horizontal, vertical, atau square");
-  const r = spawnSync("node", [join(ROOT, "tools", "new.mjs"), slug, title, "--preset", "aws", "--format", format], { encoding: "utf8" });
+  if (!/^[a-z0-9-]+$/.test(look)) die("--look tidak valid");
+  const preset = presetDirOf(look).split(/[\\/]/).pop();
+  const r = spawnSync("node", [join(ROOT, "tools", "new.mjs"), slug, title, "--preset", preset, "--format", format], { encoding: "utf8" });
   if (r.status !== 0) die(r.stderr || r.stdout);
   const dir = join(ROOT, "videos", slug);
-  writeJSON(join(dir, "meta.json"), { ...readJSON(join(dir, "meta.json")), type: "cinematic", look: "aws", watermark: false });
+  writeJSON(join(dir, "meta.json"), { ...readJSON(join(dir, "meta.json")), type: "cinematic", look, watermark: false });
   const idx = join(dir, "index.html");
   writeFileSync(idx, readFileSync(idx, "utf8").replace(/\s*<div id="captions"[\s\S]*?<\/div>/, "").replace(/\s*<audio id="voice"[^>]*><\/audio>/, "").replace("<!--@beats-end-->", "<!--@beats-end-->\n      <!--@sfx-->\n      <!--@sfx-end-->"));
   for (const f of ["beats.json", "script.md"]) rmSync(join(dir, f), { force: true });
   for (const d of ["assets/footage", "assets/logos", "assets/music", "assets/reference"]) mkdirSync(join(dir, d), { recursive: true });
-  writeJSON(join(dir, "request.json"), { type: "cinematic", look: "aws", title, idea, format, created: new Date().toISOString() });
+  writeJSON(join(dir, "request.json"), { type: "cinematic", look, title, idea, format, created: new Date().toISOString() });
   writeJSON(join(dir, "aws.json"), { title, source: { th: "", en: "" }, music: { vol: 0.8 }, data: {}, scenes: [] });
   writeFileSync(join(dir, "sources.txt"), "");
-  writeFileSync(join(dir, "brief.md"), `# Brief: ${title}\n\n> Cinematic · AWS. Claude: baca cinematic/aws/style.md, tulis aws.json (data + adegan), lalu node tools/aws.mjs check ${slug}.\n\n## Ide / brief (dari user)\n\n${idea || "(kosong)"}\n`);
+  writeFileSync(join(dir, "brief.md"), `# Brief: ${title}\n\n> Cinematic · ${look === "aws" ? "AWS" : `${look} (alur AWS)`}. Claude: baca ${existsSync(join(ROOT, "cinematic", look, "style.md")) ? `cinematic/${look}/style.md` : "cinematic/aws/style.md"}${look === "aws" ? "" : " (gaya look ini; aturan alur tetap dari cinematic/aws/style.md)"}, tulis aws.json (data + adegan), lalu node tools/aws.mjs check ${slug}.\n\n## Ide / brief (dari user)\n\n${idea || "(kosong)"}\n`);
   return dir;
 }
 
@@ -880,7 +888,7 @@ ${aws.hud === false ? "" : `    // HUD: running timecode and the progress line o
     // the grade goes in as a file: inline JSON loses its quotes through the Windows shell
     const gf = join(dir, "build", "grade.json");
     mkdirSync(join(dir, "build"), { recursive: true });
-    writeFileSync(gf, JSON.stringify(aws.grade ?? readJSON(join(ROOT, "presets", "aws", "preset.json")).grade));
+    writeFileSync(gf, JSON.stringify(aws.grade ?? readJSON(presetFile(lookOfDir(dir), "preset.json")).grade ?? readJSON(join(ROOT, "presets", "aws", "preset.json")).grade));
     const g = spawnSync("npx", ["hyperframes", "media-treatment", "--project", dir, "--file", "compositions/film.html", "--selector", ".ftg", "--grading", gf, "--apply", "--json"], { encoding: "utf8", shell: process.platform === "win32" });
     if (g.status !== 0) console.log(`⚠ grade gagal: ${(g.stdout || g.stderr).slice(-400)}`);
   }
@@ -890,7 +898,7 @@ ${aws.hud === false ? "" : `    // HUD: running timecode and the progress line o
     const m = /^assets\/fonts\/([^/]+)$/.exec(ff.src ?? "");
     if (!m || existsSync(join(dir, ff.src))) continue;
     mkdirSync(join(dir, "assets", "fonts"), { recursive: true });
-    copyFileSync(join(ROOT, "presets", "aws", "fonts", m[1]), join(dir, ff.src));
+    copyFileSync(presetFile(lookOfDir(dir), "fonts", m[1]), join(dir, ff.src));
   }
 
   // ---------- audio ----------
@@ -907,7 +915,7 @@ ${aws.hud === false ? "" : `    // HUD: running timecode and the progress line o
       lines.push(`${mu.track}\tlagu berlisensi pilihan user/klien (${mu.license ?? "lisensi: isi aws.json → music.license"})`);
     } else {
       // temp score until the licensed track is chosen: the energy follows the brief (build, peak at the Top 20, ease off)
-      const base = readJSON(join(ROOT, "presets", "aws", "preset.json")).music;
+      const base = readJSON(presetFile(lookOfDir(dir), "preset.json")).music ?? readJSON(join(ROOT, "presets", "aws", "preset.json")).music;
       const secs = [], sc = aws.scenes;
       let a = 0;
       for (const s of sc) {
@@ -1060,8 +1068,9 @@ if (process.argv[1]?.endsWith("aws.mjs")) {
   if (cmd === "new") {
     if (!/^[a-z0-9-]+$/.test(slug)) die("slug hanya huruf kecil, angka, dan tanda minus");
     const title = rest[0] && !rest[0].startsWith("--") ? rest[0] : slug;
-    create(slug, title, { format: opt("--format", "horizontal"), idea: String(opt("--idea", "")).trim() });
-    console.log(`videos/${slug}: ${title} (AWS)`);
+    const look = opt("--look", "aws");
+    create(slug, title, { format: opt("--format", "horizontal"), idea: String(opt("--idea", "")).trim(), look });
+    console.log(`videos/${slug}: ${title} (${look === "aws" ? "AWS" : `${look}, alur AWS`})`);
   } else if (cmd === "build") build(slug);
   else if (cmd === "check") {
     const { errors, dir } = lint(slug);

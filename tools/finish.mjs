@@ -18,7 +18,7 @@ const final = join(out, `${slug}.mp4`);
 
 if (!process.argv.includes("--skip-render")) {
   // AWS (Cinematic look aws): film.html is generated from aws.json, so a render always starts from a fresh build
-  { const m = JSON.parse(readFileSync(join(dir, "meta.json"), "utf8")); if (m.type === "cinematic" && m.look === "aws") (await import("./aws.mjs")).build(slug); }
+  { const m = JSON.parse(readFileSync(join(dir, "meta.json"), "utf8")); if (m.type === "cinematic") (await import("./aws.mjs")).build(slug); }
   // the channel logo (uploaded or switched off after the last build) is refreshed in index.html before every render
   if (refreshWatermark(dir)) console.log("  watermark: logo channel, kiri atas");
   console.log("Rendering (HyperFrames)...");
