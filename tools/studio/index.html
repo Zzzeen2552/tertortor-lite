@@ -242,6 +242,7 @@ select.sel,input[list]{width:100%;background:var(--panel);border:1px solid var(-
 .wprog{display:flex;align-items:center;gap:10px;margin-top:8px} .wbar{flex:1;min-width:80px;height:8px;border-radius:8px;background:color-mix(in srgb,var(--line) 70%,transparent);overflow:hidden}
 .wbar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#19C2CD,#2BDDB0);transition:width .6s ease}
 .wsteps{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:12px} .wsteps span{padding:2px 8px;border-radius:20px;border:1px solid var(--line);opacity:.7}
+.busylock{opacity:.45;cursor:not-allowed;pointer-events:none}
 .wsteps span.on{opacity:1;border-color:#2BDDB0;color:#2BDDB0} .wsteps span.now{opacity:1;border-color:var(--accent);font-weight:600}
 .pop{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.45)} .pop[hidden]{display:none}
 .pop .box{background:var(--panel,var(--bg));color:var(--fg);border:1px solid var(--line);border-radius:14px;max-width:440px;width:100%;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
@@ -895,15 +896,48 @@ function paintWork() {
     const w = workingNow.find((x) => x.slug === el.dataset.workbar);
     el.innerHTML = w ? `<div class="notice work${claudeOn ? "" : " idle"}" style="margin:0 0 12px"><span><b>${esc(w.label)}…</b> sejak ${hhmm(w.since)} · perkiraan ${esc(etaText(w))}${progressHtml(w)}${claudeOn ? "" : `<br><span class="warn">${idleNote()}</span>`}</span></div>` : "";
   });
-  // the Production button is drawn once with the editor; keep it locked while that video's production runs
+  // the Production button is drawn once with the editor; keep it locked while Claude works on that video
   document.querySelectorAll("#prodGo[data-slug]").forEach((b) => {
-    const run = workingNow.some((x) => x.slug === b.dataset.slug && (x.type === "production" || x.type === "explainer-production"));
+    const w = workingNow.find((x) => x.slug === b.dataset.slug);
     if (b.textContent === "Memulai…") return;
-    b.disabled = run || !b.dataset.ready;
-    if (run) b.textContent = "Production berjalan…";
-    else if (b.textContent === "Production berjalan…") b.textContent = "Production";
+    b.disabled = !!w || !b.dataset.ready;
+    const busy = w ? (w.type === "production" || w.type === "explainer-production" ? "Production berjalan…" : "Tunggu Claude selesai…") : null;
+    if (busy) b.textContent = busy;
+    else if (/^(Production berjalan|Tunggu Claude selesai)…$/.test(b.textContent)) b.textContent = "Production";
+  });
+  applyLocks();
+}
+// Lock while Claude works (user 2026-11-22: "naskah sedang ditulis, tapi tombol setujui naskah masih aktif … di semua preset
+// dan channel"): while any process of the open video runs, every control that approves, starts, or saves what Claude is
+// writing is off, in every editor (explainer, Docucine, Storytelling, Clone, ads, AWS). Re-applied whenever a tab or card
+// re-renders (MutationObserver), and restored to its own state once the process is done. #prodGo has its own rule above.
+const LOCK_SEL = ["#approve", "#unapprove", "#bApprove", "#bUnapprove", "#clApprove", "#clUnapprove", "#slApprove", "#slSave",
+  "#drApprove", "#drSave", "#sSave", "#refRun", "[data-concept]", "[data-start-story]",
+  // rendering or remaking while Claude still changes voice, beats or scenes gives a broken video; a new voice choice too
+  "#thVideo", "#awsRender", "#kvRender", "#fmtRatioGo", "#vSave"].join(",");
+function applyLocks() {
+  const slug = document.querySelector("[data-workbar]")?.dataset.workbar;
+  const run = !!slug && workingNow.some((x) => x.slug === slug);
+  document.querySelectorAll(LOCK_SEL).forEach((b) => {
+    if (run) {
+      if (b.dataset.lockWas == null) b.dataset.lockWas = b.disabled ? "1" : "0";
+      b.disabled = true;
+      b.classList.add("busylock");
+      b.title = "Tunggu sampai Claude selesai mengerjakan video ini";
+    } else if (b.dataset.lockWas != null) {
+      b.disabled = b.dataset.lockWas === "1";
+      delete b.dataset.lockWas;
+      b.classList.remove("busylock");
+      b.removeAttribute("title");
+    }
   });
 }
+let lockQueued = false;
+new MutationObserver(() => {
+  if (lockQueued) return;
+  lockQueued = true;
+  requestAnimationFrame(() => { lockQueued = false; applyLocks(); });
+}).observe(document.body, { childList: true, subtree: true });
 async function pollWorking() {
   const s = await fetchWorking();
   if (!s) return;
