@@ -504,8 +504,8 @@ a.preset:hover{border-color:var(--rule)}
 .top-r .icon-btn{margin:0;color:var(--fg)} .top-r .icon-btn:hover{background:var(--fg);color:var(--accent)}
 .top-r form{display:contents}
 /* editor satu halaman */
-.one-h{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--rule)}
-.one-h h1{font-size:clamp(24px,3vw,38px);font-weight:800;letter-spacing:-.045em;line-height:1;margin:6px 0 10px}
+.one-h{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.one-h h1{font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-.045em;line-height:1;margin:4px 0 8px}
 .one{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,1fr) minmax(300px,340px);gap:14px;align-items:start}
 /* video horizontal (meta.json format "horizontal" → v.wide): pemutar 16:9 mendapat kolom tengah paling lebar */
 .one.cine{grid-template-columns:minmax(0,.85fr) minmax(0,1.7fr) minmax(0,.85fr)}
@@ -568,6 +568,50 @@ a.preset:hover{border-color:var(--rule)}
   .mk-menu{position:fixed;left:8px;right:8px;top:62px;grid-template-columns:1fr;max-height:75vh;overflow:auto}
   .mk-cats{border-right:0;border-bottom:1px solid var(--rule)}
   .c-hf iframe{height:70vh}
+}
+/* ===== Editor bergaya aplikasi edit video (user 2026-11-21, acuan Clideo): rel ikon kiri, satu panel yang bisa
+   disembunyikan, video besar di tengah dengan timeline beat di bawahnya; HyperFrames menggantikan layar tengah. ===== */
+.ed2{display:grid;grid-template-columns:72px auto minmax(0,1fr);border:1px solid var(--rule);background:var(--panel);min-height:calc(100vh - 230px)}
+.rail{display:flex;flex-direction:column;gap:2px;padding:8px 6px;border-right:1px solid var(--rule);background:var(--bg)}
+.rail button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 2px;border:0;background:none;color:var(--muted);font-size:10.5px;font-weight:600;letter-spacing:.01em}
+.rail button svg{width:22px;height:22px}
+.rail button:hover{color:var(--fg);background:var(--panel-2)}
+.rail button[aria-pressed="true"]{color:var(--fg);background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.rail hr{border:0;border-top:1px solid var(--line);margin:6px 4px}
+.ed2-panel{width:400px;border-right:1px solid var(--rule);max-height:calc(100vh - 150px);overflow:auto;align-self:stretch;background:var(--panel)}
+.ed2[data-p=""] .ed2-panel{display:none}
+.ed2[data-p=""]{grid-template-columns:72px minmax(0,1fr)}
+.ed2.pwide .ed2-panel{width:min(780px,55vw)}
+.ed2-panel > [data-panel]{border:0;background:none}
+.ed2-panel > [data-panel]:not(.on){display:none}
+.ed2-panel .ocard-h{position:sticky;top:0;z-index:2;background:var(--panel)}
+.ed2 .c-script{position:static;max-height:none}
+.ed2 .trio .ocard-b,.ed2-panel .ocard-b{max-height:none}
+.pclose{margin-left:6px;width:28px;height:28px;border:1px solid var(--line-2);background:none;color:var(--fg);font-size:18px;line-height:1;display:grid;place-items:center}
+.pclose:hover{background:var(--fg);color:var(--bg)}
+.ed2-stage{min-width:0;padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--panel-2)}
+.ed2-stage > .c-video{border:0;background:none}
+.ed2-stage > .c-video > .ocard-h{display:none}
+.ed2-stage .viewer{padding:0;max-width:none}
+.ed2 .stage-wrap{width:fit-content;max-width:100%;margin:0 auto}
+.ed2 .stage{height:calc(100vh - 290px);min-height:380px;width:auto;max-width:100%;margin:0 auto}
+.ed2.cine .stage-wrap{width:100%}
+.ed2.cine .stage{width:100%;height:auto;aspect-ratio:16/9;max-height:calc(100vh - 290px);min-height:0}
+.ed2:not(.hfmode) .c-hf{display:none}
+.ed2.hfmode > .ed2-stage > .c-video{display:none}
+.ed2 .c-hf{margin:0;border:1px solid var(--line)}
+.ed2 .c-hf iframe{height:calc(100vh - 300px)}
+@media (max-width:900px){
+  .ed2,.ed2[data-p=""]{grid-template-columns:minmax(0,1fr);min-height:0}
+  .rail{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--rule);order:0}
+  .rail button{flex:none;min-width:68px}
+  .rail button[aria-pressed="true"]{box-shadow:inset 0 -3px 0 var(--accent)}
+  .rail hr{border-top:0;border-left:1px solid var(--line);margin:4px 6px}
+  .ed2-stage{order:1}
+  .ed2-panel{order:2;width:auto;position:static;max-height:none;border-right:0;border-top:1px solid var(--rule)}
+  .ed2.pwide .ed2-panel{width:auto}
+  .ed2 .stage{height:auto;width:100%;min-height:0}
+  .ed2 .stage-wrap{width:100%}
 }
 </style>
 </head>
@@ -1698,7 +1742,45 @@ async function viewEditor(slug, startTab) {
   $("#main").innerHTML = `
     <div class="one-h"><div><div class="eyebrow">${esc(slug)}${v.duration ? " · " + fmt(v.duration) : ""}${v.beats.length ? " · " + v.beats.length + " beat" : ""}</div><h1>${esc(v.title)}</h1><div class="meta-row">${stepPills(v)}${isM || isA ? `<span class="pill acc">${esc(placeLabel(v))}</span>` : `<span class="pill">${esc(catOf(v.category)?.label ?? "")}</span><button class="pill acc" id="presetBtn" title="Ganti preset gaya dan color tone">Preset: ${esc(subOf(v)?.label ?? v.preset)}${v.accent ? ` <i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${esc(v.accent)};vertical-align:0"></i>` : ""}</button>`}</div></div>
       <div class="vh-r">${v.next !== "Selesai" ? cmdBox(slug, isM ? STORY[v.type].skill : isA ? (v.animation ? "animation" : v.preset) : undefined) : ""}${v.video ? `<button class="btn" id="shareBtn" title="Link yang bisa diputar tanpa login">${v.share ? (v.share.stale ? "Link: render lama" : "Link berbagi") : "Bagikan"}</button><a class="btn pri" href="${v.video}" download>Unduh MP4</a>` : ""}</div></div>
-    <div class="one${v.wide ? " cine" : ""}">
+    <div class="ed2${v.wide ? " cine" : ""}" id="ed2" data-p="">
+    <nav class="rail" aria-label="Panel editor">
+      <button type="button" data-rail="naskah" aria-pressed="false" title="Naskah"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg><span>Naskah</span></button>
+      ${isA ? "" : `<button type="button" data-rail="suara" aria-pressed="false" title="Suara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Suara</span></button>`}
+      <button type="button" data-rail="beat" aria-pressed="false" title="Beat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18V10M9 18V6M14 18v-8M19 18V4"/></svg><span>Beat</span></button><button type="button" data-rail="aset" aria-pressed="false" title="Aset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg><span>Aset</span></button><button type="button" data-rail="thumb" aria-pressed="false" title="Thumbnail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg><span>Thumbnail</span></button><button type="button" data-rail="tebar" aria-pressed="false" title="Tebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l16-8-6 16-3-7z"/></svg><span>Tebar</span></button>
+      <hr>
+      <button type="button" data-hf aria-pressed="false" title="Ganti layar tengah ke HyperFrames Studio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span>HyperFrames</span></button>
+    </nav>
+    <aside class="ed2-panel" id="edPanel">
+      <div class="ocard c-script" data-panel="naskah"><div class="ocard-h">Naskah<small>dan tahap produksi</small></div>
+        <div data-workbar="${slug}" style="padding:12px 12px 0"></div>
+        <div class="tabs" style="padding:0 10px;margin:0" id="tabs">
+          ${isM ? `<button data-t="brief">Brief</button>
+          ${v.musafo.draftApproval.needed || v.musafo.draft ? `<button data-t="draft">Draft ${v.musafo.draftApproval.approved ? "<span>✓</span>" : ""}</button>` : ""}
+          <button data-t="storyline">Storyline ${v.musafo.storylineApproval.approved ? "<span>✓</span>" : ""}</button>
+          ${v.type === "berakitkehulu" || v.musafo.charRefs.length || v.musafo.characters.length ? `<button data-t="tokoh">Tokoh <span>${v.musafo.characters.length ? v.musafo.characters.filter((c) => c.sheetUrl).length + "/" + v.musafo.characters.length : v.musafo.charRefs.length || "–"}</span></button>` : ""}
+          <button data-t="naskah">Naskah ${v.approval.approved && v.scriptState !== "old" ? "<span>✓</span>" : ""}</button>
+          <button data-t="shot">Shot <span>${v.musafo.shots.length}</span></button>
+` : `<button data-t="brief">Brief</button>
+          ${v.aws ? `<button data-t="aws">AWS <span>${v.awsData?.tbc.length ? v.awsData.tbc.length + " TBC" : "✓"}</span></button>` : ""}
+          ${v.clone ? `<button data-t="clone">Clone <span>${v.cloneData?.shots.length || "–"}${v.cloneData?.approval?.approved ? " ✓" : ""}</span></button>` : ""}
+          ${hasRef ? `<button data-t="konsep">Konsep <span>${v.concept ? esc(v.concept.id) : v.concepts.concepts.length || "–"}</span></button>` : ""}
+          ${isA ? "" : `<button data-t="naskah">Naskah</button>`}
+          ${isA || v.oneTake ? "" : `<button data-t="flow">Prompt Flow <span>${v.flowCheck.shots.length}</span></button>`}
+`}
+        </div>
+        <div id="tabBody"></div>
+      </div>
+        <div class="ocard" data-panel="thumb"><div class="ocard-h">Thumbnail<small>${v.thumbnail?.url ? (v.thumbnail.stale ? "perlu render ulang" : "✓ siap") : "belum ada"}</small></div><div id="thumbBody"></div></div>
+        <div class="ocard" data-panel="tebar"><div class="ocard-h">Publikasi · Tebar<small>${v.buffered?.length ? "terbit: " + esc(v.buffered.join(", ")) : v.tebar?.job ? esc(v.tebar.job.phase) : ""}</small></div>
+          <div class="teb-acts">${(() => { const ready = !!v.video && !v.thumbnail?.videoRendering; const why = v.video ? "Tunggu render selesai" : "Aktif setelah video selesai dirender"; return `<button class="btn" id="tebBtn" ${ready ? "" : "disabled"} title="${ready ? "Unggah ke Tebar dan posting ke akun channel ini" : why}" style="background:#16a34a;border-color:#16a34a;color:#fff${ready ? "" : ";opacity:.45;cursor:not-allowed"}">${v.tebar?.job && !["done", "error"].includes(v.tebar.job.phase) ? "Mengirim ke Tebar…" : "Kirim ke Tebar"}</button>`; })()}
+            ${v.sub ? `<a class="btn sm" href="#/s/${v.category}/${esc(v.sub)}">Atur akun Tebar ${esc(subOf(v)?.label ?? v.sub)}</a>` : ""}
+            <span class="muted" style="font-size:12px">${v.video ? "Caption ditulis dan akun dipilih di jendela Kirim ke Tebar." : "Aktif setelah video selesai dirender."}</span></div></div>
+
+      ${isA ? "" : `<div class="ocard" id="suaraCard" data-panel="suara"><div class="ocard-h">Suara<small>${v.voice.seconds ? fmt(v.voice.seconds) + (v.voice.draft ? " · draft" : "") : "belum ada"}</small></div><div class="tabs ctabs" role="tablist"><button type="button" role="tab" data-ct="suara" class="on" aria-selected="true">Suara</button><button type="button" role="tab" data-ct="gemini" aria-selected="false">API Gemini <span id="gemTabMark"></span></button></div><div class="ocard-b" id="suaraBody"></div><div class="ocard-b" id="geminiBody" hidden></div></div>`}
+      <div class="ocard" id="beatCard" data-panel="beat"><div class="ocard-h">Beat<small>${v.beats.length ? v.beats.length + " beat" : "belum ada"}</small></div><div class="ocard-b" id="beatBody"></div></div>
+      <div class="ocard" id="asetCard" data-panel="aset"><div class="ocard-h">Aset<small>${v.keyvisuals.length + v.screens.length + v.footage.length + v.reference.length} file</small></div><div class="ocard-b" id="asetBody"></div></div>
+    </aside>
+    <section class="ed2-stage">
       <div class="ocard c-video"><div class="ocard-h">Preview video<small>${v.video ? (v.duration ? fmt(v.duration) : "render") : "belum dirender"}</small></div>
       <div class="viewer">
         <div class="stage-wrap">
@@ -1718,39 +1800,9 @@ async function viewEditor(slug, startTab) {
           <div class="legend">${Object.values(REG).map(([c, n]) => `<span><i style="--rc:${c}"></i>${n}</span>`).join("")}</div>` : ""}
         ${v.draftVoice ? `<div class="vnav"><span class="pill warn">Suara masih draft (bisu)</span><span>timing akan menyesuaikan suara asli</span></div>` : ""}
       </div></div>
-      <div class="ocard c-script"><div class="ocard-h">Naskah<small>dan tahap produksi</small></div>
-        <div data-workbar="${slug}" style="padding:12px 12px 0"></div>
-        <div class="tabs" style="padding:0 10px;margin:0" id="tabs">
-          ${isM ? `<button data-t="brief">Brief</button>
-          ${v.musafo.draftApproval.needed || v.musafo.draft ? `<button data-t="draft">Draft ${v.musafo.draftApproval.approved ? "<span>✓</span>" : ""}</button>` : ""}
-          <button data-t="storyline">Storyline ${v.musafo.storylineApproval.approved ? "<span>✓</span>" : ""}</button>
-          ${v.type === "berakitkehulu" || v.musafo.charRefs.length || v.musafo.characters.length ? `<button data-t="tokoh">Tokoh <span>${v.musafo.characters.length ? v.musafo.characters.filter((c) => c.sheetUrl).length + "/" + v.musafo.characters.length : v.musafo.charRefs.length || "–"}</span></button>` : ""}
-          <button data-t="naskah">Naskah ${v.approval.approved && v.scriptState !== "old" ? "<span>✓</span>" : ""}</button>
-          <button data-t="shot">Shot <span>${v.musafo.shots.length}</span></button>
-` : `<button data-t="brief">Brief</button>
-          ${v.aws ? `<button data-t="aws">AWS <span>${v.awsData?.tbc.length ? v.awsData.tbc.length + " TBC" : "✓"}</span></button>` : ""}
-          ${v.clone ? `<button data-t="clone">Clone <span>${v.cloneData?.shots.length || "–"}${v.cloneData?.approval?.approved ? " ✓" : ""}</span></button>` : ""}
-          ${hasRef ? `<button data-t="konsep">Konsep <span>${v.concept ? esc(v.concept.id) : v.concepts.concepts.length || "–"}</span></button>` : ""}
-          ${isA ? "" : `<button data-t="naskah">Naskah</button>`}
-          ${isA || v.oneTake ? "" : `<button data-t="flow">Prompt Flow <span>${v.flowCheck.shots.length}</span></button>`}
-`}
-        </div>
-        <div id="tabBody"></div>
-      </div>
-      <div class="ocard c-pub">
-        <div class="ocard"><div class="ocard-h">Thumbnail<small>${v.thumbnail?.url ? (v.thumbnail.stale ? "perlu render ulang" : "✓ siap") : "belum ada"}</small></div><div id="thumbBody"></div></div>
-        <div class="ocard"><div class="ocard-h">Publikasi · Tebar<small>${v.buffered?.length ? "terbit: " + esc(v.buffered.join(", ")) : v.tebar?.job ? esc(v.tebar.job.phase) : ""}</small></div>
-          <div class="teb-acts">${(() => { const ready = !!v.video && !v.thumbnail?.videoRendering; const why = v.video ? "Tunggu render selesai" : "Aktif setelah video selesai dirender"; return `<button class="btn" id="tebBtn" ${ready ? "" : "disabled"} title="${ready ? "Unggah ke Tebar dan posting ke akun channel ini" : why}" style="background:#16a34a;border-color:#16a34a;color:#fff${ready ? "" : ";opacity:.45;cursor:not-allowed"}">${v.tebar?.job && !["done", "error"].includes(v.tebar.job.phase) ? "Mengirim ke Tebar…" : "Kirim ke Tebar"}</button>`; })()}
-            ${v.sub ? `<a class="btn sm" href="#/s/${v.category}/${esc(v.sub)}">Atur akun Tebar ${esc(subOf(v)?.label ?? v.sub)}</a>` : ""}
-            <span class="muted" style="font-size:12px">${v.video ? "Caption ditulis dan akun dipilih di jendela Kirim ke Tebar." : "Aktif setelah video selesai dirender."}</span></div></div>
-      </div>
-    </div>
-    <div class="trio${isA ? " duo" : ""}">
-      ${isA ? "" : `<div class="ocard" id="suaraCard"><div class="ocard-h">Suara<small>${v.voice.seconds ? fmt(v.voice.seconds) + (v.voice.draft ? " · draft" : "") : "belum ada"}</small></div><div class="tabs ctabs" role="tablist"><button type="button" role="tab" data-ct="suara" class="on" aria-selected="true">Suara</button><button type="button" role="tab" data-ct="gemini" aria-selected="false">API Gemini <span id="gemTabMark"></span></button></div><div class="ocard-b" id="suaraBody"></div><div class="ocard-b" id="geminiBody" hidden></div></div>`}
-      <div class="ocard" id="beatCard"><div class="ocard-h">Beat<small>${v.beats.length ? v.beats.length + " beat" : "belum ada"}</small></div><div class="ocard-b" id="beatBody"></div></div>
-      <div class="ocard" id="asetCard"><div class="ocard-h">Aset<small>${v.keyvisuals.length + v.screens.length + v.footage.length + v.reference.length} file</small></div><div class="ocard-b" id="asetBody"></div></div>
-    </div>
-    <div class="ocard c-hf" id="hfCard"><div class="ocard-h">Preview HyperFrames<small id="hfState">memeriksa…</small></div><div class="hf-body" id="hfBody"></div></div>`;
+      <div class="ocard c-hf" id="hfCard"><div class="ocard-h">Preview HyperFrames<small id="hfState">memeriksa…</small></div><div class="hf-body" id="hfBody"></div></div>
+    </section>
+    </div>`;
   let sel = 0;
   let editing = false; // tab Naskah in edit mode
   const stage = $("#stage");
@@ -2144,7 +2196,7 @@ async function viewEditor(slug, startTab) {
     const host = card || $("#tabBody");
     if (!card) {
       document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.t === t));
-      document.querySelector(".one")?.classList.toggle("wide", t === "draft" || (t === "storyline" && !!v.musafo?.sourceText));
+      document.querySelector(".ed2")?.classList.toggle("pwide", t === "draft" || (t === "storyline" && !!v.musafo?.sourceText));
     }
     host.innerHTML = body[t]();
     document.querySelectorAll(".blist li").forEach((li) => (li.onclick = () => showBeat(+li.dataset.i, true)));
@@ -2194,7 +2246,7 @@ async function viewEditor(slug, startTab) {
       }
     }
     host.querySelectorAll("[data-copy]").forEach((b) => (b.onclick = () => toast(copyText(b.dataset.copy) ? "Prompt tersalin" : "Browser menolak menyalin. Salin manual.")));
-    document.querySelectorAll("[data-goto]").forEach((b) => (b.onclick = () => { openTab(b.dataset.goto); if (CARD_TABS[b.dataset.goto]) $(CARD_TABS[b.dataset.goto])?.closest(".ocard")?.scrollIntoView({ behavior: "smooth", block: "start" }); }));
+    document.querySelectorAll("[data-goto]").forEach((b) => (b.onclick = () => { openTab(b.dataset.goto); if (CARD_TABS[b.dataset.goto]) window.__edPanel?.(b.dataset.goto); }));
     document.querySelectorAll("[data-pick]").forEach((b) => (b.onclick = () => { $("#vSpeaker").value = b.dataset.pick; $("#vSpeaker").focus(); }));
     const vs = $("#vSave");
     if (vs) vs.onclick = async () => {
@@ -2754,11 +2806,28 @@ async function viewEditor(slug, startTab) {
       box.remove(); if (r.ok) { toast("Preset: " + id); await loadVideos(); viewEditor(slug); }
     };
   };
+  // editor bergaya aplikasi edit video (user 2026-11-21): rel ikon kiri membuka/menyembunyikan satu panel, video besar di tengah
+  const ed2 = $("#ed2");
+  const setPanel = (pnl) => {
+    if (pnl && !ed2.querySelector(`[data-panel="${pnl}"]`)) pnl = "";
+    ed2.dataset.p = pnl;
+    ed2.querySelectorAll("[data-panel]").forEach((c) => c.classList.toggle("on", c.dataset.panel === pnl));
+    ed2.querySelectorAll("[data-rail]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rail === pnl)));
+    try { localStorage.setItem("tt_panel", pnl); } catch {}
+  };
+  window.__edPanel = setPanel;
+  ed2.querySelectorAll("[data-rail]").forEach((b) => (b.onclick = () => setPanel(ed2.dataset.p === b.dataset.rail ? "" : b.dataset.rail)));
+  ed2.querySelectorAll("[data-panel] > .ocard-h").forEach((h) => h.insertAdjacentHTML("beforeend", '<button type="button" class="pclose" aria-label="Sembunyikan panel" title="Sembunyikan panel">×</button>'));
+  ed2.querySelectorAll(".pclose").forEach((b) => (b.onclick = () => setPanel("")));
+  const hfBtn = ed2.querySelector("[data-hf]");
+  if (hfBtn) hfBtn.onclick = () => { const on = !ed2.classList.contains("hfmode"); ed2.classList.toggle("hfmode", on); hfBtn.setAttribute("aria-pressed", String(on)); if (on) $("#stage")?.pause(); };
+  let savedPanel = "naskah"; try { const x = localStorage.getItem("tt_panel"); if (x !== null) savedPanel = x; } catch {}
+  setPanel(savedPanel);
   const firstTab = v.aws ? "aws" : v.clone ? "clone" : isM ? (v.waiting === "Setujui draft" || v.musafo.draftApproval.needed && !v.musafo.draftApproval.approved ? "draft" : v.waiting === "Setujui storyline" || !v.musafo.storylineApproval.approved && !v.musafo.shots.length ? "storyline" : "naskah") : hasRef && !v.concept && v.scriptState === "none" ? "konsep" : isA ? "brief" : "naskah";
   openTab(startTab && !CARD_TABS[startTab] && startTab !== "thumb" && body[startTab] ? startTab : firstTab);
   ["thumb", ...Object.keys(CARD_TABS)].forEach(openTab);
-  const startCard = startTab === "thumb" ? $("#thumbBody") : CARD_TABS[startTab] ? $(CARD_TABS[startTab]) : null;
-  if (startCard) startCard.closest(".ocard").scrollIntoView({ block: "start" });
+  if (startTab === "thumb" || CARD_TABS[startTab]) setPanel(startTab);
+  else if (startTab) setPanel("naskah");
   hfPreview(slug);
   if ($("#suaraCard")) {
     const tabs = $("#suaraCard").querySelectorAll("[data-ct]");

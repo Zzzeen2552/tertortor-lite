@@ -44,11 +44,13 @@ di akhir `<style>` `tools/studio/index.html`; komponen baru ikut token itu. Kart
 dari server → `--ar`), kartu tanpa thumbnail memakai `poster.jpg` kecil (bukan `<video preload>`). `/api/videos` di-cache
 per folder (berubah = dihitung ulang) dan pindah menu menggambar dari daftar yang sudah dimuat lalu menyegarkan di belakang.
 **Layout satu halaman** (user 2026-11-20): tanpa sidebar. Baris atas = logo + tombol "Buat video" (dropdown: tipe video →
-preset/channel/product, plus link "Library" ke `#/s/<kategori>/<sub>`); ikon Sampah/tema di kanan. Editor video berupa kartu
-3 kolom: Naskah (plus tab tahap lain), Preview video, Thumbnail + Publikasi Tebar; di bawahnya kartu Suara, Beat, Aset
-(`CARD_TABS`); tombol **Production** juga muncul di tab Naskah setelah naskah disetujui (Storytelling: event `production`;
-Explainer: event `explainer-production`); baris paling bawah = HyperFrames Studio proyek
-itu dalam iframe (`/api/videos/<slug>/hf-preview`, GET status / POST nyalakan `npx hyperframes preview --background`).
+preset/channel/product, plus link "Library" ke `#/s/<kategori>/<sub>`); ikon Sampah/tema di kanan. **Editor video bergaya aplikasi edit video** (user 2026-11-21, acuan Clideo):
+rel ikon kiri (Naskah, Suara, Beat, Aset, Thumbnail, Tebar) membuka satu panel samping; klik ikon yang sama atau × menyembunyikan
+panel (diingat di `localStorage tt_panel`); video besar di tengah setinggi layar dengan timeline beat di bawahnya, menu ⋮ di
+kanan atas pemutar (link, ubah format, unduh, hapus). Kartu Naskah berisi tab tahap lain; Suara, Beat, Aset (`CARD_TABS`),
+Thumbnail, dan Tebar masing-masing panel sendiri. Tombol **Production** juga muncul di tab Naskah setelah naskah disetujui
+(Storytelling: event `production`; Explainer: event `explainer-production`). Ikon **HyperFrames** mengganti layar tengah
+dengan HyperFrames Studio proyek itu dalam iframe (`/api/videos/<slug>/hf-preview`, GET status / POST nyalakan `npx hyperframes preview --background`).
 
 **Video referensi** dianalisis `npm run ref` (yt-dlp, shot, gerak, transkrip). Claude menulis `analysis.md` dan 2-3 konsep
 di `concepts.json`; user memilih di tab "Konsep" sebelum naskah. Alurnya di `.claude/skills/video-vertikal/reference.md`.
