@@ -36,13 +36,20 @@ Cinematic selain AWS (Escapement, Sandekala), Cinema Clone, Animation, dan City 
 dan menampilkan perintah untuk Claude. Ruang Produksi dan sidebar mengelompokkan video per kategori. Pohon kategori dari
 `tools/categories.mjs` (`/api/structure`). Halaman `#/s/<kategori>/<sub>` punya tab Video, Library footage, dan
 (Storytelling) Library cerita. Footage: `npm run library -- add … --for <kategori>/<sub>` (selalu isi `--for`).
-**Tampilan** (ikut MOTION 2026-11-17/18): Swiss/editorial, aksen oranye-kuning `#FFA114` (juga `theme-color`), panel abu
-terang + hairline hitam, Inter tebal rapat, sudut tajam tanpa bayangan, tombol utama hitam dengan panah garis. Sidebar gaya
-"IMMERSIVE FACTORY": blok wordmark **TERTORTOR LITE®** oranye-kuning dengan subjudul + garis bertitik, panel terang, judul
-bagian = kotak hitam + garis, item besar dengan kotak warna. Token di `:root`, override di blok "Gaya Swiss" dan blok sidebar
-di akhir `<style>` `tools/studio/index.html`; komponen baru ikut token itu. Kartu video mengikuti rasio videonya (`ratio`
+**Tampilan** (user 2026-11-21, acuan editor video Clideo): **tema gelap default** (`tt_theme` di localStorage, tombol bulan
+untuk terang), panel membulat lembut (radius 12-22 px), tombol pil, tombol utama gradasi teal `#19C2CD → #2BDDB0`, ikon rel
+editor dalam lingkaran (aktif = gradasi), logo segitiga play gradasi + wordmark TERTORTOR LITE. Token di `:root` /
+`[data-theme="dark"]` dan blok "Gaya Clideo" di akhir `<style>` `tools/studio/index.html` (menimpa gaya Swiss lama di atasnya); komponen baru ikut token itu. Kartu video mengikuti rasio videonya (`ratio`
 dari server → `--ar`), kartu tanpa thumbnail memakai `poster.jpg` kecil (bukan `<video preload>`). `/api/videos` di-cache
 per folder (berubah = dihitung ulang) dan pindah menu menggambar dari daftar yang sudah dimuat lalu menyegarkan di belakang.
+**Layout satu halaman** (user 2026-11-20): tanpa sidebar. Baris atas = logo + tombol "Buat video" (dropdown: tipe video →
+preset/channel/product, plus link "Library" ke `#/s/<kategori>/<sub>`); ikon Sampah/tema di kanan. **Editor video bergaya aplikasi edit video** (user 2026-11-21, acuan Clideo):
+rel ikon kiri (Naskah, Suara, Beat, Aset, Publikasi = Thumbnail + Tebar dalam satu panel) membuka satu panel samping; klik ikon yang sama atau × menyembunyikan
+panel (diingat di `localStorage tt_panel`); video besar di tengah setinggi layar dengan timeline beat di bawahnya, menu ⋮ di
+kanan atas pemutar (link, ubah format, unduh, hapus). Kartu Naskah berisi tab tahap lain; Suara, Beat, Aset (`CARD_TABS`),
+dan Publikasi masing-masing panel sendiri. Tombol **Production** juga muncul di tab Naskah setelah naskah disetujui
+(Storytelling: event `production`; Explainer: event `explainer-production`). Di bawah video selalu ada
+HyperFrames Studio proyek itu dalam iframe (`/api/videos/<slug>/hf-preview`, GET status / POST nyalakan `npx hyperframes preview --background`).
 
 **Video referensi** dianalisis `npm run ref` (yt-dlp, shot, gerak, transkrip). Claude menulis `analysis.md` dan 2-3 konsep
 di `concepts.json`; user memilih di tab "Konsep" sebelum naskah. Alurnya di `.claude/skills/video-vertikal/reference.md`.
@@ -95,6 +102,7 @@ lagi penunggunya. Timeout (4 jam, exit 2) = jalankan lagi bila masih menunggu.
 | --- | --- |
 | `concept` (explainer) | isi brief dari konsep → naskah → `/humanizer` → minta persetujuan |
 | `script-approved` (explainer) | `flow.json` (langkah 2b); `node tools/thumbnail.mjs sync <slug>` bila `script.md` berubah |
+| `explainer-production` (tombol Production di tab Naskah) | skill `/video-vertikal` § Event `explainer-production`: dari langkah yang belum selesai, suara → beat → scene → aset gratis → `check` hijau → `preview`; **tanpa render** (menunggu thumbnail disetujui); laporkan yang menunggu user |
 | `berakitkehulu-new` | skill `/berakit-ke-hulu <slug>`: tanpa draft, langsung `storyline.md` (series bila > 2 menit) → user mengedit dan menyetujui storyline |
 | `bumidipijak-new` | skill `/bumidipijak <slug>`: tanpa draft, langsung `storyline.md` series → user mengedit dan menyetujui storyline |
 | `storyline-approved` (BKH/BDP) | BKH: character sheet per usia bila ada foto tokoh; `series` bila perlu; `musafo.json` (naskah per shot) → build → minta persetujuan naskah |

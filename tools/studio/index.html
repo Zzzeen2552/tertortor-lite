@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id" data-theme="light">
+<html lang="id" data-theme="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -7,13 +7,13 @@
 <link rel="icon" href="/favicon.ico" sizes="any" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png" />
-<meta name="theme-color" content="#FFA114" />
+<meta name="theme-color" content="#0E1014" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="TERTORTOR" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
-<script>try { const t = localStorage.getItem("motion_theme"); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<script>try { const t = localStorage.getItem("tt_theme"); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
 <style>
 /* Bahasa visual TERTORTOR (user 2026-11-17, acuan "LIQUID ACADEMY"): Swiss/editorial. Blok oranye penuh, hairline hitam,
    panel abu sangat terang, grotesk tebal rapat (Inter), sudut tajam, tanpa bayangan lembut. Override komponen di akhir <style>. */
@@ -283,7 +283,6 @@ select.sel,input[list]{width:100%;background:var(--panel);border:1px solid var(-
 .chat-f{display:flex;gap:8px;padding:10px 12px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
 .chat-f textarea{flex:1;resize:none;min-height:44px;max-height:160px;font:14px/1.45 inherit;padding:10px 12px;border-radius:14px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--fg)}
 /* ===== Gaya Swiss/editorial (user 2026-11-17): menimpa komponen di atas. Fungsi tidak berubah. ===== */
-*:not(.tone):not(.live):not(.chat-fab):not(.chat-fab .dot):not([style*="50%"]){border-radius:0!important}
 body{letter-spacing:-.005em}
 ::selection{background:var(--accent);color:#111}
 :focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -475,38 +474,296 @@ a.preset:hover{border-color:var(--rule)}
   .nav a.on,.mchip.on{background:var(--fg);color:var(--panel)}
   .side > *:not(.brand){padding-left:14px;padding-right:14px}
 }
+/* ===== Layout satu halaman (user 2026-11-20): tanpa sidebar, semua berupa kartu. Baris atas: logo + "Buat video"
+   (dropdown tipe → preset). Editor: 3 kolom (naskah | preview video | thumbnail + Tebar), baris bawah preview HyperFrames. ===== */
+.app{display:block;min-height:100vh}
+.main{padding:22px max(16px,2.4vw) 80px}
+.top{position:sticky;top:0;z-index:40;display:flex;align-items:stretch;gap:0;background:var(--bg);border-bottom:1px solid var(--rule)}
+.top .brand{display:flex;flex-direction:column;justify-content:center;gap:2px;background:var(--accent);color:#111;padding:12px 22px;border-right:1px solid var(--rule);border-bottom:0;text-decoration:none}
+.top .brand::after{content:none}
+.top .brand b{font-size:22px;font-weight:900;letter-spacing:-.06em;line-height:.9;white-space:nowrap;color:#111}
+.top .brand small{display:block;margin:0;font-size:11.5px;font-weight:600;color:#111;opacity:.8;white-space:nowrap}
+.mk{position:relative;display:flex;align-items:center;padding:0 16px}
+.mk-menu{position:absolute;top:calc(100% + 1px);left:0;display:grid;grid-template-columns:240px 360px;background:var(--panel);border:1px solid var(--rule);min-height:200px;max-height:min(70vh,560px)}
+.mk-menu[hidden]{display:none}
+.mk-cats{border-right:1px solid var(--rule);overflow:auto}
+.mk-cats button{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:12px 14px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font-size:14.5px;font-weight:500}
+.mk-cats button:hover,.mk-cats button.on{background:var(--accent-soft)} .mk-cats button.on{font-weight:700;box-shadow:inset 4px 0 0 var(--accent)}
+.mk-cats small{color:var(--muted);font-weight:400;font-size:12px}
+.mk-subs{overflow:auto;padding:6px 0}
+.mk-subs .eyebrow{padding:8px 14px 4px}
+.mk-sub{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line)}
+.mk-sub:hover{background:var(--accent-soft)}
+.mk-sub > a{display:contents;color:inherit;text-decoration:none}
+.mk-sub img,.mk-sub .ph{width:44px;height:44px;object-fit:cover;background:var(--panel-2);border:1px solid var(--line)}
+.mk-sub b{display:block;font-size:13.5px} .mk-sub small{display:block;color:var(--muted);font-size:11.5px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mk-sub .lib{font-size:11px;color:var(--accent-text);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.mk-sub.draft b::after{content:" · belum didesain";font-weight:400;color:var(--muted);font-size:11.5px}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:8px;padding:0 16px}
+.top-r .icon-btn{margin:0;color:var(--fg)} .top-r .icon-btn:hover{background:var(--fg);color:var(--accent)}
+.top-r form{display:contents}
+/* editor satu halaman */
+.one-h{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.one-h h1{font-size:clamp(22px,2.4vw,30px);font-weight:800;letter-spacing:-.045em;line-height:1;margin:4px 0 8px}
+.one{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,1fr) minmax(300px,340px);gap:14px;align-items:start}
+/* video horizontal (meta.json format "horizontal" → v.wide): pemutar 16:9 mendapat kolom tengah paling lebar */
+.one.cine{grid-template-columns:minmax(0,.85fr) minmax(0,1.7fr) minmax(0,.85fr)}
+.one.cine .c-video .viewer{max-width:none}
+.one.cine #thumbBody > .pad > div:first-child > div:first-child{max-width:none}
+.one.wide{grid-template-columns:minmax(0,1fr)} .one.wide > .c-video,.one.wide > .c-pub{display:none}
+.ocard{background:var(--panel);border:1px solid var(--line);min-width:0;display:flex;flex-direction:column}
+.ocard > .ocard-h{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--rule);font-weight:800;letter-spacing:-.02em;font-size:15px}
+.ocard > .ocard-h small{margin-left:auto;font-weight:500;color:var(--muted);font-size:11.5px;letter-spacing:0}
+.c-script{order:1} .c-video{order:2} .c-pub{order:3}
+.c-script{max-height:calc(100vh - 150px);position:sticky;top:84px}
+.c-script #tabBody{overflow:auto;flex:1;min-height:0}
+/* kepala kartu, workbar, dan baris tab tidak boleh menyusut saat isi tab panjang (Prompt Flow, Storyline) */
+.c-script > .ocard-h,.c-script > [data-workbar],.c-script > .tabs{flex:none}
+.c-script .tabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}
+.c-script .tabs button{flex:none}
+.c-video .viewer{position:static;padding:14px;max-width:none}
+.stage-wrap{position:relative}
+.vmenu{position:absolute;top:10px;right:10px;z-index:5}
+.vmenu-btn{width:36px;height:36px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.35);background:rgba(17,17,17,.62);color:#fff;backdrop-filter:blur(6px)}
+.vmenu-btn:hover,.vmenu-btn[aria-expanded="true"]{background:var(--accent);color:#111;border-color:var(--accent)}
+.vmenu-btn svg{width:18px;height:18px}
+.vmenu-list{position:absolute;top:calc(100% + 6px);right:0;min-width:220px;background:#1b1b1a;color:#f2f2ef;border:1px solid #333;padding:6px 0;display:flex;flex-direction:column}
+.vmenu-list[hidden]{display:none}
+.vmenu-list [role=menuitem]{display:flex;align-items:center;gap:12px;padding:10px 16px;border:0;background:none;color:inherit;font-size:14px;font-weight:500;text-align:left;text-decoration:none;cursor:pointer}
+.vmenu-list [role=menuitem]:hover,.vmenu-list [role=menuitem]:focus-visible{background:#2c2c2a;outline:none}
+.vmenu-list svg{width:18px;height:18px;flex:none}
+.vmenu-list hr{border:0;border-top:1px solid #3a3a38;margin:6px 0}
+.vmenu-list .danger{color:#ff8a80}
+.one.cine .stage{aspect-ratio:16/9}
+.c-pub{display:flex;flex-direction:column;gap:14px;background:none;border:0}
+.c-pub > .ocard{border:1px solid var(--line)}
+#thumbBody > .pad > div:first-child{grid-template-columns:minmax(0,1fr)!important}
+#thumbBody > .pad > div:first-child > div:first-child{max-width:240px;width:100%;margin:0 auto}
+.teb-acts{display:flex;flex-direction:column;gap:8px;padding:14px}
+.pub-teb{border-top:1px solid var(--line);margin-top:4px}
+.pub-teb .sec-t{display:flex;align-items:center;gap:10px;padding:16px 18px 0;font-weight:600}
+.pub-teb .sec-t small{margin-left:auto;font-weight:400;color:var(--muted);font-size:12px}
+.pub-teb .teb-acts{padding:12px 18px 18px}
+.teb-acts .btn{justify-content:center}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px;align-items:start}
+.trio.duo{grid-template-columns:repeat(2,minmax(0,1fr))}
+.trio .ocard-b{max-height:640px;overflow:auto}
+.ctabs{padding:0 10px;margin:0;border-bottom:1px solid var(--rule)}
+.ctabs button span{color:var(--accent-text);font-weight:700}
+.ocard-b[hidden]{display:none}
+.c-hf{margin-top:14px}
+.c-hf .hf-body{padding:0}
+.ed2 .c-hf{background:transparent;border:0}
+.ed2 .c-hf .empty{margin:0}
+.c-hf iframe{display:block;width:100%;height:min(78vh,820px);border:1px solid var(--rule);background:#0b0b0f}
+@media (max-width:1180px){
+  .one{grid-template-columns:minmax(0,1fr) minmax(280px,320px)}
+  .one.cine{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .c-script{grid-column:1/-1;position:static;max-height:none}
+  .one.cine .c-video{grid-column:1/-1;order:0}
+  .trio{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .trio > .ocard:last-child:nth-child(odd){grid-column:1/-1}
+}
+@media (max-width:720px){
+  .one,.one.cine{grid-template-columns:minmax(0,1fr)}
+  .trio,.trio.duo{grid-template-columns:minmax(0,1fr)}
+  .trio .ocard-b{max-height:none}
+  .top{flex-wrap:wrap}
+  .top .brand{padding:10px 14px} .top .brand b{font-size:19px} .top .brand small{display:none}
+  .mk{padding:0 10px} .top-r{padding:0 10px;gap:6px}
+  .mk-menu{position:fixed;left:8px;right:8px;top:62px;grid-template-columns:1fr;max-height:75vh;overflow:auto}
+  .mk-cats{border-right:0;border-bottom:1px solid var(--rule)}
+  .c-hf iframe{height:70vh}
+}
+/* ===== Editor bergaya aplikasi edit video (user 2026-11-21, acuan Clideo): rel ikon kiri, satu panel yang bisa
+   disembunyikan, video besar di tengah dengan timeline beat di bawahnya; HyperFrames menggantikan layar tengah. ===== */
+.ed2{display:grid;grid-template-columns:72px auto minmax(0,1fr);border:1px solid var(--rule);background:var(--panel);min-height:calc(100vh - 230px)}
+.rail{display:flex;flex-direction:column;gap:2px;padding:8px 6px;border-right:1px solid var(--rule);background:var(--bg)}
+.rail button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 2px;border:0;background:none;color:var(--muted);font-size:10.5px;font-weight:600;letter-spacing:.01em}
+.rail button svg{width:22px;height:22px}
+.rail button:hover{color:var(--fg);background:var(--panel-2)}
+.rail button[aria-pressed="true"]{color:var(--fg);background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.rail hr{border:0;border-top:1px solid var(--line);margin:6px 4px}
+.ed2-panel{width:400px;border-right:1px solid var(--rule);max-height:calc(100vh - 150px);overflow:auto;align-self:stretch;background:var(--panel)}
+.ed2[data-p=""] .ed2-panel{display:none}
+.ed2[data-p=""]{grid-template-columns:72px minmax(0,1fr)}
+.ed2.pwide .ed2-panel{width:min(780px,55vw)}
+.ed2-panel > [data-panel]{border:0;background:none}
+.ed2-panel > [data-panel]:not(.on){display:none}
+.ed2-panel .ocard-h{position:sticky;top:0;z-index:2;background:var(--panel)}
+.ed2 .c-script{position:static;max-height:none}
+.ed2 .trio .ocard-b,.ed2-panel .ocard-b{max-height:none}
+.pclose{margin-left:6px;width:28px;height:28px;border:1px solid var(--line-2);background:none;color:var(--fg);font-size:18px;line-height:1;display:grid;place-items:center}
+.pclose:hover{background:var(--fg);color:var(--bg)}
+.ed2-stage{min-width:0;padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--panel-2)}
+.ed2-stage > .c-video{border:0;background:none}
+.ed2-stage > .c-video > .ocard-h{display:none}
+.ed2-stage .viewer{padding:0;max-width:none}
+.ed2 .stage-wrap{width:fit-content;max-width:100%;margin:0 auto}
+.ed2 .stage{height:calc(100vh - 290px);min-height:380px;width:auto;max-width:100%;margin:0 auto}
+.ed2.cine .stage-wrap{width:100%}
+.ed2.cine .stage{width:100%;height:auto;aspect-ratio:16/9;max-height:calc(100vh - 290px);min-height:0}
+.ed2-stage > .c-video{order:0} .ed2-stage > .c-hf{order:1}
+.ed2 .c-hf{margin:0;border:1px solid var(--line)}
+.ed2 .c-hf iframe{height:calc(100vh - 300px)}
+@media (max-width:900px){
+  .ed2,.ed2[data-p=""]{grid-template-columns:minmax(0,1fr);min-height:0}
+  .rail{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--rule);order:0}
+  .rail button{flex:none;min-width:68px}
+  .rail button[aria-pressed="true"]{box-shadow:inset 0 -3px 0 var(--accent)}
+  .rail hr{border-top:0;border-left:1px solid var(--line);margin:4px 6px}
+  .ed2-stage{order:1}
+  .ed2-panel{order:2;width:auto;position:static;max-height:none;border-right:0;border-top:1px solid var(--rule)}
+  .ed2.pwide .ed2-panel{width:auto}
+  .ed2 .stage{height:auto;width:100%;min-height:0}
+  .ed2 .stage-wrap{width:100%}
+}
+/* ===== Gaya "Clideo" (user 2026-11-21): editor video gelap, panel membulat lembut, tombol pil, aksen teal bergradasi,
+   ikon rel dalam lingkaran. Menimpa gaya Swiss di atas; tema terang tetap tersedia lewat tombol bulan. ===== */
+:root{
+  --bg:#F2F4F5; --panel:#FFFFFF; --panel-2:#EBEEF0; --line:#E0E4E7; --line-2:#CBD1D6; --rule:#D5DADF;
+  --fg:#12161A; --muted:#5F6B76; --dim:#8D98A2;
+  --accent:#17B8C4; --accent-2:#22D3A6; --accent-ink:#061214; --accent-text:#0B8F99; --accent-soft:rgba(23,184,196,.12);
+  --sel:#12161A; --sel-ink:#FFFFFF; --grad:linear-gradient(90deg,#17B8C4,#22D3A6);
+  --r:20px; --r-sm:12px; color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0E1014; --panel:#181B20; --panel-2:#20242A; --line:#272B31; --line-2:#353A42; --rule:#2B3036;
+  --fg:#E8EDF1; --muted:#98A2AC; --dim:#6B747D;
+  --accent:#19C2CD; --accent-2:#2BDDB0; --accent-text:#4FD6DF; --accent-soft:rgba(25,194,205,.14);
+  --sel:#E8EDF1; --sel-ink:#0E1014; color-scheme:dark;
+}
+body{background:var(--bg);letter-spacing:0}
+.eyebrow{color:var(--muted)}
+/* baris atas */
+.top{background:var(--bg);border-bottom:0;padding:10px 16px;gap:16px;align-items:center}
+.top .brand{background:none;border:0;padding:4px 6px;flex-direction:row;align-items:center;gap:10px;color:var(--fg)}
+.top .brand::before{content:"";width:34px;height:34px;border-radius:9px;background:var(--grad);clip-path:polygon(18% 8%,92% 50%,18% 92%);flex:none}
+.top .brand b{color:var(--fg);font-size:21px;font-weight:700;letter-spacing:-.03em}
+.top .brand sup{display:none}
+.top .brand small{display:none}
+.mk{padding:0}
+.top-r{padding:0}
+.top-r .icon-btn,.icon-btn{border:0;background:var(--panel-2);border-radius:999px;width:38px;height:38px;color:var(--fg)}
+.top-r .icon-btn:hover{background:var(--line-2);color:var(--fg)}
+.live{box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
+/* tombol */
+.btn{border:1px solid var(--line-2);background:var(--panel-2);color:var(--fg);border-radius:999px;font-weight:500;padding:9px 18px}
+.btn:hover{background:var(--line-2);color:var(--fg);border-color:var(--line-2)}
+.btn.pri{background:var(--grad);color:#fff;border:0;font-weight:600;box-shadow:0 6px 20px -8px rgba(25,194,205,.6)}
+.btn.pri::after{content:none}
+.btn.pri:hover{filter:brightness(1.08);background:var(--grad);color:#fff}
+.btn.sm{padding:6px 13px}
+.cmd{border:1px solid var(--line-2);background:var(--panel);border-radius:999px;padding:5px 5px 5px 14px}
+.cmd .btn{padding:5px 12px}
+.pill{border-radius:999px;border-color:var(--line-2)}
+.pill.acc{background:var(--accent-soft);border-color:transparent;color:var(--accent-text)}
+.pill.ok{background:color-mix(in srgb,var(--ok) 12%,transparent);border-color:transparent}
+/* menu Buat video */
+.mk-menu{border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 24px 60px -20px rgba(0,0,0,.6);top:calc(100% + 10px)}
+.mk-cats{border-right:1px solid var(--line)}
+.mk-cats button{border-bottom:0;border-radius:12px;margin:2px 6px;width:calc(100% - 12px)}
+.mk-cats button.on{box-shadow:none;background:var(--accent-soft);color:var(--accent-text)}
+.mk-sub{border-bottom:0;border-radius:12px;margin:2px 6px}
+.mk-sub img,.mk-sub .ph{border-radius:10px;border:0}
+/* kepala halaman, kartu, panel */
+.one-h{border-bottom:0;padding-bottom:4px}
+.one-h h1{font-weight:700;letter-spacing:-.03em}
+.vh{border-bottom:0} .vh::before,.vh::after{content:none}
+.vh h1{font-weight:700;letter-spacing:-.04em}
+.grp-h{border-top:0} .grp-h h2::before{border-radius:3px;background:var(--grad)}
+.panel,.card,.ocard,.empty,.notice,.stats,.stat,.preset,.shot,.prompt,.drop,#fmtBody,.mk-menu{border-radius:var(--r)}
+.panel,.card,.empty{border:1px solid var(--line);background:var(--panel)}
+.panel-h{border-bottom:1px solid var(--line)}
+.stats{background:transparent;border:0;gap:14px}
+.stats .stat{border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.card{overflow:hidden}
+.card:hover{border-color:var(--accent)}
+.card-b{border-top:0}
+.cover{border-radius:0}
+.cnt,.wip,.buffered{border-radius:999px}
+.prog{border-radius:99px;overflow:hidden} .prog i{background:var(--grad)}
+.notice,.notice.ok,.notice.work{border:1px solid var(--line);border-left-width:1px;background:var(--panel-2)}
+.notice{box-shadow:inset 3px 0 0 var(--warn)} .notice.ok{box-shadow:inset 3px 0 0 var(--ok)} .notice.work{box-shadow:inset 3px 0 0 var(--accent)}
+.preset{border-radius:16px;overflow:hidden}
+.preset .cov{border-radius:0}
+.tabs{border-bottom:1px solid var(--line)}
+.tabs button,.tabs a{border-radius:0}
+.tabs button.on,.tabs a.on{border-bottom-color:var(--accent);color:var(--fg)}
+textarea,input[type=text],input[type=password],select,select.sel,input[list],input[type=number]{border:1px solid var(--line-2);background:var(--panel-2);border-radius:10px;color:var(--fg)}
+textarea:focus,input[type=text]:focus,input[type=password]:focus,select:focus{border-color:var(--accent);outline:none}
+.seg{border-radius:999px;overflow:hidden;border-color:var(--line-2)}
+.seg label:has(input:checked){background:var(--accent);color:var(--accent-ink)}
+.chip{border-radius:999px}
+.toast,.donebox{border-radius:14px;border-left:0;background:var(--panel-2);color:var(--fg);box-shadow:0 18px 40px -16px rgba(0,0,0,.6)}
+.pop .box,.modal .panel{border-radius:22px;border:1px solid var(--line)}
+.pop .box{box-shadow:0 30px 80px -20px rgba(0,0,0,.7)}
+.modal,.pop{background:rgba(5,7,9,.65);backdrop-filter:blur(4px)}
+.chat-fab{background:var(--grad);border:0;color:#fff}
+.chat{border-left:1px solid var(--line);background:var(--bg)}
+.chat-h{background:var(--panel);color:var(--fg);border-bottom:1px solid var(--line)} .chat-h small{color:var(--muted)}
+.chat-h .btn,.chat-h .icon-btn{border-color:var(--line-2);color:var(--fg)}
+/* editor */
+.ed2{border:0;background:transparent;gap:16px;grid-template-columns:84px auto minmax(0,1fr)}
+.ed2[data-p=""]{grid-template-columns:84px minmax(0,1fr)}
+.rail{background:transparent;border:0;padding:4px 0;gap:6px}
+.rail button{color:var(--muted);font-size:12px;font-weight:500;gap:8px;padding:6px 0;border-radius:0}
+.rail button svg{width:46px;height:46px;padding:12px;border-radius:999px;background:var(--panel-2);color:var(--fg);transition:background .15s}
+.rail button:hover{background:none;color:var(--fg)} .rail button:hover svg{background:var(--line-2)}
+.rail button[aria-pressed="true"]{background:none;box-shadow:none;color:var(--accent-text)}
+.rail button[aria-pressed="true"] svg{background:var(--grad);color:#fff}
+.rail hr{border-top-color:var(--line);margin:4px 14px}
+.ed2-panel{border:1px solid var(--line);border-radius:22px;background:var(--panel);overflow:auto}
+.ed2-panel .ocard-h{background:var(--panel);border-bottom:1px solid var(--line);border-radius:22px 22px 0 0;padding:16px 18px}
+.ocard > .ocard-h{border-bottom:1px solid var(--line);font-weight:600;letter-spacing:-.01em}
+.pclose{border:0;background:var(--panel-2);border-radius:999px;width:30px;height:30px}
+.pclose:hover{background:var(--line-2);color:var(--fg)}
+.ed2-stage{background:transparent;padding:0}
+.ed2 .stage,.stage{border:0;border-radius:22px;background:#000;box-shadow:0 20px 60px -24px rgba(0,0,0,.65)}
+.stage.ph{color:var(--dim)}
+.vmenu{top:14px;right:14px}
+.vmenu-btn{border-radius:999px;border:0;background:rgba(14,16,20,.55)}
+.vmenu-btn:hover,.vmenu-btn[aria-expanded="true"]{background:var(--grad);color:#fff}
+.vmenu-list{border-radius:16px;overflow:hidden;background:#15181C;border-color:#2B3036;box-shadow:0 24px 60px -20px rgba(0,0,0,.7)}
+.vmenu-list [role=menuitem]{border-radius:10px;margin:0 6px}
+.tline{border-radius:14px;overflow:hidden}
+.tb{border-radius:8px}
+.c-hf{border-radius:22px;overflow:hidden}
+.c-hf iframe{border:0;border-radius:14px}
+.blist li.on{box-shadow:inset 3px 0 0 var(--accent);background:var(--accent-soft)}
+.btab th{color:var(--muted);border-bottom-color:var(--line)}
+@media (max-width:900px){
+  .ed2,.ed2[data-p=""]{grid-template-columns:minmax(0,1fr);gap:12px}
+  .rail{border:0}
+  .rail button{min-width:72px}
+  .rail button[aria-pressed="true"]{box-shadow:none}
+  .rail button svg{width:42px;height:42px;padding:11px}
+  .ed2-panel{border-top:1px solid var(--line)}
+  .top{padding:8px 12px}
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <aside class="side">
-    <a href="#/" class="brand">
-      <span class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg></span>
-      <span><b>TERTORTOR LITE<sup>®</sup></b><small>Studio video vertikal<i class="brand-rule"></i></small></span>
-    </a>
-    <nav class="nav" aria-label="Menu utama">
-      <div class="sec-h">Produksi</div>
-      <a href="#/" data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Ruang Produksi</a>
-      <a href="#/baru" data-nav="baru"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Buat Video</a>
-      <a href="#/sampah" data-nav="sampah" id="navTrash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Sampah</a>
-      <a href="#/user" data-nav="user" id="navUser" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg>User</a>
-    </nav>
-    <div>
-      <div class="sec-h">Gaya · library per channel</div>
-      <div class="switch" id="snav"></div>
+  <!-- Layout satu halaman (user 2026-11-20): tanpa sidebar. Baris atas = logo + Buat video (dropdown tipe → preset). -->
+  <header class="top">
+    <a href="#/" class="brand"><b>TERTORTOR LITE<sup>®</sup></b><small>Studio video vertikal</small></a>
+    <div class="mk" id="mk">
+      <button class="btn pri" id="mkBtn" aria-expanded="false" aria-haspopup="true" aria-controls="mkMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Buat video</button>
+      <div class="mk-menu" id="mkMenu" hidden>
+        <div class="mk-cats" id="mkCats" role="menu" aria-label="Tipe video"></div>
+        <div class="mk-subs" id="mkSubs" aria-live="polite"></div>
+      </div>
     </div>
-    <div>
-      <div class="sec-h">Video</div>
-      <div class="switch" id="vnav"></div>
-    </div>
-    <div class="side-foot">
-      <span class="live" id="liveDot"></span>
-      <div style="min-width:0"><b id="liveName">Lokal</b><small id="liveNote">localhost · render di laptop</small></div>
+    <div class="top-r">
+      <span class="live" id="liveDot" title="Lokal · render di laptop"></span><span hidden><b id="liveName">Lokal</b><small id="liveNote">localhost · render di laptop</small></span>
+      <a class="icon-btn" href="#/sampah" id="navTrash" aria-label="Sampah" title="Sampah"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></a>
+      <a class="icon-btn" href="#/user" id="navUser" hidden aria-label="User" title="User"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg></a>
       <button class="icon-btn" id="pushBtn" hidden aria-label="Notifikasi" title="Aktifkan notifikasi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
       <form method="post" action="/logout" id="logoutF" hidden><button class="icon-btn" aria-label="Keluar" title="Keluar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></form>
       <button class="icon-btn" id="theme" aria-label="Ganti tema" title="Ganti tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
     </div>
-  </aside>
+  </header>
+  <div hidden><div id="snav"></div><div id="vnav"></div></div>
   <main class="main" id="main"></main>
 </div>
 <div class="toast" id="toast"></div>
@@ -689,7 +946,7 @@ pushSetup();
 $("#theme").onclick = () => {
   const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   document.documentElement.dataset.theme = t;
-  try { localStorage.setItem("motion_theme", t); } catch {}
+  try { localStorage.setItem("tt_theme", t); } catch {}
 };
 
 // style tree from /api/structure: Video Explainer → preset, Storytelling → channel, Advertisement → product
@@ -706,7 +963,31 @@ async function loadVideos() {
   const curS = location.hash.match(/^#\/s\/([\w-]+)\/([\w-]+)/);
   $("#snav").innerHTML = tree.map((c) => `<div class="vgrp">${esc(c.label)}</div>` + c.subs.map((s) => `<a class="mchip ${curS?.[1] === c.id && curS?.[2] === s.id ? "on" : ""}" href="#/s/${c.id}/${esc(s.id)}"><span class="mdot" style="--c:${s.draft ? "var(--line-2)" : "var(--accent)"}"></span><span class="t">${esc(s.label)}</span><b>${videos.filter((v) => v.category === c.id && v.sub === s.id).length || ""}</b></a>`).join("") + `<a class="mchip" href="#/tambah/${c.id}"><span class="t muted">+ Tambah ${esc(c.subLabel.toLowerCase())}</span></a>`).join("");
 }
-const stepPills = (v) => v.steps.map((s) => `<span class="pill ${s.ok ? "ok" : s.name === "Suara" && v.draftVoice ? "warn" : ""}">${s.ok ? "✓ " : ""}${s.name}${s.name === "Suara" && v.draftVoice ? " · draft" : ""}</span>`).join("");
+// "Buat video" dropdown di baris atas (user 2026-11-20): kolom kiri = tipe video (kategori), kanan = preset/channel/product-nya.
+// Klik preset → formulir video baru (#/baru/<kategori>/<sub>); "Library" → halaman sub (footage, Tebar, Library Cerita).
+let mkCat = null;
+function mkPaint() {
+  if (!tree.length) return;
+  if (!catOf(mkCat)) mkCat = tree[0].id;
+  $("#mkCats").innerHTML = tree.map((c) => `<button type="button" role="menuitem" data-mkcat="${esc(c.id)}" class="${c.id === mkCat ? "on" : ""}" aria-expanded="${c.id === mkCat}">${esc(c.label)}<small>${c.subs.length} ›</small></button>`).join("");
+  const c = catOf(mkCat);
+  $("#mkSubs").innerHTML = `<div class="eyebrow">${esc(c.subLabel)} · ${esc(c.label)}</div>` + c.subs.map((s) => `<div class="mk-sub${s.draft ? " draft" : ""}"><a href="#/baru/${c.id}/${esc(s.id)}" data-mkgo>${s.cover ? `<img src="${coverUrl(c, s)}" alt="" loading="lazy">` : `<span class="ph"></span>`}<span style="min-width:0"><b>${esc(s.label || s.id)}</b><small>${esc(s.description || c.desc || "")}</small></span></a><a class="lib" href="#/s/${c.id}/${esc(s.id)}" data-mkgo title="Halaman ${esc(s.label || s.id)}: video, footage, akun Tebar">Library</a></div>`).join("")
+    + `<div class="mk-sub"><a href="#/tambah/${c.id}" data-mkgo><span class="ph"></span><span><b>+ Tambah ${esc(c.subLabel.toLowerCase())}</b><small>Brief untuk Claude, lalu didesain</small></span></a></div>`;
+  $("#mkCats").querySelectorAll("[data-mkcat]").forEach((b) => {
+    b.onclick = () => { mkCat = b.dataset.mkcat; mkPaint(); $(`[data-mkcat="${mkCat}"]`)?.focus(); };
+    b.onmouseenter = () => { if (matchMedia("(hover:hover)").matches && mkCat !== b.dataset.mkcat) { mkCat = b.dataset.mkcat; mkPaint(); } };
+  });
+  $("#mkSubs").querySelectorAll("[data-mkgo]").forEach((a) => (a.onclick = () => mkOpen(false)));
+}
+function mkOpen(open = $("#mkMenu").hidden) {
+  $("#mkMenu").hidden = !open; $("#mkBtn").setAttribute("aria-expanded", open);
+  if (open) { mkPaint(); $("#mkCats button.on")?.focus(); }
+}
+$("#mkBtn").onclick = (e) => { e.stopPropagation(); mkOpen(); };
+$("#mkMenu").onclick = (e) => e.stopPropagation();
+document.addEventListener("click", () => { if (!$("#mkMenu").hidden) mkOpen(false); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#mkMenu").hidden) { mkOpen(false); $("#mkBtn").focus(); } });
+const stepPills = (v) => v.steps.map((s) => `<span class="pill ${s.ok ? "ok" : s.name === "Suara" && v.draftVoice ? "warn" : ""}">${s.name}${s.name === "Suara" && v.draftVoice ? " · draft" : ""}</span>`).join("");
 const cmdBox = (slug, skill = "video-vertikal") => `<span class="cmd">/${skill} ${esc(slug)}<button class="btn sm" onclick="copy('/${skill} ${esc(slug)}')">Salin</button></span>`;
 // "Buat video" path: Buat video › category › sub
 const crumb = (cat, sub) => `<div class="crumb"><a href="#/baru">Buat video</a>${cat ? ` › <a href="#/baru/${cat.id}">${esc(cat.label)}</a>` : ""}${sub ? ` › <b>${esc(sub.label)}</b>` : ""}</div>`;
@@ -1586,20 +1867,16 @@ async function viewEditor(slug, startTab) {
   const hasRef = v.steps.some((s) => s.name === "Konsep");
   const isM = !!STORY[v.type], isA = !!v.ad; // Advertisement: no script, voice or Flow prompts (tools/ad.mjs)
   $("#main").innerHTML = `
-    <div class="vh"><div><div class="eyebrow">${esc(slug)}${v.duration ? " · " + fmt(v.duration) : ""}${v.beats.length ? " · " + v.beats.length + " beat" : ""}</div><h1>${esc(v.title)}</h1><div class="meta-row">${stepPills(v)}${isM || isA ? `<span class="pill acc">${esc(placeLabel(v))}</span>` : `<span class="pill">${esc(catOf(v.category)?.label ?? "")}</span><button class="pill acc" id="presetBtn" title="Ganti preset gaya dan color tone">Preset: ${esc(subOf(v)?.label ?? v.preset)}${v.accent ? ` <i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${esc(v.accent)};vertical-align:0"></i>` : ""}</button>`}</div></div>
-      <div class="vh-r">${v.next !== "Selesai" ? cmdBox(slug, isM ? STORY[v.type].skill : isA ? (v.animation ? "animation" : v.preset) : undefined) : ""}${v.video ? `<button class="btn" id="shareBtn" title="Link yang bisa diputar tanpa login">${v.share ? (v.share.stale ? "Link: render lama" : "Link berbagi") : "Bagikan"}</button><a class="btn pri" href="${v.video}" download>Unduh MP4</a>` : ""}${v.thumbnail?.url ? `<a class="btn" href="${v.thumbnail.url}" download="${slug}-thumbnail.png" title="Unduh thumbnail (PNG)">Unduh thumbnail</a>` : ""}${(() => { const ready = !!v.video && !v.thumbnail?.videoRendering; const why = v.video ? "Tunggu render selesai" : "Aktif setelah video selesai dirender"; return `<button class="btn" id="tebBtn" ${ready ? "" : "disabled"} title="${ready ? "Unggah ke Tebar dan posting ke akun channel ini" : why}" style="background:#16a34a;border-color:#16a34a;color:#fff${ready ? "" : ";opacity:.45;cursor:not-allowed"}">${v.tebar?.job && !["done", "error"].includes(v.tebar.job.phase) ? "Mengirim ke Tebar…" : "Kirim ke Tebar"}</button>`; })()}</div></div>
-    <div class="ed${v.wide ? " cine" : ""}">
-      <div class="viewer">
-        ${v.video ? `<video class="stage" id="stage" src="${v.video}"${v.cinematic && v.cover ? ` poster="${v.cover}"` : ""} controls playsinline preload="metadata"></video>
-          <div class="linkrow"><button class="btn sm" id="linkBtn">${v.share ? "Lihat link video" : "Buat link video"}</button>
-            <div id="linkBox" hidden>${v.share ? `<input readonly value="${esc(v.share.url)}"><button class="btn sm" data-copy>Salin</button><a class="btn sm" href="${esc(v.share.url)}" target="_blank" rel="noopener">Buka</a>${v.share.stale ? `<span class="muted" style="font-size:12px;width:100%">Link ini masih memutar render lama. Perbarui lewat tombol "Link: render lama" di atas.</span>` : ""}` : ""}</div></div>` : `<div class="stage ph">Belum ada render.<br>Tempel perintah di atas ke Claude Code.</div>`}
-        ${v.video ? `<div class="fmtbox" id="fmtBox"><button class="btn sm" id="fmtBtn" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="6" width="11" height="12" rx="2"/><rect x="16" y="3" width="5" height="9" rx="1.5"/></svg>Ubah format</button><div id="fmtBody" hidden></div></div>` : ""}
-        ${me?.role === "viewer" ? "" : `<div class="linkrow" style="margin-top:6px"><button class="btn sm" id="delBtn" title="Pindahkan proyek ini ke Sampah (bisa dipulihkan)" aria-label="Hapus video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Hapus video</button></div>`}
-        ${v.beats.length ? `<div class="tline" id="tline">${v.beats.map((b, i) => `<button class="tb" data-i="${i}" title="${esc(b.id)} · ${b.duration.toFixed(1)}s" style="--w:${b.duration / total * 100};--rc:${REG[b.register]?.[0]}">${thumb(b) ? `<img src="${thumb(b)}" alt="" loading="lazy">` : ""}</button>`).join("")}</div>
-          <div class="legend">${Object.values(REG).map(([c, n]) => `<span><i style="--rc:${c}"></i>${n}</span>`).join("")}</div>` : ""}
-        ${v.draftVoice ? `<div class="vnav"><span class="pill warn">Suara masih draft (bisu)</span><span>timing akan menyesuaikan suara asli</span></div>` : ""}
-      </div>
-      <div class="panel">
+    <div class="one-h"><div><div class="eyebrow">${esc(slug)}${v.duration ? " · " + fmt(v.duration) : ""}${v.beats.length ? " · " + v.beats.length + " beat" : ""}</div><h1>${esc(v.title)}</h1><div class="meta-row">${stepPills(v)}${isM || isA ? `<span class="pill acc">${esc(placeLabel(v))}</span>` : `<span class="pill">${esc(catOf(v.category)?.label ?? "")}</span><button class="pill acc" id="presetBtn" title="Ganti preset gaya dan color tone">Preset: ${esc(subOf(v)?.label ?? v.preset)}${v.accent ? ` <i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${esc(v.accent)};vertical-align:0"></i>` : ""}</button>`}</div></div>
+      <div class="vh-r">${v.video ? `<button class="btn" id="shareBtn" title="Link yang bisa diputar tanpa login">${v.share ? (v.share.stale ? "Link: render lama" : "Link berbagi") : "Bagikan"}</button><a class="btn pri" href="${v.video}" download>Unduh MP4</a>` : ""}</div></div>
+    <div class="ed2${v.wide ? " cine" : ""}" id="ed2" data-p="">
+    <nav class="rail" aria-label="Panel editor">
+      <button type="button" data-rail="naskah" aria-pressed="false" title="Naskah"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg><span>Naskah</span></button>
+      ${isA ? "" : `<button type="button" data-rail="suara" aria-pressed="false" title="Suara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Suara</span></button>`}
+      <button type="button" data-rail="beat" aria-pressed="false" title="Beat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18V10M9 18V6M14 18v-8M19 18V4"/></svg><span>Beat</span></button><button type="button" data-rail="aset" aria-pressed="false" title="Aset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg><span>Aset</span></button><button type="button" data-rail="thumb" aria-pressed="false" title="Thumbnail dan Tebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg><span>Publikasi</span></button>
+    </nav>
+    <aside class="ed2-panel" id="edPanel">
+      <div class="ocard c-script" data-panel="naskah"><div class="ocard-h">Naskah<small>dan tahap produksi</small></div>
         <div data-workbar="${slug}" style="padding:12px 12px 0"></div>
         <div class="tabs" style="padding:0 10px;margin:0" id="tabs">
           ${isM ? `<button data-t="brief">Brief</button>
@@ -1608,24 +1885,66 @@ async function viewEditor(slug, startTab) {
           ${v.type === "berakitkehulu" || v.musafo.charRefs.length || v.musafo.characters.length ? `<button data-t="tokoh">Tokoh <span>${v.musafo.characters.length ? v.musafo.characters.filter((c) => c.sheetUrl).length + "/" + v.musafo.characters.length : v.musafo.charRefs.length || "–"}</span></button>` : ""}
           <button data-t="naskah">Naskah ${v.approval.approved && v.scriptState !== "old" ? "<span>✓</span>" : ""}</button>
           <button data-t="shot">Shot <span>${v.musafo.shots.length}</span></button>
-          <button data-t="suara">Suara <span>${v.voice.seconds ? fmt(v.voice.seconds) : "–"}</span></button>
-          <button data-t="beat">Beat <span>${v.beats.length}</span></button>` : `<button data-t="brief">Brief</button>
+` : `<button data-t="brief">Brief</button>
           ${v.aws ? `<button data-t="aws">AWS <span>${v.awsData?.tbc.length ? v.awsData.tbc.length + " TBC" : "✓"}</span></button>` : ""}
           ${v.clone ? `<button data-t="clone">Clone <span>${v.cloneData?.shots.length || "–"}${v.cloneData?.approval?.approved ? " ✓" : ""}</span></button>` : ""}
           ${hasRef ? `<button data-t="konsep">Konsep <span>${v.concept ? esc(v.concept.id) : v.concepts.concepts.length || "–"}</span></button>` : ""}
           ${isA ? "" : `<button data-t="naskah">Naskah</button>`}
           ${isA || v.oneTake ? "" : `<button data-t="flow">Prompt Flow <span>${v.flowCheck.shots.length}</span></button>`}
-          ${isA ? "" : `<button data-t="suara">Suara <span>${v.voice.seconds ? fmt(v.voice.seconds) : "–"}</span></button>`}
-          <button data-t="beat"${v.clone || v.aws ? "" : ' class="on"'}>Beat <span>${v.beats.length}</span></button>`}
-          <button data-t="thumb">Thumbnail ${v.thumbnail?.url ? (v.thumbnail.stale ? "<span>!</span>" : "<span>✓</span>") : ""}</button>
-          <button data-t="aset">Aset <span>${v.keyvisuals.length + v.screens.length + v.footage.length + v.reference.length}</span></button>
+`}
         </div>
         <div id="tabBody"></div>
       </div>
+        <div class="ocard" data-panel="thumb"><div class="ocard-h">Thumbnail &amp; Tebar<small>${v.thumbnail?.url ? (v.thumbnail.stale ? "perlu render ulang" : "✓ siap") : "belum ada"}</small></div><div id="thumbBody"></div>
+        <div class="pub-teb"><div class="sec-t">Kirim ke Tebar<small>${v.buffered?.length ? "terbit: " + esc(v.buffered.join(", ")) : v.tebar?.job ? esc(v.tebar.job.phase) : ""}</small></div>
+          <div class="teb-acts">${(() => { const ready = !!v.video && !v.thumbnail?.videoRendering; const why = v.video ? "Tunggu render selesai" : "Aktif setelah video selesai dirender"; return `<button class="btn" id="tebBtn" ${ready ? "" : "disabled"} title="${ready ? "Unggah ke Tebar dan posting ke akun channel ini" : why}" style="background:#16a34a;border-color:#16a34a;color:#fff${ready ? "" : ";opacity:.45;cursor:not-allowed"}">${v.tebar?.job && !["done", "error"].includes(v.tebar.job.phase) ? "Mengirim ke Tebar…" : "Kirim ke Tebar"}</button>`; })()}
+            ${v.sub ? `<a class="btn sm" href="#/s/${v.category}/${esc(v.sub)}">Atur akun Tebar ${esc(subOf(v)?.label ?? v.sub)}</a>` : ""}
+            <span class="muted" style="font-size:12px">${v.video ? "Caption ditulis dan akun dipilih di jendela Kirim ke Tebar." : "Aktif setelah video selesai dirender."}</span></div></div>
+        </div>
+
+      ${isA ? "" : `<div class="ocard" id="suaraCard" data-panel="suara"><div class="ocard-h">Suara<small>${v.voice.seconds ? fmt(v.voice.seconds) + (v.voice.draft ? " · draft" : "") : "belum ada"}</small></div><div class="tabs ctabs" role="tablist"><button type="button" role="tab" data-ct="suara" class="on" aria-selected="true">Suara</button><button type="button" role="tab" data-ct="gemini" aria-selected="false">API Gemini <span id="gemTabMark"></span></button></div><div class="ocard-b" id="suaraBody"></div><div class="ocard-b" id="geminiBody" hidden></div></div>`}
+      <div class="ocard" id="beatCard" data-panel="beat"><div class="ocard-h">Beat<small>${v.beats.length ? v.beats.length + " beat" : "belum ada"}</small></div><div class="ocard-b" id="beatBody"></div></div>
+      <div class="ocard" id="asetCard" data-panel="aset"><div class="ocard-h">Aset<small>${v.keyvisuals.length + v.screens.length + v.footage.length + v.reference.length} file</small></div><div class="ocard-b" id="asetBody"></div></div>
+    </aside>
+    <section class="ed2-stage">
+      <div class="ocard c-video"><div class="ocard-h">Preview video<small>${v.video ? (v.duration ? fmt(v.duration) : "render") : "belum dirender"}</small></div>
+      <div class="viewer">
+        <div class="stage-wrap">
+          ${v.video ? `<video class="stage" id="stage" src="${v.video}"${v.cinematic && v.cover ? ` poster="${v.cover}"` : ""} controls playsinline preload="metadata"></video>` : `<div class="stage ph">Belum ada render.<br>Tempel perintah di atas ke Claude Code.</div>`}
+          ${v.video || me?.role !== "viewer" ? `<div class="vmenu">
+            <button type="button" class="vmenu-btn" id="vmBtn" aria-label="Opsi video" title="Opsi video" aria-haspopup="menu" aria-expanded="false" aria-controls="vmList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg></button>
+            <div class="vmenu-list" id="vmList" role="menu" hidden>
+              ${v.video ? `<button type="button" role="menuitem" id="linkBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span id="linkLbl">${v.share ? "Lihat link video" : "Buat link video"}</span></button>
+              <button type="button" role="menuitem" id="fmtBtn" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="11" height="12" rx="2"/><rect x="16" y="3" width="5" height="9" rx="1.5"/></svg><span>Ubah format</span></button>
+              <a role="menuitem" href="${v.video}" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Unduh MP4</span></a>` : ""}
+              ${me?.role === "viewer" ? "" : `${v.video ? '<hr>' : ""}<button type="button" role="menuitem" class="danger" id="delBtn" title="Pindahkan proyek ini ke Sampah (bisa dipulihkan)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span>Hapus video</span></button>`}
+            </div></div>` : ""}
+        </div>
+        ${v.video ? `<div class="linkrow"><div id="linkBox" hidden>${v.share ? `<input readonly value="${esc(v.share.url)}"><button class="btn sm" data-copy>Salin</button><a class="btn sm" href="${esc(v.share.url)}" target="_blank" rel="noopener">Buka</a>${v.share.stale ? `<span class="muted" style="font-size:12px;width:100%">Link ini masih memutar render lama. Perbarui lewat tombol "Link: render lama" di atas.</span>` : ""}` : ""}</div></div>
+        <div class="fmtbox" id="fmtBox"><div id="fmtBody" hidden></div></div>` : ""}
+        ${v.beats.length ? `<div class="tline" id="tline">${v.beats.map((b, i) => `<button class="tb" data-i="${i}" title="${esc(b.id)} · ${b.duration.toFixed(1)}s" style="--w:${b.duration / total * 100};--rc:${REG[b.register]?.[0]}">${thumb(b) ? `<img src="${thumb(b)}" alt="" loading="lazy">` : ""}</button>`).join("")}</div>
+          <div class="legend">${Object.values(REG).map(([c, n]) => `<span><i style="--rc:${c}"></i>${n}</span>`).join("")}</div>` : ""}
+        ${v.draftVoice ? `<div class="vnav"><span class="pill warn">Suara masih draft (bisu)</span><span>timing akan menyesuaikan suara asli</span></div>` : ""}
+      </div></div>
+      <div class="ocard c-hf" id="hfCard"><div class="hf-body" id="hfBody"></div></div>
+    </section>
     </div>`;
   let sel = 0;
   let editing = false; // tab Naskah in edit mode
   const stage = $("#stage");
+  // Production (user 2026-11-07, Storytelling: suara lalu key visual) dan (user 2026-11-20) Video Explainer: suara, beat,
+  // scene, gerbang check. Tampil di tab Shot (Storytelling) dan di tab Naskah setelah naskah disetujui.
+  const canProduce = isM || (!isA && !v.aws && !v.clone && !v.oneTake);
+  const prodBarHtml = () => {
+    if (!canProduce) return "";
+    const run = workingNow.find((w) => w.slug === slug && (w.type === "production" || w.type === "explainer-production"));
+    if (isM) {
+      const pr = v.musafo.production;
+      return `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : "<br>Setujui storyline dan naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
+    }
+    const ready = v.approval.approved && v.scriptState !== "old", voice = !!v.voice?.seconds && !v.voice.draft, done = voice && v.beats.length > 0;
+    return `<div class="notice ${done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${voice ? "✓" : "–"} · beat ${v.beats.length || "–"}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}<br><small class="muted">Claude membuat suara, beat, dan scene sampai lolos check. Render menunggu thumbnail kamu setujui.</small>${ready ? "" : "<br>Setujui naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" ${!ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : done ? "Production lagi" : "Production"}</button></span></div>`;
+  };
   const body = {
     beat: () => v.oneTake ? beatTableView(v) : v.kvBeats ? `
       <div class="pad"><div class="notice"><span><b>Durasi tiap beat bisa diubah.</b> Cut dibulatkan ke ketukan musik (kelipatan 0,3 s; beat pertama 0,55 + 0,3 s); beat penutup bebas. Semua waktu di dalamnya, potongan orang, celah bingkai, SFX, dan musik ikut menyesuaikan. Total sekarang <b id="kvTotal">${v.beats.reduce((s, b) => s + b.duration, 0).toFixed(2)} s</b>.</span></div></div>
@@ -1658,7 +1977,8 @@ async function viewEditor(slug, startTab) {
         const doc = isM && shots.length
           ? shots.map((s) => `<div class="sline"><b class="mono">${esc(s.id)}${s.stat ? `<br><small class="${s.stat.over ? "over" : "muted"}" title="maks ±${v.musafo.shotLimit?.words} kata ≈ ${v.musafo.shotLimit?.seconds} s per shot">${s.stat.words} kata<br>${s.stat.measured ? "" : "±"}${s.stat.sec}s${s.stat.over ? " ⚠" : ""}</small>` : ""}</b><div>${s.lines.map((l) => `<div>${esc(l.text)}<br><small class="muted">${esc(l.en)}</small></div>`).join("")}</div></div>`).join("")
           : `<div class="doc">${esc(v.script) || '<span class="muted">Naskah belum ditulis.</span>'}</div>`;
-        return `<div class="pad">${bar}${pend}${warns}${canEdit ? `<div class="meta-row" style="justify-content:flex-end;margin:4px 0 8px"><button class="btn sm" id="sEdit">Edit naskah</button></div>` : ""}${doc}</div>`;
+        const prod = a.approved && v.scriptState !== "old" ? prodBarHtml() : "";
+        return `<div class="pad">${bar}${prod}${pend}${warns}${canEdit ? `<div class="meta-row" style="justify-content:flex-end;margin:4px 0 8px"><button class="btn sm" id="sEdit">Edit naskah</button></div>` : ""}${doc}</div>`;
       }
       const note = voiced
         ? `<div class="notice"><span><b>Suara sudah dibuat.</b> Hanya kalimat yang kamu ubah yang dibuat ulang suaranya (satu per satu, tidak rekam ulang semua).${isM ? " Shot yang sudah punya klip dan isinya berubah mungkin butuh klip baru (15 kredit per generate)." : ""} Jaga panjangnya mirip supaya durasi tetap aman.</span></div>`
@@ -1792,9 +2112,7 @@ async function viewEditor(slug, startTab) {
       const lookBar = m.looks?.length ? `<div class="notice" style="margin-bottom:14px"><span><b>Gaya visual</b> · ${esc(m.looks.find((l) => l.id === m.look)?.description ?? "")}</span><span class="sp"><select class="sel" id="lookSel">${m.looks.map((l) => `<option value="${esc(l.id)}" ${l.id === m.look ? "selected" : ""}>${esc(l.label)}</option>`).join("")}</select></span></div>` : "";
       if (!m.shots.length) return `<div class="pad">${lookBar}<div class="empty"><b>Belum ada shot</b>Claude memecah cerita jadi shot (kalimat + terjemahan + prompt gambar dan gerak).<br><br>${cmdBox(slug, STORY[v.type]?.skill ?? "musafo")}</div></div>`;
       const issues = m.errors.map((e) => `<li class="e">✗ ${esc(e)}</li>`).join("") + m.warns.map((w) => `<li class="w">⚠ ${esc(w)}</li>`).join("");
-      // Production (user 2026-11-07): one click → voice, then key visuals; disabled until the script is approved
-      const pr = m.production, run = workingNow.find((w) => w.slug === slug && w.type === "production");
-      const prodBar = `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : "<br>Setujui storyline dan naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
+      const prodBar = prodBarHtml();
       return `<div class="pad">${lookBar}${prodBar}
         <div class="notice ok" style="margin-bottom:14px"><span><b>${m.shots.length} shot</b> · gambar ${m.shots.filter((s) => s.frameUrl).length} · klip ${m.shots.filter((s) => s.clipUrl).length}${m.imageTool ? " · " + esc(m.imageTool) : ""}${m.videoTool ? " · " + esc(m.videoTool) : ""}</span></div>
         ${issues ? `<ul class="issues">${issues}</ul>` : ""}
@@ -1855,7 +2173,7 @@ async function viewEditor(slug, startTab) {
       const opt = (o, i) => `<button class="shot" data-opt="${i}" style="text-align:left;display:block;width:100%;cursor:pointer;margin-bottom:8px;padding:10px 12px"><b>${hl(o.headline)}</b><br><span class="muted">${esc(o.sub)}</span></button>`;
       const ring = (on) => (on ? "3px solid var(--acc,#e5b84a)" : "1px solid #0003");
       return `<div class="pad"><div style="display:grid;grid-template-columns:minmax(180px,280px) 1fr;gap:20px;align-items:start">
-        <div>${t.url ? `<a href="${t.url}" target="_blank"><img src="${t.url}" alt="thumbnail" style="width:100%;border-radius:10px;display:block"></a>` : '<div class="empty" style="aspect-ratio:9/16"><b>Belum ada thumbnail</b>Isi teksnya lalu klik Render.</div>'}
+        <div>${t.url ? `<a href="${t.url}" target="_blank"><img src="${t.url}" alt="thumbnail" style="width:100%;border-radius:10px;display:block"></a>` : `<div class="empty" style="aspect-ratio:${v.wide ? "16/9" : "9/16"}"><b>Belum ada thumbnail</b>Isi teksnya lalu klik Render.</div>`}
           ${t.url ? `<a class="btn sm" href="${t.url}" download="${slug}-thumbnail.png" style="margin-top:8px;width:100%;justify-content:center">Unduh thumbnail</a>` : ""}
           ${t.stale && t.url ? '<p class="muted" style="font-size:12.5px;margin-top:6px">Pengaturan berubah sejak render terakhir.</p>' : ""}</div>
         <div>
@@ -1996,9 +2314,17 @@ async function viewEditor(slug, startTab) {
     if (seek && stage) { stage.currentTime = b.start + 0.05; }
   };
   const openTab = (t) => {
-    document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.t === t));
-    document.querySelector(".ed")?.classList.toggle("wide", t === "draft" || (t === "storyline" && !!v.musafo?.sourceText));
-    $("#tabBody").innerHTML = body[t]();
+    // layout satu halaman: Thumbnail selalu tampil di kartunya sendiri (kolom 3), tab lain di kartu Naskah (kolom 1)
+    // Suara, Beat, dan Aset juga punya kartu sendiri (user 2026-11-20), di baris di bawah tiga kolom
+    if (t === "thumb") { $("#thumbBody").innerHTML = body.thumb(); bindThumb(); $("#thumbBody").querySelectorAll("[data-copy]").forEach((b) => (b.onclick = () => toast(copyText(b.dataset.copy) ? "Tersalin" : "Browser menolak menyalin. Salin manual."))); return; }
+    const card = CARD_TABS[t] ? $(CARD_TABS[t]) : null;
+    if (CARD_TABS[t] && !card) return;
+    const host = card || $("#tabBody");
+    if (!card) {
+      document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.t === t));
+      document.querySelector(".ed2")?.classList.toggle("pwide", t === "draft" || (t === "storyline" && !!v.musafo?.sourceText));
+    }
+    host.innerHTML = body[t]();
     document.querySelectorAll(".blist li").forEach((li) => (li.onclick = () => showBeat(+li.dataset.i, true)));
     // BRI-style ad: beat durations (retime.mjs on the laptop, then optionally a fresh render)
     document.querySelectorAll(".kvdur").forEach((x) => {
@@ -2045,8 +2371,8 @@ async function viewEditor(slug, startTab) {
         };
       }
     }
-    $("#tabBody").querySelectorAll("[data-copy]").forEach((b) => (b.onclick = () => toast(copyText(b.dataset.copy) ? "Prompt tersalin" : "Browser menolak menyalin. Salin manual.")));
-    document.querySelectorAll("[data-goto]").forEach((b) => (b.onclick = () => openTab(b.dataset.goto)));
+    host.querySelectorAll("[data-copy]").forEach((b) => (b.onclick = () => toast(copyText(b.dataset.copy) ? "Prompt tersalin" : "Browser menolak menyalin. Salin manual.")));
+    document.querySelectorAll("[data-goto]").forEach((b) => (b.onclick = () => { openTab(b.dataset.goto); if (CARD_TABS[b.dataset.goto]) window.__edPanel?.(b.dataset.goto); }));
     document.querySelectorAll("[data-pick]").forEach((b) => (b.onclick = () => { $("#vSpeaker").value = b.dataset.pick; $("#vSpeaker").focus(); }));
     const vs = $("#vSave");
     if (vs) vs.onclick = async () => {
@@ -2171,11 +2497,13 @@ async function viewEditor(slug, startTab) {
     };
     const pg = $("#prodGo");
     if (pg) pg.onclick = async () => {
-      if (v.musafo.production.done && !confirm("Suara dan key visual sudah ada. Jalankan production lagi? Claude akan membuat ulang yang belum cocok dengan naskah.")) return;
+      if (isM ? v.musafo.production.done && !confirm("Suara dan key visual sudah ada. Jalankan production lagi? Claude akan membuat ulang yang belum cocok dengan naskah.")
+        : v.beats.length && !confirm("Suara dan beat sudah ada. Jalankan production lagi? Claude melanjutkan dari yang belum selesai dan memperbarui yang tidak cocok dengan naskah.")) return;
+      const here = document.querySelector("#tabs button.on")?.dataset.t || (isM ? "shot" : "naskah");
       pg.disabled = true; pg.textContent = "Memulai…";
       const r = await fetch(`/api/videos/${slug}/production`, { method: "POST" });
       if (!r.ok) { pg.disabled = false; pg.textContent = "Production"; return alert((await r.json()).error); }
-      await loadVideos(); await viewEditor(slug, "shot"); showWorking(slug, r.status === 202);
+      await loadVideos(); await viewEditor(slug, here); showWorking(slug, r.status === 202);
     };
     const cap = $("#clApprove"), cun = $("#clUnapprove");
     if (cap) cap.onclick = async () => {
@@ -2196,6 +2524,7 @@ async function viewEditor(slug, startTab) {
     // script editor
     if ($("#sEdit")) $("#sEdit").onclick = () => { editing = true; openTab("naskah"); };
     if ($("#sCancel")) $("#sCancel").onclick = () => { editing = false; openTab("naskah"); };
+    if (card) { if (t === "beat") showBeat(sel); return; }
     if (t === "naskah" && editing) $("#tabBody").onclick = (e) => {
       const del = e.target.closest("[data-del]"), add = e.target.closest("[data-add]");
       if (del) { const rows = del.closest("[data-rows]"); if (rows.querySelectorAll(".lrow").length > 1) del.closest(".lrow").remove(); else toast("Minimal satu kalimat"); }
@@ -2228,7 +2557,6 @@ async function viewEditor(slug, startTab) {
       toast(j.queued ? "Laptop offline: perubahan masuk antrean" : j.changed?.length ? `Naskah disimpan: ${j.changed.length} ${isM ? "shot" : "paragraf"} berubah${j.translated ? `, ${j.translated} terjemahan otomatis` : ""}` : "Tidak ada yang berubah");
       editing = false; await loadVideos(); viewEditor(slug, "naskah");
     };
-    if (t === "thumb") bindThumb();
     if (t === "beat") showBeat(sel);
   };
   const bindThumb = () => {
@@ -2526,12 +2854,25 @@ async function viewEditor(slug, startTab) {
       location.hash = v.sub ? `#/s/${v.category}/${v.sub}` : "#/";
     };
   };
+  // menu titik tiga di kanan atas pemutar (user 2026-11-20, seperti Google Flow): link, ubah format, unduh, hapus
+  if ($("#vmBtn")) {
+    const btn = $("#vmBtn"), list = $("#vmList");
+    const setOpen = (open) => { list.hidden = !open; btn.setAttribute("aria-expanded", String(open)); if (open) list.querySelector("[role=menuitem]")?.focus(); };
+    btn.onclick = (e) => { e.stopPropagation(); setOpen(list.hidden); };
+    list.addEventListener("click", (e) => { if (e.target.closest("[role=menuitem]")) setOpen(false); });
+    list.onkeydown = (e) => {
+      const items = [...list.querySelectorAll("[role=menuitem]")], i = items.indexOf(document.activeElement);
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); items[(i + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length]?.focus(); }
+      if (e.key === "Escape") { setOpen(false); btn.focus(); }
+    };
+    document.addEventListener("click", (e) => { if (!list.hidden && !e.target.closest(".vmenu")) setOpen(false); });
+  }
   // the link under the player: shows the URL when there is one, otherwise opens the "Bagikan" dialog to make it
   if ($("#linkBtn")) $("#linkBtn").onclick = () => {
     const box = $("#linkBox");
     if (!v.share) return $("#shareBtn").click();
     box.hidden = !box.hidden;
-    $("#linkBtn").textContent = box.hidden ? "Lihat link video" : "Sembunyikan link";
+    $("#linkLbl").textContent = box.hidden ? "Lihat link video" : "Sembunyikan link";
     if (!box.hidden) box.querySelector("input").select();
   };
   $("#linkBox [data-copy]")?.addEventListener("click", () => { const i = $("#linkBox input"); if (copyText(i.value)) toast("Link disalin"); else { i.select(); toast("Browser menolak menyalin. Link sudah diblok, tekan Ctrl+C."); } });
@@ -2591,8 +2932,96 @@ async function viewEditor(slug, startTab) {
       box.remove(); if (r.ok) { toast("Preset: " + id); await loadVideos(); viewEditor(slug); }
     };
   };
-  openTab(startTab || (v.aws ? "aws" : v.clone ? "clone" : isM ? (v.waiting === "Setujui draft" || v.musafo.draftApproval.needed && !v.musafo.draftApproval.approved ? "draft" : v.waiting === "Setujui storyline" || !v.musafo.storylineApproval.approved && !v.musafo.shots.length ? "storyline" : v.scriptState === "waiting" || v.scriptState === "stale" ? "naskah" : v.beats.length ? "beat" : "shot") : hasRef && !v.concept && v.scriptState === "none" ? "konsep" : v.scriptState === "waiting" || v.scriptState === "stale" ? "naskah" : !v.oneTake && v.approval.approved && (!v.flowCheck.shots.length || v.flowCheck.errors.length) && !v.beats.length ? "flow" : "beat"));
+  // editor bergaya aplikasi edit video (user 2026-11-21): rel ikon kiri membuka/menyembunyikan satu panel, video besar di tengah
+  const ed2 = $("#ed2");
+  const setPanel = (pnl) => {
+    if (pnl === "tebar") pnl = "thumb";
+    if (pnl && !ed2.querySelector(`[data-panel="${pnl}"]`)) pnl = "";
+    ed2.dataset.p = pnl;
+    ed2.querySelectorAll("[data-panel]").forEach((c) => c.classList.toggle("on", c.dataset.panel === pnl));
+    ed2.querySelectorAll("[data-rail]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rail === pnl)));
+    try { localStorage.setItem("tt_panel", pnl); } catch {}
+  };
+  window.__edPanel = setPanel;
+  ed2.querySelectorAll("[data-rail]").forEach((b) => (b.onclick = () => setPanel(ed2.dataset.p === b.dataset.rail ? "" : b.dataset.rail)));
+  ed2.querySelectorAll("[data-panel] > .ocard-h").forEach((h) => h.insertAdjacentHTML("beforeend", '<button type="button" class="pclose" aria-label="Sembunyikan panel" title="Sembunyikan panel">×</button>'));
+  ed2.querySelectorAll(".pclose").forEach((b) => (b.onclick = () => setPanel("")));
+  let savedPanel = "naskah"; try { const x = localStorage.getItem("tt_panel"); if (x !== null) savedPanel = x; } catch {}
+  setPanel(savedPanel);
+  const firstTab = v.aws ? "aws" : v.clone ? "clone" : isM ? (v.waiting === "Setujui draft" || v.musafo.draftApproval.needed && !v.musafo.draftApproval.approved ? "draft" : v.waiting === "Setujui storyline" || !v.musafo.storylineApproval.approved && !v.musafo.shots.length ? "storyline" : "naskah") : hasRef && !v.concept && v.scriptState === "none" ? "konsep" : isA ? "brief" : "naskah";
+  openTab(startTab && !CARD_TABS[startTab] && startTab !== "thumb" && body[startTab] ? startTab : firstTab);
+  ["thumb", ...Object.keys(CARD_TABS)].forEach(openTab);
+  if (startTab === "thumb" || CARD_TABS[startTab]) setPanel(startTab);
+  else if (startTab) setPanel("naskah");
+  hfPreview(slug);
+  if ($("#suaraCard")) {
+    const tabs = $("#suaraCard").querySelectorAll("[data-ct]");
+    tabs.forEach((b) => (b.onclick = () => {
+      tabs.forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-selected", x === b); });
+      $("#suaraBody").hidden = b.dataset.ct !== "suara"; $("#geminiBody").hidden = b.dataset.ct !== "gemini";
+    }));
+    geminiPanel($("#geminiBody"));
+  }
   paintWork(); // banner if Claude is working on this project
+}
+
+// Tab "API Gemini" di kartu Suara (user 2026-11-20): user menempel kuncinya sendiri; server menyimpannya di .env (gitignored)
+// dan mengetesnya ke Google. Kunci tidak pernah ditampilkan balik, hanya 4 karakter terakhir.
+async function geminiPanel(host) {
+  const mark = (st) => { const m = $("#gemTabMark"); if (m) m.textContent = st.set ? "✓" : "!"; };
+  const draw = (st, msg) => {
+    mark(st);
+    host.innerHTML = `<div class="pad">
+      ${st.set ? `<div class="notice ok"><span><b>API key Gemini tersimpan</b> · berakhiran <span class="mono">${esc(st.hint)}</span></span></div>`
+        : `<div class="notice"><span><b>Belum ada API key Gemini.</b> Dipakai untuk suara Gemini TTS, sampel suara, thumbnail, caption posting, dan Library Cerita.</span></div>`}
+      <div class="fld"><label for="gemKey">${st.set ? "Ganti API key" : "API key"}</label>
+        <input type="password" id="gemKey" autocomplete="off" spellcheck="false" placeholder="AIza…" style="font-family:var(--f-mono)"></div>
+      <p class="muted" style="font-size:12.5px;margin:0 0 12px">Buat di <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio → Get API key</a>, lalu tempel di sini. Kunci disimpan di file <span class="mono">.env</span> di laptop ini (tidak ikut git) dan langsung dipakai tanpa restart Studio.</p>
+      <div class="meta-row" style="gap:8px"><button class="btn pri sm" id="gemSave">Simpan</button>${st.set ? `<button class="btn sm" id="gemTest">Tes kunci</button><button class="btn sm" id="gemDel">Hapus</button>` : ""}</div>
+      ${msg ? `<p style="font-size:12.5px;margin:12px 0 0;color:${msg.ok ? "var(--ok)" : "var(--bad)"}">${esc(msg.text)}</p>` : ""}</div>`;
+    const call = async (btn, opts, label) => {
+      const old = btn.textContent; btn.disabled = true; btn.textContent = label;
+      const r = await fetch("/api/settings/gemini", opts).catch(() => null);
+      const j = r ? await r.json().catch(() => ({})) : { error: "Server Studio tidak menjawab." };
+      if (!r?.ok) { btn.disabled = false; btn.textContent = old; return draw(st, { ok: false, text: j.error || "Gagal." }); }
+      draw(j, "ok" in j ? { ok: j.ok, text: j.ok ? "Kunci diterima Google dan siap dipakai." : `Tersimpan, tapi tes gagal: ${j.error}` } : { ok: true, text: j.set ? "" : "API key dihapus dari .env." });
+    };
+    $("#gemSave", host).onclick = () => {
+      const key = $("#gemKey", host).value.trim();
+      if (!key) return $("#gemKey", host).focus();
+      call($("#gemSave", host), { method: "POST", body: JSON.stringify({ key }) }, "Menyimpan & mengetes…");
+    };
+    $("#gemKey", host).onkeydown = (e) => { if (e.key === "Enter") $("#gemSave", host).click(); };
+    if ($("#gemTest", host)) $("#gemTest", host).onclick = () => call($("#gemTest", host), { method: "POST", body: JSON.stringify({ test: true }) }, "Mengetes…");
+    if ($("#gemDel", host)) $("#gemDel", host).onclick = () => { if (confirm("Hapus API key Gemini dari laptop ini?")) call($("#gemDel", host), { method: "DELETE" }, "Menghapus…"); };
+  };
+  const r = await fetch("/api/settings/gemini").catch(() => null);
+  if (!r?.ok) { host.innerHTML = `<div class="pad"><div class="notice"><span>API key hanya bisa diatur dari Studio di laptop ini (http://localhost:4331).</span></div></div>`; return; }
+  draw(await r.json());
+}
+// tab editor yang tampil sebagai kartu sendiri, bukan di kartu Naskah (user 2026-11-20)
+const CARD_TABS = { suara: "#suaraBody", beat: "#beatBody", aset: "#asetBody" };
+// Baris bawah editor (user 2026-11-20): HyperFrames Studio dari proyek ini (`npx hyperframes preview`, server lokal)
+// disematkan lewat iframe. GET = status; tombol menyalakannya. Proyek tanpa index.html (mis. iklan AE) tidak punya preview.
+async function hfPreview(slug, start = false) {
+  const body = $("#hfBody"), st = { set textContent(_) {} }; // tanpa kepala kartu (user 2026-11-21)
+  if (!body) return;
+  const show = (j) => {
+    if ($("#hfBody") !== body || !location.hash.startsWith(`#/v/${slug}`)) return;
+    if (j.state === "none") { $("#hfCard").hidden = true; return; }
+    if (j.state === "running") {
+      const u = new URL(j.url); if (["127.0.0.1", "localhost"].includes(u.hostname)) u.hostname = location.hostname;
+      st.textContent = `jalan · port ${j.port}`;
+      body.innerHTML = `<iframe src="${esc(u.href)}" title="Preview HyperFrames ${esc(slug)}" loading="lazy" allow="autoplay; fullscreen"></iframe>`;
+      return;
+    }
+    st.textContent = "mati";
+    body.innerHTML = `<div class="empty" style="padding:28px 20px"><b>Preview HyperFrames belum jalan</b>Komposisi, timeline, dan elemen proyek ini bisa dicek langsung di HyperFrames Studio.${j.error ? `<br><span style="color:var(--bad)">${esc(j.error)}</span>` : ""}<br><button class="btn pri" id="hfStart">Nyalakan preview</button></div>`;
+    $("#hfStart").onclick = () => hfPreview(slug, true);
+  };
+  if (start) { st.textContent = "menyalakan…"; body.innerHTML = `<div class="empty" style="padding:28px 20px"><b>Menyalakan HyperFrames Studio…</b>Bisa sampai satu menit saat pertama kali.</div>`; }
+  const r = await fetch(`/api/videos/${slug}/hf-preview`, { method: start ? "POST" : "GET" }).catch(() => null);
+  show(r?.ok ? await r.json() : { state: "stopped", error: start ? "Server Studio tidak menjawab." : "" });
 }
 
 // ---------- Musafo story library: a long book -> stories ready to become videos one by one ----------

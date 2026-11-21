@@ -535,6 +535,41 @@ createServer(async (req, res) => {
       }
       return send(res, 404, { error: "not found" });
     }
+    // API key Gemini (user 2026-11-20, tab "API Gemini" di kartu Suara): ditempel user sendiri, disimpan di .env (gitignored)
+    // dan langsung dipakai proses ini. Hanya dari halaman Studio di laptop ini; kuncinya tidak pernah dikirim balik utuh.
+    if (p === "/api/settings/gemini") {
+      const host = String(req.headers.host || "");
+      if (!/^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host) || (req.headers.origin && new URL(req.headers.origin).host !== host)) return send(res, 403, { error: "Kunci hanya bisa diatur dari Studio di laptop ini (localhost)." });
+      const ENV = join(ROOT, ".env");
+      const envText = () => (existsSync(ENV) ? readFileSync(ENV, "utf8") : "");
+      const writeKey = (v) => {
+        const lines = envText().split(/\r?\n/).filter((l, i, a) => !/^\s*GEMINI_API_KEY\s*=/.test(l) && !(i === a.length - 1 && l === ""));
+        if (v) lines.push(`GEMINI_API_KEY=${v}`);
+        writeFileSync(ENV, lines.join("\n") + "\n");
+        if (v) process.env.GEMINI_API_KEY = v; else delete process.env.GEMINI_API_KEY;
+      };
+      const info = () => { const k = process.env.GEMINI_API_KEY || ""; return { set: !!k, hint: k ? `…${k.slice(-4)}` : "" }; };
+      // one cheap call (list models) to tell the user whether Google accepts the key
+      const test = async (k) => {
+        try {
+          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1&key=${encodeURIComponent(k)}`, { signal: AbortSignal.timeout(15e3) });
+          if (r.ok) return { ok: true };
+          const j = await r.json().catch(() => ({}));
+          return { ok: false, error: j.error?.message || `Google menolak kunci ini (HTTP ${r.status}).` };
+        } catch (e) { return { ok: false, error: `Tidak bisa menghubungi Google untuk mengetes kunci: ${e.message}` }; }
+      };
+      if (req.method === "GET") return send(res, 200, info());
+      if (req.method === "DELETE") { writeKey(""); return send(res, 200, info()); }
+      if (req.method === "POST") {
+        const body = JSON.parse((await readBody(req)).toString() || "{}");
+        if (body.test) { const k = process.env.GEMINI_API_KEY; return send(res, 200, { ...info(), ...(k ? await test(k) : { ok: false, error: "Belum ada kunci." }) }); }
+        const v = String(body.key ?? "").trim();
+        if (!/^[\x21-\x7e]{20,200}$/.test(v)) return send(res, 400, { error: "API key Gemini tidak terbaca. Tempel utuh tanpa spasi (biasanya diawali AIza)." });
+        writeKey(v);
+        return send(res, 200, { ...info(), ...(await test(v)) });
+      }
+      return send(res, 405, { error: "method" });
+    }
     // what Claude is doing after the user's clicks, with estimates, and whether a Claude session is listening at all
     if (p === "/api/working" && req.method === "GET") return send(res, 200, { claude: claudeWaiting(), items: working() });
     if (p === "/api/videos" && req.method === "GET") {
@@ -747,6 +782,24 @@ createServer(async (req, res) => {
       // added later to a project that already has a story: tell a waiting Claude session
       if (url.searchParams.get("later") === "1") emit("characters", up[1]);
       return send(res, 200, { ok: true });
+    }
+    // HyperFrames Studio preview (user 2026-11-20, baris bawah layout satu halaman): GET = status, POST = nyalakan.
+    // `npx hyperframes preview <dir> --background --no-open --json`; Studio menyematkan studioUrl-nya dalam iframe.
+    const hfp = p.match(/^\/api\/videos\/([a-z0-9-]+)\/hf-preview$/);
+    if (hfp && (req.method === "GET" || req.method === "POST")) {
+      const d = join(VIDEOS, hfp[1]);
+      if (!existsSync(join(d, "index.html"))) return send(res, 200, { state: "none" });
+      const args = ["hyperframes", "preview", d, ...(req.method === "POST" ? ["--background", "--no-open"] : ["--status"]), "--json"];
+      const out = await new Promise((ok) => {
+        const c = spawn("npx", args, { cwd: ROOT, windowsHide: true, shell: process.platform === "win32" });
+        let s = ""; c.stdout.on("data", (b) => (s += b)); c.on("close", () => ok(s)); c.on("error", () => ok(s));
+        setTimeout(() => c.kill(), 120000);
+      });
+      const line = out.split(/\r?\n/).reverse().find((l) => l.trim().startsWith("{"));
+      let j = null; try { j = JSON.parse(line); } catch {}
+      const r = j?.result;
+      if (r?.ready && r.studioUrl) return send(res, 200, { state: "running", url: r.studioUrl, port: r.port });
+      return send(res, 200, { state: "stopped", error: req.method === "POST" ? (j?.error?.message || "Preview HyperFrames gagal dinyalakan.") : undefined });
     }
     const ready = p.match(/^\/api\/videos\/([a-z0-9-]+)\/ready$/);
     if (ready && req.method === "POST" && isMusafo(join(VIDEOS, ready[1]))) {
@@ -1101,7 +1154,16 @@ createServer(async (req, res) => {
     const prod = p.match(/^\/api\/videos\/([a-z0-9-]+)\/production$/);
     if (prod && req.method === "POST") {
       const d = join(VIDEOS, prod[1]);
-      if (!isMusafo(d)) return send(res, 404, { error: "bukan proyek Storytelling" });
+      // Video Explainer (user 2026-11-20): one click after the script is approved → Claude continues voice, beats, scenes
+      // and the gate (event explainer-production); rendering still waits for the thumbnail approval
+      if (!isMusafo(d)) {
+        if (!existsSync(d)) return send(res, 404, { error: "video tidak ditemukan" });
+        if (isAd(d) || isAws(d) || isOneTake(d)) return send(res, 400, { error: "Production satu tombol hanya untuk Video Explainer dan Storytelling." });
+        const a = approval(d);
+        if (!a.approved) return send(res, 400, { error: a.stale ? "Naskah berubah setelah disetujui. Setujui lagi dulu." : "Setujui naskah dulu." });
+        emit("explainer-production", prod[1]);
+        return send(res, 200, { ok: true });
+      }
       try {
         const st = startProduction(d);
         emit("production", prod[1]);
