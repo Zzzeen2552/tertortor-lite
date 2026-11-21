@@ -8,7 +8,8 @@
 import { existsSync, readFileSync, writeFileSync, statSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT, readJSON, sceneTemplate } from "./lib.mjs";
-import { productionDone, productionState } from "./musafo.mjs";
+import { productionDone, productionState, storylineApproval, draftApproval } from "./musafo.mjs";
+import { approval } from "./flow.mjs";
 import { isAws } from "./aws.mjs";
 
 const EVENTS = join(ROOT, ".events.jsonl"), TIMES = join(ROOT, ".process-times.json"), BEAT = join(ROOT, ".waiting");
@@ -44,7 +45,9 @@ export const PROCESSES = {
     steps: (d, at) => explainerNewSteps(d, at),
     next: (d) => (explainerWithRef(d) ? "konsep siap; pilih satu di tab Konsep" : "naskah siap kamu edit dan setujui"),
   },
-  concept: { label: "Claude menulis naskah dari konsep pilihanmu", eta: [5, 10], out: () => "script.md", steps: (d, at) => [{ label: "Konsep dipilih", done: 1 }, { label: "Naskah", done: mtime(d, "script.md") > at && realScript(d) ? 1 : 0 }], next: "naskah siap disetujui" },
+  // done = a real script written after the concepts were offered. Not "after the click": Claude (or a pick made in chat) can
+  // write the script seconds before Studio logs the click (user 2026-11-22: naskah selesai tapi Studio masih 50 %)
+  concept: { label: "Claude menulis naskah dari konsep pilihanmu", eta: [5, 10], done: (d, at) => conceptScriptAt(d, at), steps: (d, at) => [{ label: "Konsep dipilih", done: 1 }, { label: "Naskah", done: conceptScriptAt(d, at) ? 1 : 0 }], next: "naskah siap disetujui" },
   "script-approved": {
     // Storytelling (user 2026-11-07): approving the script starts nothing; voice and images wait for the Production button
     skip: (d) => isStory(d),
@@ -98,6 +101,11 @@ const reqOf = (d) => (existsSync(join(d, "request.json")) ? readJSON(join(d, "re
 const refDir = (d) => join(d, "assets", "reference");
 const refList = (d) => (existsSync(refDir(d)) ? readdirSync(refDir(d)) : []);
 const explainerWithRef = (d) => refList(d).some((f) => /\.(mp4|mov|webm|m4v)$/i.test(f)) || !!reqOf(d).refLink;
+// the script for a picked concept: real lines, and newer than the concepts (or than the click, when no concepts.json)
+const conceptScriptAt = (d, at) => {
+  const t = mtime(d, "script.md"), offered = mtime(d, "concepts.json") || at;
+  return realScript(d) && t > Math.min(at, offered) ? t : 0;
+};
 function explainerNewSteps(d, at) {
   // "Diisi Claude" in brief.md: done once its first field has text after the click
   const brief = existsSync(join(d, "brief.md")) ? readFileSync(join(d, "brief.md"), "utf8") : "";
@@ -141,6 +149,29 @@ function progressOf(type, d, at, eta) {
 
 
 const endAt = (type, d, at) => (PROCESSES[type].done ? PROCESSES[type].done(d, at) : mtime(d, val(PROCESSES[type].out, d)));
+
+// ---------- when a process really starts (user 2026-11-22: naskah selesai tapi Studio masih 50 %, "di semua preset dan channel")
+// The click is logged when Studio receives it, but the approval or pick it stands for can come earlier: made in chat with
+// Claude, or Claude already working on it. Work finished between that moment and the click must count, or the process sticks
+// forever. So each process is measured from its input: the approval/concepts it is based on, when that came shortly
+// before the click (≤ 2 h; an older one means the user is re-running the step on purpose, so the click counts).
+const isoMs = (iso) => (iso ? Date.parse(iso) || 0 : 0);
+const approvedAt = (a) => (a?.approved ? isoMs(a.at) : 0);
+const FROM = {
+  "draft-approved": (d) => approvedAt(draftApproval(d)),
+  "storyline-approved": (d) => approvedAt(storylineApproval(d)),
+  "script-approved": (d) => approvedAt(approval(d)),
+  "beats-approved": (d) => isoMs(reqOf(d).beatsApprovedAt),
+  concept: (d) => mtime(d, "concepts.json"),
+  "explainer-production": (d) => approvedAt(approval(d)),
+  production: (d) => approvedAt(approval(d)),
+};
+const LOOKBACK = 2 * 3600e3;
+function startOf(type, d, at) {
+  let f = 0;
+  try { f = FROM[type]?.(d) ?? 0; } catch {}
+  return f > 0 && f < at && at - f <= LOOKBACK ? f : at;
+}
 const times = () => { try { return JSON.parse(readFileSync(TIMES, "utf8")); } catch { return {}; } };
 function estimate(type, d) {
   const runs = (times()[type] ?? []).slice(-8).map((x) => x.s / 60).sort((a, b) => a - b);
@@ -166,10 +197,11 @@ export function working() {
     if (!existsSync(d) || Date.now() - at > 6 * 3600e3) continue;
     const P = PROCESSES[e.type];
     if (P.skip?.(d)) continue;
-    if (endAt(e.type, d, at) > at) continue;
+    const since = startOf(e.type, d, at);
+    if (endAt(e.type, d, since) > since) continue;
     const name = existsSync(join(d, "meta.json")) ? readJSON(join(d, "meta.json")).name : e.slug;
     const eta = estimate(e.type, d);
-    out.push({ slug: e.slug, name, type: e.type, label: val(P.label, d), since: e.at, eta, next: val(P.next, d), progress: progressOf(e.type, d, at, eta) });
+    out.push({ slug: e.slug, name, type: e.type, label: val(P.label, d), since: e.at, eta, next: val(P.next, d), progress: progressOf(e.type, d, since, eta) });
   }
   return out;
 }
@@ -180,10 +212,13 @@ export function finished() {
   const now = working(), was = prev ?? now;
   prev = now;
   // gone from the list because its output appeared (not because a newer click replaced it)
-  const endOf = (w) => endAt(w.type, join(VIDEOS, w.slug), Date.parse(w.since));
-  const done = was.filter((w) => !now.some((n) => n.slug === w.slug && n.since === w.since) && endOf(w) > Date.parse(w.since));
+  const startW = (w) => startOf(w.type, join(VIDEOS, w.slug), Date.parse(w.since));
+  const endOf = (w) => endAt(w.type, join(VIDEOS, w.slug), startW(w));
+  const done = was.filter((w) => !now.some((n) => n.slug === w.slug && n.since === w.since) && endOf(w) > startW(w));
   const t = times();
   for (const w of done) {
+    // work finished before the click was logged (e.g. a script written while the concept was picked in chat): no timing
+    if (endOf(w) - Date.parse(w.since) < 10e3) continue;
     (t[w.type] ??= []).push({ s: Math.round((endOf(w) - Date.parse(w.since)) / 1000), at: w.since });
     if (t[w.type].length > 30) t[w.type] = t[w.type].slice(-30);
   }
