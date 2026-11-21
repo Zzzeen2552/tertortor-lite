@@ -46,7 +46,8 @@ per folder (berubah = dihitung ulang) dan pindah menu menggambar dari daftar yan
 **Layout satu halaman** (user 2026-11-20): tanpa sidebar. Baris atas = logo + tombol "Buat video" (dropdown: tipe video →
 preset/channel/product, plus link "Library" ke `#/s/<kategori>/<sub>`); ikon Sampah/tema di kanan. Editor video berupa kartu
 3 kolom: Naskah (plus tab tahap lain), Preview video, Thumbnail + Publikasi Tebar; di bawahnya kartu Suara, Beat, Aset
-(`CARD_TABS`); baris paling bawah = HyperFrames Studio proyek
+(`CARD_TABS`); tombol **Production** juga muncul di tab Naskah setelah naskah disetujui (Storytelling: event `production`;
+Explainer: event `explainer-production`); baris paling bawah = HyperFrames Studio proyek
 itu dalam iframe (`/api/videos/<slug>/hf-preview`, GET status / POST nyalakan `npx hyperframes preview --background`).
 
 **Video referensi** dianalisis `npm run ref` (yt-dlp, shot, gerak, transkrip). Claude menulis `analysis.md` dan 2-3 konsep
@@ -100,6 +101,7 @@ lagi penunggunya. Timeout (4 jam, exit 2) = jalankan lagi bila masih menunggu.
 | --- | --- |
 | `concept` (explainer) | isi brief dari konsep → naskah → `/humanizer` → minta persetujuan |
 | `script-approved` (explainer) | `flow.json` (langkah 2b); `node tools/thumbnail.mjs sync <slug>` bila `script.md` berubah |
+| `explainer-production` (tombol Production di tab Naskah) | skill `/video-vertikal` § Event `explainer-production`: dari langkah yang belum selesai, suara → beat → scene → aset gratis → `check` hijau → `preview`; **tanpa render** (menunggu thumbnail disetujui); laporkan yang menunggu user |
 | `berakitkehulu-new` | skill `/berakit-ke-hulu <slug>`: tanpa draft, langsung `storyline.md` (series bila > 2 menit) → user mengedit dan menyetujui storyline |
 | `bumidipijak-new` | skill `/bumidipijak <slug>`: tanpa draft, langsung `storyline.md` series → user mengedit dan menyetujui storyline |
 | `storyline-approved` (BKH/BDP) | BKH: character sheet per usia bila ada foto tokoh; `series` bila perlu; `musafo.json` (naskah per shot) → build → minta persetujuan naskah |

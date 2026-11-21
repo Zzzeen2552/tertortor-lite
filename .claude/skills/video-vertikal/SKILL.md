@@ -11,6 +11,14 @@ Ikuti `CLAUDE.md` proyek ini (aturan naskah, register, tata letak, gerbang). **B
 
 Setiap kali berhenti menunggu user (pilih konsep, setujui naskah), jalankan `node tools/wait-event.mjs` di background: klik di TERTORTOR membangunkan sesi (CLAUDE.md § Pemicu dari TERTORTOR).
 
+**Event `explainer-production`** (user klik "Production" di tab Naskah Studio, user 2026-11-20) = lanjutkan tanpa bertanya
+dari langkah yang belum selesai, berurutan: 2b prompt Flow (bila `flow.json` belum ada/tidak cocok), 3 suara (satu take,
+speaker dari `request.json → voiceSpeaker`; speaker `clone:` → `npm run voice -- <slug> --force`), 4 beat, 5 scene, 6 aset
+gratis (Commons, screen, drawn, type; footage berbayar tetap dilaporkan dulu sesuai `footage.md`), lalu 7 gerbang
+`npm run check` sampai hijau dan `npm run preview` (snapshot). **Jangan render**: render menunggu user menyetujui thumbnail
+(`node tools/thumbnail.mjs sync <slug>` bila naskah berubah). Laporkan yang selesai dan yang menunggu user (take suara di AI
+Studio bila belum ada, screenshot yang harus diberi user, footage berbayar).
+
 1. **Brief.**
    - Argumen berupa slug yang sudah ada (dibuat di TERTORTOR, `npm run studio`) → baca `videos/<slug>/brief.md` dan `request.json`. Ide/storyline user adalah sumber utama; lengkapi bagian "Diisi Claude".
    - Argumen berupa topik → `npm run new -- <slug> "<topik>"`, isi `brief.md`.

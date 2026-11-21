@@ -45,6 +45,8 @@ export const PROCESSES = {
     next: (d) => (isStory(d) ? "suara selesai; gambar dan klip menyusul" : isOneTake(d) ? "beat table siap kamu setujui" : "prompt Flow siap"),
   },
   // done(d, at) → end time in ms (0 = not yet), for processes with more than one output file
+  // Video Explainer (user 2026-11-20): tombol Production di tab Naskah → suara, beat, scene, gerbang check; render menunggu thumbnail
+  "explainer-production": { label: "Claude membuat suara, beat, dan scene sampai lolos check", eta: [20, 50], out: () => "build/timeline.json", next: "scene siap dicek di preview HyperFrames; setujui thumbnail lalu render" },
   production: { label: "Claude membuat suara (Gemini TTS), lalu key visual per shot", eta: [20, 45], done: (d, at) => productionDone(d, at), next: "suara dan semua key visual sudah jadi" },
   // App Demo (product appdemo) writes demo.json, builds and renders: done when an MP4 is newer than the click
   "ad-new": { label: (d) => (existsSync(join(d, "demo.json")) ? "Claude menyusun storyboard demo aplikasi, membangun, lalu merender" : "Claude menyusun iklan"), eta: (d) => (existsSync(join(d, "demo.json")) ? [8, 20] : [10, 25]), done: (d, at) => { if (!existsSync(join(d, "demo.json"))) { const f = join(d, "ad.json"); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; } const mp4 = existsSync(join(d, "out")) ? readdirSync(join(d, "out")).filter((x) => x.endsWith(".mp4")).map((x) => statSync(join(d, "out", x)).mtimeMs).sort((a, b) => b - a)[0] ?? 0 : 0; return mp4 > at ? mp4 : 0; }, next: (d) => (existsSync(join(d, "demo.json")) ? "demo aplikasi siap ditonton" : "iklan siap dicek") },

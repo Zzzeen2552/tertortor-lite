@@ -1755,6 +1755,19 @@ async function viewEditor(slug, startTab) {
   let sel = 0;
   let editing = false; // tab Naskah in edit mode
   const stage = $("#stage");
+  // Production (user 2026-11-07, Storytelling: suara lalu key visual) dan (user 2026-11-20) Video Explainer: suara, beat,
+  // scene, gerbang check. Tampil di tab Shot (Storytelling) dan di tab Naskah setelah naskah disetujui.
+  const canProduce = isM || (!isA && !v.aws && !v.clone && !v.oneTake);
+  const prodBarHtml = () => {
+    if (!canProduce) return "";
+    const run = workingNow.find((w) => w.slug === slug && (w.type === "production" || w.type === "explainer-production"));
+    if (isM) {
+      const pr = v.musafo.production;
+      return `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : "<br>Setujui storyline dan naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
+    }
+    const ready = v.approval.approved && v.scriptState !== "old", voice = !!v.voice?.seconds && !v.voice.draft, done = voice && v.beats.length > 0;
+    return `<div class="notice ${done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${voice ? "✓" : "–"} · beat ${v.beats.length || "–"}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}<br><small class="muted">Claude membuat suara, beat, dan scene sampai lolos check. Render menunggu thumbnail kamu setujui.</small>${ready ? "" : "<br>Setujui naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" ${!ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : done ? "Production lagi" : "Production"}</button></span></div>`;
+  };
   const body = {
     beat: () => v.oneTake ? beatTableView(v) : v.kvBeats ? `
       <div class="pad"><div class="notice"><span><b>Durasi tiap beat bisa diubah.</b> Cut dibulatkan ke ketukan musik (kelipatan 0,3 s; beat pertama 0,55 + 0,3 s); beat penutup bebas. Semua waktu di dalamnya, potongan orang, celah bingkai, SFX, dan musik ikut menyesuaikan. Total sekarang <b id="kvTotal">${v.beats.reduce((s, b) => s + b.duration, 0).toFixed(2)} s</b>.</span></div></div>
@@ -1787,7 +1800,8 @@ async function viewEditor(slug, startTab) {
         const doc = isM && shots.length
           ? shots.map((s) => `<div class="sline"><b class="mono">${esc(s.id)}${s.stat ? `<br><small class="${s.stat.over ? "over" : "muted"}" title="maks ±${v.musafo.shotLimit?.words} kata ≈ ${v.musafo.shotLimit?.seconds} s per shot">${s.stat.words} kata<br>${s.stat.measured ? "" : "±"}${s.stat.sec}s${s.stat.over ? " ⚠" : ""}</small>` : ""}</b><div>${s.lines.map((l) => `<div>${esc(l.text)}<br><small class="muted">${esc(l.en)}</small></div>`).join("")}</div></div>`).join("")
           : `<div class="doc">${esc(v.script) || '<span class="muted">Naskah belum ditulis.</span>'}</div>`;
-        return `<div class="pad">${bar}${pend}${warns}${canEdit ? `<div class="meta-row" style="justify-content:flex-end;margin:4px 0 8px"><button class="btn sm" id="sEdit">Edit naskah</button></div>` : ""}${doc}</div>`;
+        const prod = a.approved && v.scriptState !== "old" ? prodBarHtml() : "";
+        return `<div class="pad">${bar}${prod}${pend}${warns}${canEdit ? `<div class="meta-row" style="justify-content:flex-end;margin:4px 0 8px"><button class="btn sm" id="sEdit">Edit naskah</button></div>` : ""}${doc}</div>`;
       }
       const note = voiced
         ? `<div class="notice"><span><b>Suara sudah dibuat.</b> Hanya kalimat yang kamu ubah yang dibuat ulang suaranya (satu per satu, tidak rekam ulang semua).${isM ? " Shot yang sudah punya klip dan isinya berubah mungkin butuh klip baru (15 kredit per generate)." : ""} Jaga panjangnya mirip supaya durasi tetap aman.</span></div>`
@@ -1921,9 +1935,7 @@ async function viewEditor(slug, startTab) {
       const lookBar = m.looks?.length ? `<div class="notice" style="margin-bottom:14px"><span><b>Gaya visual</b> · ${esc(m.looks.find((l) => l.id === m.look)?.description ?? "")}</span><span class="sp"><select class="sel" id="lookSel">${m.looks.map((l) => `<option value="${esc(l.id)}" ${l.id === m.look ? "selected" : ""}>${esc(l.label)}</option>`).join("")}</select></span></div>` : "";
       if (!m.shots.length) return `<div class="pad">${lookBar}<div class="empty"><b>Belum ada shot</b>Claude memecah cerita jadi shot (kalimat + terjemahan + prompt gambar dan gerak).<br><br>${cmdBox(slug, STORY[v.type]?.skill ?? "musafo")}</div></div>`;
       const issues = m.errors.map((e) => `<li class="e">✗ ${esc(e)}</li>`).join("") + m.warns.map((w) => `<li class="w">⚠ ${esc(w)}</li>`).join("");
-      // Production (user 2026-11-07): one click → voice, then key visuals; disabled until the script is approved
-      const pr = m.production, run = workingNow.find((w) => w.slug === slug && w.type === "production");
-      const prodBar = `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : "<br>Setujui storyline dan naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
+      const prodBar = prodBarHtml();
       return `<div class="pad">${lookBar}${prodBar}
         <div class="notice ok" style="margin-bottom:14px"><span><b>${m.shots.length} shot</b> · gambar ${m.shots.filter((s) => s.frameUrl).length} · klip ${m.shots.filter((s) => s.clipUrl).length}${m.imageTool ? " · " + esc(m.imageTool) : ""}${m.videoTool ? " · " + esc(m.videoTool) : ""}</span></div>
         ${issues ? `<ul class="issues">${issues}</ul>` : ""}
@@ -2308,11 +2320,13 @@ async function viewEditor(slug, startTab) {
     };
     const pg = $("#prodGo");
     if (pg) pg.onclick = async () => {
-      if (v.musafo.production.done && !confirm("Suara dan key visual sudah ada. Jalankan production lagi? Claude akan membuat ulang yang belum cocok dengan naskah.")) return;
+      if (isM ? v.musafo.production.done && !confirm("Suara dan key visual sudah ada. Jalankan production lagi? Claude akan membuat ulang yang belum cocok dengan naskah.")
+        : v.beats.length && !confirm("Suara dan beat sudah ada. Jalankan production lagi? Claude melanjutkan dari yang belum selesai dan memperbarui yang tidak cocok dengan naskah.")) return;
+      const here = document.querySelector("#tabs button.on")?.dataset.t || (isM ? "shot" : "naskah");
       pg.disabled = true; pg.textContent = "Memulai…";
       const r = await fetch(`/api/videos/${slug}/production`, { method: "POST" });
       if (!r.ok) { pg.disabled = false; pg.textContent = "Production"; return alert((await r.json()).error); }
-      await loadVideos(); await viewEditor(slug, "shot"); showWorking(slug, r.status === 202);
+      await loadVideos(); await viewEditor(slug, here); showWorking(slug, r.status === 202);
     };
     const cap = $("#clApprove"), cun = $("#clUnapprove");
     if (cap) cap.onclick = async () => {

@@ -1154,7 +1154,16 @@ createServer(async (req, res) => {
     const prod = p.match(/^\/api\/videos\/([a-z0-9-]+)\/production$/);
     if (prod && req.method === "POST") {
       const d = join(VIDEOS, prod[1]);
-      if (!isMusafo(d)) return send(res, 404, { error: "bukan proyek Storytelling" });
+      // Video Explainer (user 2026-11-20): one click after the script is approved → Claude continues voice, beats, scenes
+      // and the gate (event explainer-production); rendering still waits for the thumbnail approval
+      if (!isMusafo(d)) {
+        if (!existsSync(d)) return send(res, 404, { error: "video tidak ditemukan" });
+        if (isAd(d) || isAws(d) || isOneTake(d)) return send(res, 400, { error: "Production satu tombol hanya untuk Video Explainer dan Storytelling." });
+        const a = approval(d);
+        if (!a.approved) return send(res, 400, { error: a.stale ? "Naskah berubah setelah disetujui. Setujui lagi dulu." : "Setujui naskah dulu." });
+        emit("explainer-production", prod[1]);
+        return send(res, 200, { ok: true });
+      }
       try {
         const st = startProduction(d);
         emit("production", prod[1]);
