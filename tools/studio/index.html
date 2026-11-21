@@ -524,6 +524,18 @@ a.preset:hover{border-color:var(--rule)}
 .c-script .tabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}
 .c-script .tabs button{flex:none}
 .c-video .viewer{position:static;padding:14px;max-width:none}
+.stage-wrap{position:relative}
+.vmenu{position:absolute;top:10px;right:10px;z-index:5}
+.vmenu-btn{width:36px;height:36px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.35);background:rgba(17,17,17,.62);color:#fff;backdrop-filter:blur(6px)}
+.vmenu-btn:hover,.vmenu-btn[aria-expanded="true"]{background:var(--accent);color:#111;border-color:var(--accent)}
+.vmenu-btn svg{width:18px;height:18px}
+.vmenu-list{position:absolute;top:calc(100% + 6px);right:0;min-width:220px;background:#1b1b1a;color:#f2f2ef;border:1px solid #333;padding:6px 0;display:flex;flex-direction:column}
+.vmenu-list[hidden]{display:none}
+.vmenu-list [role=menuitem]{display:flex;align-items:center;gap:12px;padding:10px 16px;border:0;background:none;color:inherit;font-size:14px;font-weight:500;text-align:left;text-decoration:none;cursor:pointer}
+.vmenu-list [role=menuitem]:hover,.vmenu-list [role=menuitem]:focus-visible{background:#2c2c2a;outline:none}
+.vmenu-list svg{width:18px;height:18px;flex:none}
+.vmenu-list hr{border:0;border-top:1px solid #3a3a38;margin:6px 0}
+.vmenu-list .danger{color:#ff8a80}
 .one.cine .stage{aspect-ratio:16/9}
 .c-pub{display:flex;flex-direction:column;gap:14px;background:none;border:0}
 .c-pub > .ocard{border:1px solid var(--line)}
@@ -1690,11 +1702,19 @@ async function viewEditor(slug, startTab) {
     <div class="one${v.wide ? " cine" : ""}">
       <div class="ocard c-video"><div class="ocard-h">Preview video<small>${v.video ? (v.duration ? fmt(v.duration) : "render") : "belum dirender"}</small></div>
       <div class="viewer">
-        ${v.video ? `<video class="stage" id="stage" src="${v.video}"${v.cinematic && v.cover ? ` poster="${v.cover}"` : ""} controls playsinline preload="metadata"></video>
-          <div class="linkrow"><button class="btn sm" id="linkBtn">${v.share ? "Lihat link video" : "Buat link video"}</button>
-            <div id="linkBox" hidden>${v.share ? `<input readonly value="${esc(v.share.url)}"><button class="btn sm" data-copy>Salin</button><a class="btn sm" href="${esc(v.share.url)}" target="_blank" rel="noopener">Buka</a>${v.share.stale ? `<span class="muted" style="font-size:12px;width:100%">Link ini masih memutar render lama. Perbarui lewat tombol "Link: render lama" di atas.</span>` : ""}` : ""}</div></div>` : `<div class="stage ph">Belum ada render.<br>Tempel perintah di atas ke Claude Code.</div>`}
-        ${v.video ? `<div class="fmtbox" id="fmtBox"><button class="btn sm" id="fmtBtn" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="6" width="11" height="12" rx="2"/><rect x="16" y="3" width="5" height="9" rx="1.5"/></svg>Ubah format</button><div id="fmtBody" hidden></div></div>` : ""}
-        ${me?.role === "viewer" ? "" : `<div class="linkrow" style="margin-top:6px"><button class="btn sm" id="delBtn" title="Pindahkan proyek ini ke Sampah (bisa dipulihkan)" aria-label="Hapus video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Hapus video</button></div>`}
+        <div class="stage-wrap">
+          ${v.video ? `<video class="stage" id="stage" src="${v.video}"${v.cinematic && v.cover ? ` poster="${v.cover}"` : ""} controls playsinline preload="metadata"></video>` : `<div class="stage ph">Belum ada render.<br>Tempel perintah di atas ke Claude Code.</div>`}
+          ${v.video || me?.role !== "viewer" ? `<div class="vmenu">
+            <button type="button" class="vmenu-btn" id="vmBtn" aria-label="Opsi video" title="Opsi video" aria-haspopup="menu" aria-expanded="false" aria-controls="vmList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg></button>
+            <div class="vmenu-list" id="vmList" role="menu" hidden>
+              ${v.video ? `<button type="button" role="menuitem" id="linkBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span id="linkLbl">${v.share ? "Lihat link video" : "Buat link video"}</span></button>
+              <button type="button" role="menuitem" id="fmtBtn" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="11" height="12" rx="2"/><rect x="16" y="3" width="5" height="9" rx="1.5"/></svg><span>Ubah format</span></button>
+              <a role="menuitem" href="${v.video}" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Unduh MP4</span></a>` : ""}
+              ${me?.role === "viewer" ? "" : `${v.video ? '<hr>' : ""}<button type="button" role="menuitem" class="danger" id="delBtn" title="Pindahkan proyek ini ke Sampah (bisa dipulihkan)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span>Hapus video</span></button>`}
+            </div></div>` : ""}
+        </div>
+        ${v.video ? `<div class="linkrow"><div id="linkBox" hidden>${v.share ? `<input readonly value="${esc(v.share.url)}"><button class="btn sm" data-copy>Salin</button><a class="btn sm" href="${esc(v.share.url)}" target="_blank" rel="noopener">Buka</a>${v.share.stale ? `<span class="muted" style="font-size:12px;width:100%">Link ini masih memutar render lama. Perbarui lewat tombol "Link: render lama" di atas.</span>` : ""}` : ""}</div></div>
+        <div class="fmtbox" id="fmtBox"><div id="fmtBody" hidden></div></div>` : ""}
         ${v.beats.length ? `<div class="tline" id="tline">${v.beats.map((b, i) => `<button class="tb" data-i="${i}" title="${esc(b.id)} · ${b.duration.toFixed(1)}s" style="--w:${b.duration / total * 100};--rc:${REG[b.register]?.[0]}">${thumb(b) ? `<img src="${thumb(b)}" alt="" loading="lazy">` : ""}</button>`).join("")}</div>
           <div class="legend">${Object.values(REG).map(([c, n]) => `<span><i style="--rc:${c}"></i>${n}</span>`).join("")}</div>` : ""}
         ${v.draftVoice ? `<div class="vnav"><span class="pill warn">Suara masih draft (bisu)</span><span>timing akan menyesuaikan suara asli</span></div>` : ""}
@@ -2643,12 +2663,25 @@ async function viewEditor(slug, startTab) {
       location.hash = v.sub ? `#/s/${v.category}/${v.sub}` : "#/";
     };
   };
+  // menu titik tiga di kanan atas pemutar (user 2026-11-20, seperti Google Flow): link, ubah format, unduh, hapus
+  if ($("#vmBtn")) {
+    const btn = $("#vmBtn"), list = $("#vmList");
+    const setOpen = (open) => { list.hidden = !open; btn.setAttribute("aria-expanded", String(open)); if (open) list.querySelector("[role=menuitem]")?.focus(); };
+    btn.onclick = (e) => { e.stopPropagation(); setOpen(list.hidden); };
+    list.addEventListener("click", (e) => { if (e.target.closest("[role=menuitem]")) setOpen(false); });
+    list.onkeydown = (e) => {
+      const items = [...list.querySelectorAll("[role=menuitem]")], i = items.indexOf(document.activeElement);
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); items[(i + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length]?.focus(); }
+      if (e.key === "Escape") { setOpen(false); btn.focus(); }
+    };
+    document.addEventListener("click", (e) => { if (!list.hidden && !e.target.closest(".vmenu")) setOpen(false); });
+  }
   // the link under the player: shows the URL when there is one, otherwise opens the "Bagikan" dialog to make it
   if ($("#linkBtn")) $("#linkBtn").onclick = () => {
     const box = $("#linkBox");
     if (!v.share) return $("#shareBtn").click();
     box.hidden = !box.hidden;
-    $("#linkBtn").textContent = box.hidden ? "Lihat link video" : "Sembunyikan link";
+    $("#linkLbl").textContent = box.hidden ? "Lihat link video" : "Sembunyikan link";
     if (!box.hidden) box.querySelector("input").select();
   };
   $("#linkBox [data-copy]")?.addEventListener("click", () => { const i = $("#linkBox input"); if (copyText(i.value)) toast("Link disalin"); else { i.select(); toast("Browser menolak menyalin. Link sudah diblok, tekan Ctrl+C."); } });
