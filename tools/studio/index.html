@@ -239,6 +239,10 @@ select.sel,input[list]{width:100%;background:var(--panel);border:1px solid var(-
 .search{max-width:420px;margin-bottom:16px}
 
 .notice.work{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--panel,transparent))} .notice.work.idle{border-color:var(--bad)}
+.wprog{display:flex;align-items:center;gap:10px;margin-top:8px} .wbar{flex:1;min-width:80px;height:8px;border-radius:8px;background:color-mix(in srgb,var(--line) 70%,transparent);overflow:hidden}
+.wbar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#19C2CD,#2BDDB0);transition:width .6s ease}
+.wsteps{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:12px} .wsteps span{padding:2px 8px;border-radius:20px;border:1px solid var(--line);opacity:.7}
+.wsteps span.on{opacity:1;border-color:#2BDDB0;color:#2BDDB0} .wsteps span.now{opacity:1;border-color:var(--accent);font-weight:600}
 .pop{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.45)} .pop[hidden]{display:none}
 .pop .box{background:var(--panel,var(--bg));color:var(--fg);border:1px solid var(--line);border-radius:14px;max-width:440px;width:100%;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .pop h3{margin:0 0 6px;font-size:18px} .pop p{margin:8px 0;font-size:14px;line-height:1.5} .pop .warn{color:var(--bad)}
@@ -879,10 +883,25 @@ const hhmm = (d) => new Date(d).toLocaleTimeString("id-ID", { hour: "2-digit", m
 const etaText = (w) => { const t = Date.parse(w.since); return `${w.eta[0]}–${w.eta[1]} menit (sekitar ${hhmm(t + w.eta[0] * 60e3)}–${hhmm(t + w.eta[1] * 60e3)})`; };
 const idleNote = () => `Tidak ada sesi Claude yang sedang menunggu klikmu. Buka Claude Code di laptop dan ketik <b>lanjut</b>; klikmu sudah tersimpan dan tidak hilang.`;
 async function fetchWorking() { const r = await _fetch("/api/working").catch(() => null); return r?.ok ? r.json() : null; }
+// progress (user 2026-11-22): percent from the steps already finished (tools/progress.mjs), or "± %" from the time estimate
+const progressHtml = (w) => {
+  const p = w.progress;
+  if (!p) return "";
+  const steps = p.steps.length ? `<span class="wsteps">${p.steps.map((st) => `<span class="${st.done ? "on" : st.label === p.step ? "now" : ""}">${st.done ? "✓ " : ""}${esc(st.label)}</span>`).join("")}</span>` : "";
+  return `<span class="wprog"><span class="wbar"><i style="width:${p.pct}%"></i></span><b>${p.estimated ? "±" : ""}${p.pct}%</b>${p.step ? ` · sekarang: ${esc(p.step)}` : p.estimated ? " · perkiraan dari waktu" : ""}</span>${steps}`;
+};
 function paintWork() {
   document.querySelectorAll("[data-workbar]").forEach((el) => {
     const w = workingNow.find((x) => x.slug === el.dataset.workbar);
-    el.innerHTML = w ? `<div class="notice work${claudeOn ? "" : " idle"}" style="margin:0 0 12px"><span><b>${esc(w.label)}…</b> sejak ${hhmm(w.since)} · perkiraan ${esc(etaText(w))}${claudeOn ? "" : `<br><span class="warn">${idleNote()}</span>`}</span></div>` : "";
+    el.innerHTML = w ? `<div class="notice work${claudeOn ? "" : " idle"}" style="margin:0 0 12px"><span><b>${esc(w.label)}…</b> sejak ${hhmm(w.since)} · perkiraan ${esc(etaText(w))}${progressHtml(w)}${claudeOn ? "" : `<br><span class="warn">${idleNote()}</span>`}</span></div>` : "";
+  });
+  // the Production button is drawn once with the editor; keep it locked while that video's production runs
+  document.querySelectorAll("#prodGo[data-slug]").forEach((b) => {
+    const run = workingNow.some((x) => x.slug === b.dataset.slug && (x.type === "production" || x.type === "explainer-production"));
+    if (b.textContent === "Memulai…") return;
+    b.disabled = run || !b.dataset.ready;
+    if (run) b.textContent = "Production berjalan…";
+    else if (b.textContent === "Production berjalan…") b.textContent = "Production";
   });
 }
 async function pollWorking() {
@@ -1947,10 +1966,10 @@ async function viewEditor(slug, startTab) {
     const run = workingNow.find((w) => w.slug === slug && (w.type === "production" || w.type === "explainer-production"));
     if (isM) {
       const pr = v.musafo.production;
-      return `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : "<br>Setujui storyline dan naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
+      return `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : "<br>Setujui storyline dan naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${pr.ready ? 1 : ""}" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
     }
     const ready = v.approval.approved && v.scriptState !== "old", voice = !!v.voice?.seconds && !v.voice.draft, done = voice && v.beats.length > 0;
-    return `<div class="notice ${done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${voice ? "✓" : "–"} · beat ${v.beats.length || "–"}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}<br><small class="muted">Claude membuat suara, beat, dan scene sampai lolos check. Render menunggu thumbnail kamu setujui.</small>${ready ? "" : "<br>Setujui naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" ${!ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : done ? "Production lagi" : "Production"}</button></span></div>`;
+    return `<div class="notice ${done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${voice ? "✓" : "–"} · beat ${v.beats.length || "–"}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}<br><small class="muted">Claude membuat suara, beat, dan scene sampai lolos check. Render menunggu thumbnail kamu setujui.</small>${ready ? "" : "<br>Setujui naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${ready ? 1 : ""}" ${!ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : done ? "Production lagi" : "Production"}</button></span></div>`;
   };
   const body = {
     beat: () => v.oneTake ? beatTableView(v) : v.kvBeats ? `

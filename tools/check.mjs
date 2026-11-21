@@ -1,6 +1,7 @@
 // check.mjs <slug> : cues -> retention lint -> HyperFrames check. One gate before any render.
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
+import { writeFileSync } from "node:fs";
 import { ROOT, videoDir } from "./lib.mjs";
 
 const slug = process.argv[2];
@@ -16,4 +17,6 @@ const step = (label, cmd, args) => {
 step("cues (re-time from words)", "node", [join(ROOT, "tools", "cues.mjs"), slug]);
 step("retention lint", "node", [join(ROOT, "tools", "lint-video.mjs"), slug]);
 step("hyperframes check", "npx", ["hyperframes", "check", dir]);
+// marker for Studio's progress (tools/progress.mjs): the gate passed for this build
+writeFileSync(join(dir, "build", "check.json"), JSON.stringify({ ok: true, at: new Date().toISOString() }) + "\n");
 console.log("\n\u2714 all gates passed");

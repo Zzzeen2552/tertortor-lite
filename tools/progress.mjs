@@ -7,8 +7,8 @@
 // .waiting is the heartbeat of tools/wait-event.mjs: fresh = a Claude session will pick up the click.
 import { existsSync, readFileSync, writeFileSync, statSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { ROOT, readJSON } from "./lib.mjs";
-import { productionDone } from "./musafo.mjs";
+import { ROOT, readJSON, sceneTemplate } from "./lib.mjs";
+import { productionDone, productionState } from "./musafo.mjs";
 import { isAws } from "./aws.mjs";
 
 const EVENTS = join(ROOT, ".events.jsonl"), TIMES = join(ROOT, ".process-times.json"), BEAT = join(ROOT, ".waiting");
@@ -46,14 +46,66 @@ export const PROCESSES = {
   },
   // done(d, at) → end time in ms (0 = not yet), for processes with more than one output file
   // Video Explainer (user 2026-11-20): tombol Production di tab Naskah → suara, beat, scene, gerbang check; render menunggu thumbnail
-  "explainer-production": { label: "Claude membuat suara, beat, dan scene sampai lolos check", eta: [20, 50], out: () => "build/timeline.json", next: "scene siap dicek di preview HyperFrames; setujui thumbnail lalu render" },
-  production: { label: "Claude membuat suara (Gemini TTS), lalu key visual per shot", eta: [20, 45], done: (d, at) => productionDone(d, at), next: "suara dan semua key visual sudah jadi" },
+  // done = the gate passed after the click (tools/check.mjs writes build/check.json), not the first timeline.json
+  "explainer-production": { label: "Claude membuat suara, beat, dan scene sampai lolos check", eta: [20, 50], done: (d, at) => (mtime(d, "build/check.json") > at ? mtime(d, "build/check.json") : 0), steps: (d) => explainerSteps(d), next: "scene siap dicek di preview HyperFrames; setujui thumbnail lalu render" },
+  production: { label: "Claude membuat suara (Gemini TTS), lalu key visual per shot", eta: [20, 45], done: (d, at) => productionDone(d, at), steps: (d) => storySteps(d), next: "suara dan semua key visual sudah jadi" },
   // App Demo (product appdemo) writes demo.json, builds and renders: done when an MP4 is newer than the click
   "ad-new": { label: (d) => (existsSync(join(d, "demo.json")) ? "Claude menyusun storyboard demo aplikasi, membangun, lalu merender" : "Claude menyusun iklan"), eta: (d) => (existsSync(join(d, "demo.json")) ? [8, 20] : [10, 25]), done: (d, at) => { if (!existsSync(join(d, "demo.json"))) { const f = join(d, "ad.json"); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; } const mp4 = existsSync(join(d, "out")) ? readdirSync(join(d, "out")).filter((x) => x.endsWith(".mp4")).map((x) => statSync(join(d, "out", x)).mtimeMs).sort((a, b) => b - a)[0] ?? 0 : 0; return mp4 > at ? mp4 : 0; }, next: (d) => (existsSync(join(d, "demo.json")) ? "demo aplikasi siap ditonton" : "iklan siap dicek") },
   // AWS (Cinematic, user 2026-11-17) answers with aws.json (data + scenes) and a first build: the animatic with slates and TBC chips
   "cinematic-new": { label: "Claude menyusun data, adegan, dan animatic rekap", eta: [5, 15], done: (d, at) => { if (!isAws(d)) return 0; const f = join(d, "build", "timeline.json"); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; }, next: "animatic dan daftar footage siap di tab AWS" },
 };
 const val = (v, d) => (typeof v === "function" ? v(d) : v);
+
+// ---------- progress (user 2026-11-22 "keliatan progress berapa persennya") ----------
+// Measured from the files each step leaves behind, so a step Claude already finished before the click counts as done.
+// A step's `done` is 0..1 (scenes count partly). Processes without steps get a time-based estimate (`estimated`).
+const escStub = (t = "") => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+// a scene counts as designed once its file no longer equals the stub cues.mjs wrote for it
+function sceneDesigned(d, b) {
+  const f = join(d, "compositions", `${b.id}.html`);
+  if (!existsSync(f)) return false;
+  const stub = (b.stub && sceneTemplate(d, b.stub)) || sceneTemplate(d, b.register ?? "type");
+  if (!stub) return true;
+  const fresh = readFileSync(stub, "utf8").replaceAll("__ID__", b.id).replaceAll("__HERO__", escStub(b.heroText ?? b.hero)).replaceAll("__JOB__", escStub(b.job));
+  return readFileSync(f, "utf8") !== fresh;
+}
+function explainerSteps(d) {
+  const words = mtime(d, "voice/words.json"), tl = mtime(d, "build/timeline.json"), chk = mtime(d, "build/check.json");
+  let beats = [];
+  try { beats = readJSON(join(d, "beats.json")).beats ?? []; } catch {}
+  const designed = beats.filter((b) => sceneDesigned(d, b)).length;
+  const lastScene = Math.max(0, ...beats.map((b) => mtime(d, `compositions/${b.id}.html`)));
+  return [
+    { label: "Prompt Flow", done: existsSync(join(d, "flow.json")) ? 1 : 0 },
+    { label: "Suara", done: words ? 1 : 0 },
+    { label: "Beat", done: words && tl >= words ? 1 : 0 },
+    { label: `Scene ${designed}/${beats.length || "?"}`, done: beats.length ? designed / beats.length : 0 },
+    { label: "Lolos check", done: chk && chk >= Math.max(tl, lastScene) ? 1 : 0 },
+  ];
+}
+function storySteps(d) {
+  const st = productionState(d);
+  return [
+    { label: "Suara", done: st.voice ? 1 : 0 },
+    { label: `Key visual ${st.frames}/${st.need}`, done: st.need ? st.frames / st.need : 0 },
+  ];
+}
+function progressOf(type, d, at, eta) {
+  const P = PROCESSES[type];
+  if (P.steps) {
+    let steps;
+    try { steps = P.steps(d); } catch { steps = null; }
+    if (steps?.length) {
+      const sum = steps.reduce((a, s) => a + s.done, 0);
+      const now = steps.find((s) => s.done < 1);
+      // never 100 % while the process is still listed as running
+      return { pct: Math.min(99, Math.round((100 * sum) / steps.length)), step: now?.label ?? steps.at(-1).label, steps: steps.map((s) => ({ label: s.label, done: s.done >= 1 })), estimated: false };
+    }
+  }
+  const mid = ((eta[0] + eta[1]) / 2) * 60e3;
+  return { pct: Math.min(95, Math.round((100 * (Date.now() - at)) / mid)), step: null, steps: [], estimated: true };
+}
+
 
 const endAt = (type, d, at) => (PROCESSES[type].done ? PROCESSES[type].done(d, at) : mtime(d, val(PROCESSES[type].out, d)));
 const times = () => { try { return JSON.parse(readFileSync(TIMES, "utf8")); } catch { return {}; } };
@@ -83,7 +135,8 @@ export function working() {
     if (P.skip?.(d)) continue;
     if (endAt(e.type, d, at) > at) continue;
     const name = existsSync(join(d, "meta.json")) ? readJSON(join(d, "meta.json")).name : e.slug;
-    out.push({ slug: e.slug, name, type: e.type, label: val(P.label, d), since: e.at, eta: estimate(e.type, d), next: val(P.next, d) });
+    const eta = estimate(e.type, d);
+    out.push({ slug: e.slug, name, type: e.type, label: val(P.label, d), since: e.at, eta, next: val(P.next, d), progress: progressOf(e.type, d, at, eta) });
   }
   return out;
 }
