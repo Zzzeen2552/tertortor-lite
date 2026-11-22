@@ -129,7 +129,7 @@ Aturan:
 export async function writeOptions(dir) {
   const out = await gemini({ json: true, system: SYSTEM, text: `${material(dir)}\n\nJawab JSON: {"options":[{"headline":"...","sub":"..."}]} dengan tepat 5 pasangan.` });
   const options = (out?.options ?? []).map((o) => ({ headline: String(o.headline ?? "").trim(), sub: String(o.sub ?? "").trim() })).filter((o) => o.headline).slice(0, 5);
-  if (!options.length) throw new Error("Opsi headline tidak terbaca dari Gemini/Claude; coba lagi.");
+  if (!options.length) throw new Error("Opsi headline tidak terbaca dari Gemini/Antigravity; coba lagi.");
   const t = loadThumb(dir);
   // a headline the user typed (not one of the previous options) is kept; an earlier auto pick follows the new options
   const auto = !t.headline || (t.options ?? []).some((o) => o.headline === t.headline);

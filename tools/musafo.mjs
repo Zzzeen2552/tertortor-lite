@@ -292,7 +292,7 @@ export function createMusafo(slug, title, story, source = "", { type = "musafo",
   writeJSON(join(dir, "meta.json"), { ...meta, type, ...(channel ? { channel } : {}), ...(looks ? { look: looks[look] ? look : loadBrand()[type].defaultLook } : {}) });
   const src = source.trim() ? `**Sumber:** ${source.trim()}\n\n` : "";
   const { label, skill } = STORY_TYPES[type];
-  writeFileSync(join(dir, "brief.md"), `# Brief: ${title}\n\n> Proyek ${label} dari TERTORTOR. Claude: ikuti /${skill} ${slug} (bahan mentah → storyline.md → naskah).\n\n## Bahan mentah (dari user, jangan diubah)\n\n${src}${story.trim()}\n`);
+  writeFileSync(join(dir, "brief.md"), `# Brief: ${title}\n\n> Proyek ${label} dari TERTORTOR. Antigravity: ikuti /${skill} ${slug} (bahan mentah → storyline.md → naskah).\n\n## Bahan mentah (dari user, jangan diubah)\n\n${src}${story.trim()}\n`);
   writeJSON(join(dir, "musafo.json"), { shots: [] });
   writeFileSync(join(dir, "costs.md"), `# Biaya: ${slug}\n\n| Item | Detail | Kredit/USD |\n| --- | --- | --- |\n`);
   return dir;

@@ -1,4 +1,4 @@
-# TERTORTOR LITE — mesin video vertikal versi ramping (Claude Code + HyperFrames)
+# TERTORTOR LITE — mesin video vertikal versi ramping (Antigravity / Claude + HyperFrames)
 
 Duplikat ramping dari MOTION (`Documents/MOTION`), dibuat 2026-11-12. Folder, git, Studio, dan antrean event-nya
 **terpisah total** dari MOTION: jangan menyalin balik ke MOTION, jangan menyentuh `.events.jsonl` MOTION. Studio LITE

@@ -1,17 +1,12 @@
-// studio-chat.mjs: the Chat panel in TERTORTOR Studio (user 2026-11-13). Each message runs Claude Code headless in this folder
-// (`claude -p`, stream-json) and continues the same conversation with --resume, so the user can talk to Claude without
-// switching to Claude Desktop. It reads the same CLAUDE.md, so it knows every workflow here.
-// State in .studio-chat.json (gitignored): { sessionId, messages: [{ role: user|assistant|tool|error|info, text, at }] }.
-// One claude process at a time; messages sent while it works wait in a queue. Only the child this module started is ever
-// stopped (never other node/claude processes: other sessions run tools/wait-event.mjs).
-// Safety: no permission prompt is possible here, so tools are limited: edits in this folder (acceptEdits), read/search,
-// npm/node tools/npx hyperframes, read-only git. Commit, push, Tebar send, and publish are refused; Claude is told to ask
-// the user to approve them in chat first and to do anything outside the allowlist in Claude Desktop.
+// studio-chat.mjs: the Chat panel in TERTORTOR Studio.
+// Uses Antigravity (Gemini API) when GEMINI_API_KEY is available, or Claude Code CLI if configured.
+// Continues conversation from .studio-chat.json so the user can talk to Antigravity directly from Studio.
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync, renameSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { ROOT } from "./lib.mjs";
+import { gemini } from "./gemini-api.mjs";
 
 const FILE = join(ROOT, ".studio-chat.json");
 const ARCHIVE = join(ROOT, ".studio-chat");
@@ -27,10 +22,10 @@ const DENIED = [
   "Bash(git commit*)", "Bash(git push*)", "Bash(git reset*)", "Bash(git checkout*)", "Bash(git clean*)", "Bash(rm *)",
   "Bash(node tools/tebar.mjs send*)", "Bash(node tools/wait-event.mjs*)", "Bash(npx hyperframes publish*)", "Bash(taskkill*)",
 ];
-const SYSTEM = `You are answering from the Chat panel inside TERTORTOR Studio (the user's dashboard at localhost:4331, TERTORTOR LITE), not from Claude Desktop.
-- Reply in casual Indonesian, short and plain: the panel is narrow and often read on a phone.
-- There is no permission prompt here. If a tool is denied, say what you wanted to run and ask the user to do it in Claude Desktop (or to approve a different route); never try to get around the limit.
-- Never commit, push, send to Tebar, publish, delete videos, or spend money/credits (RunningHub coins, paid APIs) unless the user asked for that exact action in this chat. Free Flow images are fine when the user asks for them.
+const SYSTEM = `You are Antigravity, answering from the Chat panel inside TERTORTOR Studio (the user's dashboard at localhost:4331, TERTORTOR LITE).
+- Reply in casual Indonesian, short, helpful, and plain: the panel is narrow and often read on a phone.
+- You know all workflows in TERTORTOR LITE: Video Explainer (Hyperframe, VOX, SNAPCN), Storytelling (Berakit ke Hulu, BumiDiPijak), Advertisement (Flashcut, BRI, App Demo), and Cinematic (AWS).
+- Never commit, push, send to Tebar, publish, delete videos, or spend money/credits unless the user asked for that exact action.
 - Do not run tools/wait-event.mjs and do not edit .events.jsonl: Studio clicks already reach the sessions that wait for them.
 - When a page context line like "[Studio: …]" opens a message, it tells you which video or page the user is looking at.`;
 
@@ -67,17 +62,40 @@ export function send(text, context = "") {
   return state();
 }
 
-function next() {
+async function next() {
   const job = queue.shift();
   if (!job) return;
   const s = load();
+  startedAt = new Date().toISOString();
+
+  // If GEMINI_API_KEY is available, use Antigravity (Gemini API) directly
+  if (process.env.GEMINI_API_KEY) {
+    child = { isGemini: true };
+    try {
+      const recent = s.messages.slice(-8).map((m) => `${m.role === "user" ? "User" : "Antigravity"}: ${m.text}`).join("\n");
+      const userText = (job.context ? `[Studio: ${job.context}]\n\n` : "") + job.text;
+      const prompt = `Percakapan sebelumnya:\n${recent}\n\nPesan terbaru:\n${userText}`;
+      const reply = await gemini({ system: SYSTEM, text: prompt, soft: true });
+      if (reply) {
+        push({ role: "assistant", text: String(reply).trim() });
+      }
+    } catch (e) {
+      push({ role: "error", text: `Antigravity error: ${e.message}` });
+    } finally {
+      child = null;
+      startedAt = null;
+      next();
+    }
+    return;
+  }
+
+  // Fallback to Claude Code CLI if GEMINI_API_KEY is not set
   const args = ["-p", "--output-format", "stream-json", "--verbose", "--permission-mode", "acceptEdits",
     "--allowedTools", ...ALLOWED, "--disallowedTools", ...DENIED, "--append-system-prompt", SYSTEM,
     ...(s.sessionId ? ["--resume", s.sessionId] : [])];
-  startedAt = new Date().toISOString();
   try {
     child = spawn(BIN, args, { cwd: ROOT, windowsHide: true, env: { ...process.env, TERTORTOR_CHAT: "1" } });
-  } catch (e) { child = null; push({ role: "error", text: `Claude tidak bisa dijalankan: ${e.message}` }); return next(); }
+  } catch (e) { child = null; push({ role: "error", text: `Antigravity/Claude tidak bisa dijalankan: ${e.message}` }); return next(); }
   const me = child;
   me.stdin.end((job.context ? `[Studio: ${job.context}]\n\n` : "") + job.text);
   let buf = "", errText = "", gotResult = false;
@@ -116,7 +134,7 @@ function next() {
     if (child === me) child = null;
     startedAt = null;
     if (me.killed || me.stoppedByUser) push({ role: "info", text: "Dihentikan." });
-    else if (!gotResult && code !== 0) push({ role: "error", text: `Claude keluar (kode ${code}). ${errText.trim().slice(-400)}` });
+    else if (!gotResult && code !== 0) push({ role: "error", text: `Keluar (kode ${code}). ${errText.trim().slice(-400)}` });
     next();
   });
 }

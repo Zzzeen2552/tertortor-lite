@@ -779,15 +779,15 @@ textarea:focus,input[type=text]:focus,input[type=password]:focus,select:focus{bo
   <main class="main" id="main"></main>
 </div>
 <div class="toast" id="toast"></div>
-<button class="chat-fab" id="chatFab" hidden aria-label="Chat dengan Claude" title="Chat dengan Claude"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="dot"></span></button>
-<section class="chat" id="chat" aria-label="Chat Claude" aria-hidden="true">
-  <div class="chat-h"><b>Claude<small>jalan di laptop · TERTORTOR LITE</small></b>
+<button class="chat-fab" id="chatFab" hidden aria-label="Chat dengan Antigravity" title="Chat dengan Antigravity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="dot"></span></button>
+<section class="chat" id="chat" aria-label="Chat Antigravity" aria-hidden="true">
+  <div class="chat-h"><b>Antigravity<small>jalan di laptop · TERTORTOR LITE</small></b>
     <button class="btn sm" id="chatStop" hidden>Hentikan</button>
     <button class="btn sm" id="chatNew" title="Mulai percakapan baru">Baru</button>
     <button class="icon-btn" id="chatX" aria-label="Tutup chat">×</button></div>
   <div class="chat-log" id="chatLog"></div>
   <div class="chat-work" id="chatWork"></div>
-  <form class="chat-f" id="chatF"><textarea id="chatIn" rows="1" placeholder="Tulis ke Claude… (Enter kirim, Shift+Enter baris baru)"></textarea><button class="btn pri" id="chatSend">Kirim</button></form>
+  <form class="chat-f" id="chatF"><textarea id="chatIn" rows="1" placeholder="Tulis ke Antigravity… (Enter kirim, Shift+Enter baris baru)"></textarea><button class="btn pri" id="chatSend">Kirim</button></form>
 </section>
 <div class="pop" id="workPop" hidden><div class="box" role="dialog" aria-modal="true" aria-labelledby="workPopH"><h3 id="workPopH"></h3><div id="workPopB"></div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn pri" id="workPopOk">Oke</button></div></div></div>
 <div class="donebox" id="doneBox" hidden><span id="doneMsg" style="flex:1"></span><a id="doneLink" href="#">Buka</a><button id="doneX" aria-label="Tutup">×</button></div>
@@ -801,10 +801,10 @@ const cutsOf = (s) => (s.cuts?.length ? s.cuts : [{ from: 0, to: s.seconds, beat
 // Docucine beat table (user 2026-11-09): time → narration → the one hero → on-screen text, approved before the world is built
 function beatTableView(v) {
   const rows = v.beatTable ?? [], a = v.beatsApproval ?? {};
-  if (!rows.length) return `<div class="pad"><div class="empty"><b>Belum ada beat table</b>${v.approval?.approved ? "Claude sedang membuat suara, lalu menyusun beat table dari waktu kata yang asli." : "Setujui naskah dulu. Setelah itu Claude membuat suara, lalu beat table untuk kamu setujui."}${v.sourceError ? `<br><span style="color:var(--bad)">Artikel sumber gagal dibaca: ${esc(v.sourceError)}</span>` : ""}</div></div>`;
+  if (!rows.length) return `<div class="pad"><div class="empty"><b>Belum ada beat table</b>${v.approval?.approved ? "Antigravity sedang membuat suara, lalu menyusun beat table dari waktu kata yang asli." : "Setujui naskah dulu. Setelah itu Antigravity membuat suara, lalu beat table untuk kamu setujui."}${v.sourceError ? `<br><span style="color:var(--bad)">Artikel sumber gagal dibaca: ${esc(v.sourceError)}</span>` : ""}</div></div>`;
   const bar = a.approved
-    ? `<div class="notice ok"><span><b>Beat table disetujui</b> · ${new Date(a.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}. Claude membangun dunianya.</span><span class="sp"><button class="btn sm" id="bUnapprove">Batalkan</button></span></div>`
-    : `<div class="notice"><span>${a.stale ? "<b>Beat table berubah setelah disetujui.</b> " : ""}<b>Cek tiap baris:</b> satu hero per kalimat, teks layar tidak mengulang narasi. Setelah disetujui, Claude membangun dunia, mengecek still dan gerak kamera, lalu menyiapkan thumbnail.</span><span class="sp"><button class="btn pri sm" id="bApprove">Setujui beat table</button></span></div>`;
+    ? `<div class="notice ok"><span><b>Beat table disetujui</b> · ${new Date(a.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}. Antigravity membangun dunianya.</span><span class="sp"><button class="btn sm" id="bUnapprove">Batalkan</button></span></div>`
+    : `<div class="notice"><span>${a.stale ? "<b>Beat table berubah setelah disetujui.</b> " : ""}<b>Cek tiap baris:</b> satu hero per kalimat, teks layar tidak mengulang narasi. Setelah disetujui, Antigravity membangun dunia, mengecek still dan gerak kamera, lalu menyiapkan thumbnail.</span><span class="sp"><button class="btn pri sm" id="bApprove">Setujui beat table</button></span></div>`;
   return `<div class="pad">${bar}</div><div class="pad" style="padding-top:0;overflow-x:auto"><table class="btab"><thead><tr><th>Waktu</th><th>Narasi</th><th>Hero di layar</th><th>Teks layar</th></tr></thead><tbody>${rows.map((r) => `<tr style="--rc:${REG[r.register]?.[0] ?? "var(--muted)"}"><td class="mono">${fmt(r.start)}<br><small>${r.duration.toFixed(1)}s</small></td><td>${esc(r.narration)}</td><td><b>${esc(r.hero)}</b><br><small>${REG[r.register]?.[1] ?? esc(r.register ?? "")}</small></td><td>${r.text ? esc(r.text) : '<span class="muted">—</span>'}</td></tr>`).join("")}</tbody></table></div>`;
 }
 // colour tone of a video: the preset's own accent, its suggested tones (preset.json "tones"), or a free colour
@@ -882,7 +882,7 @@ relayStatus().then((web) => web && setInterval(relayStatus, 20000));
 let workingNow = [], claudeOn = false, pushOn = false;
 const hhmm = (d) => new Date(d).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
 const etaText = (w) => { const t = Date.parse(w.since); return `${w.eta[0]}–${w.eta[1]} menit (sekitar ${hhmm(t + w.eta[0] * 60e3)}–${hhmm(t + w.eta[1] * 60e3)})`; };
-const idleNote = () => `Tidak ada sesi Claude yang sedang menunggu klikmu. Buka Claude Code di laptop dan ketik <b>lanjut</b>; klikmu sudah tersimpan dan tidak hilang.`;
+const idleNote = () => `Tidak ada sesi Antigravity yang sedang menunggu klikmu. Antigravity di IDE siap melanjutkan; klikmu sudah tersimpan dan tidak hilang.`;
 async function fetchWorking() { const r = await _fetch("/api/working").catch(() => null); return r?.ok ? r.json() : null; }
 // progress (user 2026-11-22): percent from the steps already finished (tools/progress.mjs), or "± %" from the time estimate
 const progressHtml = (w) => {
@@ -902,9 +902,9 @@ function paintWork() {
     const w = workingNow.find((x) => x.slug === b.dataset.slug);
     if (b.textContent === "Memulai…") return;
     b.disabled = !!w || !b.dataset.ready;
-    const busy = w ? (w.type === "production" || w.type === "explainer-production" ? "Production berjalan…" : "Tunggu Claude selesai…") : null;
+    const busy = w ? (w.type === "production" || w.type === "explainer-production" ? "Production berjalan…" : "Tunggu Antigravity selesai…") : null;
     if (busy) b.textContent = busy;
-    else if (/^(Production berjalan|Tunggu Claude selesai)…$/.test(b.textContent)) b.textContent = "Production";
+    else if (/^(Production berjalan|Tunggu (?:Claude|Antigravity) selesai)…$/.test(b.textContent)) b.textContent = "Production";
   });
   applyLocks();
 }
@@ -924,7 +924,7 @@ function applyLocks() {
       if (b.dataset.lockWas == null) b.dataset.lockWas = b.disabled ? "1" : "0";
       b.disabled = true;
       b.classList.add("busylock");
-      b.title = "Tunggu sampai Claude selesai mengerjakan video ini";
+      b.title = "Tunggu sampai Antigravity selesai mengerjakan video ini";
     } else if (b.dataset.lockWas != null) {
       b.disabled = b.dataset.lockWas === "1";
       delete b.dataset.lockWas;
@@ -947,7 +947,7 @@ async function pollWorking() {
     $("#doneLink").href = `#/v/${w.slug}`;
     $("#doneBox").hidden = false;
   }
-  workingNow = s.items; claudeOn = s.claude;
+  workingNow = s.items; claudeOn = !!(s.antigravity ?? s.claude);
   paintWork();
 }
 $("#doneX").onclick = () => ($("#doneBox").hidden = true);
@@ -959,12 +959,12 @@ async function showWorking(slug, queued) {
   const s = queued ? null : await fetchWorking();
   const w = s?.items.find((x) => x.slug === slug);
   if (!queued && !w) return;
-  if (s) { workingNow = s.items; claudeOn = s.claude; paintWork(); }
+  if (s) { workingNow = s.items; claudeOn = !!(s.antigravity ?? s.claude); paintWork(); }
   $("#workPopH").textContent = queued ? "Masuk antrean" : `${w.label}…`;
   $("#workPopB").innerHTML = queued
     ? `<p>Laptop sedang offline. Keputusanmu disimpan di server dan dijalankan begitu laptop menyala.</p>`
     : `<p>Perkiraan selesai: <b>${esc(etaText(w))}</b>.</p>
-       ${s.claude ? `<p>Claude sudah menerima klikmu dan mulai bekerja.</p>` : `<p class="warn">${idleNote()}</p>`}
+       ${(s.antigravity ?? s.claude) ? `<p>Antigravity sudah menerima klikmu dan mulai bekerja.</p>` : `<p class="warn">${idleNote()}</p>`}
        <p>Halaman ini boleh ditutup. ${pushOn ? "Notifikasi dikirim ke perangkat ini saat selesai." : "Tekan lonceng di bawah sidebar (dari alamat web) supaya diberi tahu saat selesai."}</p>`;
   $("#workPop").hidden = false;
 }
@@ -1033,7 +1033,7 @@ function mkPaint() {
   $("#mkCats").innerHTML = tree.map((c) => `<button type="button" role="menuitem" data-mkcat="${esc(c.id)}" class="${c.id === mkCat ? "on" : ""}" aria-expanded="${c.id === mkCat}">${esc(c.label)}<small>${c.subs.length} ›</small></button>`).join("");
   const c = catOf(mkCat);
   $("#mkSubs").innerHTML = `<div class="eyebrow">${esc(c.subLabel)} · ${esc(c.label)}</div>` + c.subs.map((s) => `<div class="mk-sub${s.draft ? " draft" : ""}"><a href="#/baru/${c.id}/${esc(s.id)}" data-mkgo>${s.cover ? `<img src="${coverUrl(c, s)}" alt="" loading="lazy">` : `<span class="ph"></span>`}<span style="min-width:0"><b>${esc(s.label || s.id)}</b><small>${esc(s.description || c.desc || "")}</small></span></a><a class="lib" href="#/s/${c.id}/${esc(s.id)}" data-mkgo title="Halaman ${esc(s.label || s.id)}: video, footage, akun Tebar">Library</a></div>`).join("")
-    + `<div class="mk-sub"><a href="#/tambah/${c.id}" data-mkgo><span class="ph"></span><span><b>+ Tambah ${esc(c.subLabel.toLowerCase())}</b><small>Brief untuk Claude, lalu didesain</small></span></a></div>`;
+    + `<div class="mk-sub"><a href="#/tambah/${c.id}" data-mkgo><span class="ph"></span><span><b>+ Tambah ${esc(c.subLabel.toLowerCase())}</b><small>Brief untuk Antigravity, lalu didesain</small></span></a></div>`;
   $("#mkCats").querySelectorAll("[data-mkcat]").forEach((b) => {
     b.onclick = () => { mkCat = b.dataset.mkcat; mkPaint(); $(`[data-mkcat="${mkCat}"]`)?.focus(); };
     b.onmouseenter = () => { if (matchMedia("(hover:hover)").matches && mkCat !== b.dataset.mkcat) { mkCat = b.dataset.mkcat; mkPaint(); } };
@@ -1090,7 +1090,7 @@ function viewPick(catId) {
       : tree.map((c) => `<a class="preset" href="#/baru/${c.id}">${c.subs.some((s) => s.cover) ? `<span class="strip">${c.subs.filter((s) => s.cover).slice(0, 5).map((s) => `<img src="${coverUrl(c, s)}" alt="" loading="lazy">`).join("")}</span>` : ""}<b>${esc(c.label)}</b><small>${esc(c.desc)}</small><em>${esc(c.subLabel.toUpperCase())}: ${c.subs.map((s) => esc(s.label) + (s.draft ? "*" : "")).join(", ")}</em></a>`).join("")}</div>
     ${!cat ? `<p class="muted" style="font-size:12.5px;margin-top:10px">* belum didesain</p>` : ""}`;
 }
-const addCard = (cat) => `<a class="preset draft" href="#/tambah/${cat.id}"><b>+ Tambah ${esc(cat.subLabel.toLowerCase())}</b><small>Beri nama, lalu brief untuk agent: workflow dan visual style, plus acuan. Claude yang mendesainnya.</small></a>`;
+const addCard = (cat) => `<a class="preset draft" href="#/tambah/${cat.id}"><b>+ Tambah ${esc(cat.subLabel.toLowerCase())}</b><small>Beri nama, lalu brief untuk agent: workflow dan visual style, plus acuan. Antigravity yang mendesainnya.</small></a>`;
 
 // "+ Tambah" a preset / channel / product: name + a brief for the agent (workflow, visual style, references).
 // It is saved as a draft (brief.md + reference/ in its folder) and wakes a waiting Claude session (event channel-new).
@@ -1105,14 +1105,14 @@ const ADD_HINT = {
 function viewAddSub(cat) {
   const h = ADD_HINT[cat.id], files = [];
   $("#main").innerHTML = `
-    <div class="vh"><div><div class="eyebrow">${esc(cat.label)}</div><h1>Tambah ${esc(cat.subLabel.toLowerCase())}</h1><p>Tulis brief untuk agent. Claude membaca brief dan acuannya, bertanya bila ada yang belum jelas, lalu mendesain ${esc(cat.subLabel.toLowerCase())} ini. Sampai selesai didesain statusnya "belum didesain" dan belum bisa membuat video${cat.id === "storytelling" ? " (Library Cerita sudah bisa diisi)" : ""}.</p></div></div>
+    <div class="vh"><div><div class="eyebrow">${esc(cat.label)}</div><h1>Tambah ${esc(cat.subLabel.toLowerCase())}</h1><p>Tulis brief untuk agent. Antigravity membaca brief dan acuannya, bertanya bila ada yang belum jelas, lalu mendesain ${esc(cat.subLabel.toLowerCase())} ini. Sampai selesai didesain statusnya "belum didesain" dan belum bisa membuat video${cat.id === "storytelling" ? " (Library Cerita sudah bisa diisi)" : ""}.</p></div></div>
     ${crumb(cat, { label: "Tambah " + cat.subLabel.toLowerCase() })}
     <div class="form-grid">
       <form class="panel pad" id="form">
         <div class="fld"><label for="sName">Nama ${esc(cat.subLabel.toLowerCase())}</label><input type="text" id="sName" placeholder="${esc(h.name)}" required autofocus></div>
         <div class="fld"><label for="sDesc">Deskripsi singkat (opsional)</label><input type="text" id="sDesc" placeholder="satu kalimat yang tampil di kartu"></div>
         <div class="fld"><label for="sWf">Workflow</label><textarea id="sWf" style="min-height:140px" placeholder="${esc(h.wf)}"></textarea></div>
-        <div class="fld"><label for="sVis">Visual style</label><textarea id="sVis" style="min-height:140px" placeholder="${esc(h.vis)}"></textarea><span class="hint">Boleh poin-poin. Claude tidak mengarang gaya di luar brief dan acuan ini.</span></div>
+        <div class="fld"><label for="sVis">Visual style</label><textarea id="sVis" style="min-height:140px" placeholder="${esc(h.vis)}"></textarea><span class="hint">Boleh poin-poin. Antigravity tidak mengarang gaya di luar brief dan acuan ini.</span></div>
         <div class="fld"><label for="sLinks">Link acuan (opsional)</label><input type="text" id="sLinks" placeholder="link TikTok / Reels / YouTube / X, pisahkan dengan spasi"></div>
         <div class="fld"><span class="lb">File acuan (opsional)</span><div class="drop" id="sDrop">Tarik video atau gambar ke sini atau klik<input type="file" accept="video/*,image/*" multiple></div><div class="thumbs" id="sPrev"></div></div>
         <button class="btn pri" id="go" style="width:100%;padding:12px">Simpan brief</button>
@@ -1121,8 +1121,8 @@ function viewAddSub(cat) {
         <div class="panel-h">Setelah disimpan</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
           <li>Brief tersimpan di <span class="mono">${esc({ explainer: "presets", storytelling: "musafo/channels", advertisement: "advertisement", cinematic: "cinematic", cinemaclone: "cinemaclone", animation: "presets" }[cat.id])}/&lt;id&gt;/brief.md</span>, acuan di <span class="mono">reference/</span>.</li>
-          <li><b>Claude</b> dibangunkan bila sesi sedang menunggu (event <span class="mono">channel-new</span>); kalau tidak, bilang "desain ${esc(cat.subLabel.toLowerCase())} &lt;nama&gt;".</li>
-          <li>Video acuan dianalisis (<span class="mono">npm run ref</span> + <span class="mono">/reverse-video-v2</span>), lalu Claude menulis gayanya dan menanyakan yang belum jelas.</li>
+          <li><b>Antigravity</b> dibangunkan bila sesi sedang menunggu (event <span class="mono">channel-new</span>); kalau tidak, bilang "desain ${esc(cat.subLabel.toLowerCase())} &lt;nama&gt;".</li>
+          <li>Video acuan dianalisis (<span class="mono">npm run ref</span> + <span class="mono">/reverse-video-v2</span>), lalu Antigravity menulis gayanya dan menanyakan yang belum jelas.</li>
           <li>Setelah didesain, ${esc(cat.subLabel.toLowerCase())} ini bisa dipilih di Buat video.</li>
         </ol>
       </div>
@@ -1144,7 +1144,7 @@ function viewAddSub(cat) {
       for (const f of files) await fetch(`/api/subs/${cat.id}/${j.id}/upload?name=${encodeURIComponent(f.name)}`, { method: "PUT", body: f });
       await loadVideos();
       location.hash = `#/s/${cat.id}/${j.id}`;
-      toast("Brief tersimpan. Claude dibangunkan bila sesi sedang menunggu.");
+      toast("Brief tersimpan. Antigravity dibangunkan bila sesi sedang menunggu.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Simpan brief"; }
   };
 }
@@ -1253,13 +1253,13 @@ function viewNew(presetId) {
   const files = { ref: [], kv: [] };
   const cat = catOf("explainer"), preset = cat.subs.find((s) => s.id === presetId);
   $("#main").innerHTML = `
-    <div class="vh"><div><div class="eyebrow">Video baru</div><h1>Dari ide ke video</h1><p>Tulis idenya, beri contoh gaya, tambahkan gambar acuan. Claude yang menyusun naskah, beat, scene, sampai render.</p></div></div>
+    <div class="vh"><div><div class="eyebrow">Video baru</div><h1>Dari ide ke video</h1><p>Tulis idenya, beri contoh gaya, tambahkan gambar acuan. Antigravity yang menyusun naskah, beat, scene, sampai render.</p></div></div>
     ${crumb(cat, preset)}
     <div class="form-grid">
       <form class="panel pad" id="form">
         <div class="fld"><label for="title">Judul</label><input type="text" id="title" placeholder="Cegah penipuan WhatsApp" required></div>
         <div class="fld"><label for="idea">Ide · konsep · storyline</label><textarea id="idea" placeholder="Siapa penontonnya, masalahnya apa, langkah apa yang mau diajarkan, ending/CTA-nya apa…" required></textarea><span class="hint">Tulis bebas. Boleh poin-poin, boleh satu paragraf panjang.</span></div>
-        ${preset.oneTake ? `<div class="fld"><label for="sourceLink">Link artikel sumber</label><input type="text" id="sourceLink" placeholder="https://… (artikel, thread, blog)"><span class="hint">Teksnya dibaca otomatis dan jadi bahan naskah. Link yang kamu tempel di kolom Ide juga ikut dibaca. Claude menulis naskahnya dulu dan menunggu persetujuanmu.</span></div>` : ""}
+        ${preset.oneTake ? `<div class="fld"><label for="sourceLink">Link artikel sumber</label><input type="text" id="sourceLink" placeholder="https://… (artikel, thread, blog)"><span class="hint">Teksnya dibaca otomatis dan jadi bahan naskah. Link yang kamu tempel di kolom Ide juga ikut dibaca. Antigravity menulis naskahnya dulu dan menunggu persetujuanmu.</span></div>` : ""}
         <div class="two">
           <div class="fld"><span class="lb">Video referensi</span>
             <div class="drop" data-for="ref">Tarik video ke sini atau klik<input type="file" accept="video/*"></div>
@@ -1286,7 +1286,7 @@ function viewNew(presetId) {
         <div class="panel-h">Cara kerjanya</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
           <li><b>Kamu</b> mengisi ide dan acuan di sini.</li>
-          <li><b>Claude</b> menulis naskah, lalu menunggu persetujuanmu.</li>
+          <li><b>Antigravity</b> menulis naskah, lalu menunggu persetujuanmu.</li>
           <li><b>Suara</b> dibuat di Google AI Studio (Gemini TTS) satu take penuh; waktu tiap kata jadi timeline.</li>
           <li><b>Footage</b> dicari dulu di library; yang belum ada dibuat di Google Flow dan disimpan untuk dipakai ulang.</li>
           <li><b>Gerbang retensi</b> memeriksa hook, dead air, angka, durasi, lalu render MP4.</li>
@@ -1327,7 +1327,7 @@ function viewNew(presetId) {
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
       showWorking(j.slug);
-      toast("Video dibuat. Claude menulis naskahnya.");
+      toast("Video dibuat. Antigravity menulis naskahnya.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat video"; }
   };
 }
@@ -1355,7 +1355,7 @@ function viewNewMusafo(channelId) {
   const cat = catOf("storytelling"), ch = cat.subs.find((s) => s.id === channelId);
   const type = ch.type, bkh = type === "berakitkehulu", bdp = type === "bumidipijak", moh = type === "miracleofhajj", series = bkh || bdp;
   $("#main").innerHTML = `
-    <div class="vh"><div><div class="eyebrow">Proyek baru · ${esc(cat.label)}</div><h1>${esc(ch.label)}</h1><p>${bkh ? "Kisah asal-usul merek dan pendiri usaha Indonesia. " : bdp ? "Sejarah dan legenda Jawa dari Babad Tanah Jawa. " : moh ? "Pengalaman jamaah haji dan umrah. Cukup dua-tiga kalimat: Claude mencari sebabnya, mencari dalil Al-Qur'an (dicek ke equran.id), dan menutup dengan Wallahu a'lam bishawab. " : ""}Masukkan bahan mentah: ide kasar, artikel, atau kutipan buku. Claude menyusunnya jadi storyline, lalu naskah lisan, suara Gemini TTS, ${bdp ? "satu lukisan minyak gelap" : bkh ? "satu adegan bergaya visual pilihanmu" : "satu ilustrasi 3D"} dan satu klip per kalimat, dan caption Indonesia + Inggris.</p></div></div>
+    <div class="vh"><div><div class="eyebrow">Proyek baru · ${esc(cat.label)}</div><h1>${esc(ch.label)}</h1><p>${bkh ? "Kisah asal-usul merek dan pendiri usaha Indonesia. " : bdp ? "Sejarah dan legenda Jawa dari Babad Tanah Jawa. " : moh ? "Pengalaman jamaah haji dan umrah. Cukup dua-tiga kalimat: Antigravity mencari sebabnya, mencari dalil Al-Qur'an (dicek ke equran.id), dan menutup dengan Wallahu a'lam bishawab. " : ""}Masukkan bahan mentah: ide kasar, artikel, atau kutipan buku. Antigravity menyusunnya jadi storyline, lalu naskah lisan, suara Gemini TTS, ${bdp ? "satu lukisan minyak gelap" : bkh ? "satu adegan bergaya visual pilihanmu" : "satu ilustrasi 3D"} dan satu klip per kalimat, dan caption Indonesia + Inggris.</p></div></div>
     ${crumb(cat, ch)}
     <div class="form-grid">
       <form class="panel pad" id="form">
@@ -1364,14 +1364,14 @@ function viewNewMusafo(channelId) {
           <span class="hint" id="skHint"></span></div>
         <div data-sk="link text"><div class="fld"><label for="title">Judul</label><input type="text" id="title" placeholder="${bkh ? "Malu atau maju: awal Kapal Api" : "Doa di Arafah untuk orang tua"}" autofocus></div></div>
         <div data-sk="link"><div class="fld"><label for="link">Link artikel</label><input type="url" id="link" placeholder="https://… (teks artikelnya diambil otomatis)"></div></div>
-        <div data-sk="text"><div class="fld"><label for="story">Bahan mentah</label><textarea id="story" style="min-height:200px" placeholder="Ide kasar, artikel, kutipan buku, atau transkrip ceramah. Boleh panjang dan berantakan; Claude yang memilih alur ceritanya."></textarea><span class="hint">Claude tidak mengarang ${bkh ? "angka, tanggal, atau kejadian" : bdp ? "nama, tembang, atau kejadian" : moh ? "kejadian, nama, atau ayat (ayat diambil dari equran.id, sebab yang dicari ditulis sebagai dugaan di storyline)" : "ayat, hadis, atau kejadian"}; ${moh ? "detail yang ditambahkan Claude didaftar di storyline" : "yang ada di bahan ini yang dipakai"}.</span></div>
+        <div data-sk="text"><div class="fld"><label for="story">Bahan mentah</label><textarea id="story" style="min-height:200px" placeholder="Ide kasar, artikel, kutipan buku, atau transkrip ceramah. Boleh panjang dan berantakan; Antigravity yang memilih alur ceritanya."></textarea><span class="hint">Antigravity tidak mengarang ${bkh ? "angka, tanggal, atau kejadian" : bdp ? "nama, tembang, atau kejadian" : moh ? "kejadian, nama, atau ayat (ayat diambil dari equran.id, sebab yang dicari ditulis sebagai dugaan di storyline)" : "ayat, hadis, atau kejadian"}; ${moh ? "detail yang ditambahkan Antigravity didaftar di storyline" : "yang ada di bahan ini yang dipakai"}.</span></div>
           <div class="fld"><label for="source">Sumber (opsional)</label><input type="text" id="source" placeholder="judul buku + penulis + halaman, atau link artikel"></div></div>
         <div data-sk="lib"><div class="fld"><label for="libBook">Sumber di Library Cerita ${esc(ch.label)}</label><select id="libBook" class="sel"></select></div>
           <div class="fld"><label for="libStory">Kisah</label><select id="libStory" class="sel"></select><span class="hint" id="libInfo"></span></div>
           <a class="btn sm" href="#/s/storytelling/${ch.id}/cerita">Buka Library Cerita</a></div>
         ${bkh ? `<div class="fld"><span class="lb">Foto tokoh utama (opsional)</span>
           <div class="drop" id="tokohDrop">Tarik foto ke sini atau klik<input type="file" accept="image/png,image/jpeg,image/webp" multiple></div>
-          <span class="hint">Foto asli tokohnya (mis. Eka Tjipta muda dan tua). Claude membuat character sheet per usia dari foto ini, lalu semua shot memakai sheet itu supaya wajahnya konsisten. Bisa juga ditambahkan nanti di tab Tokoh.</span>
+          <span class="hint">Foto asli tokohnya (mis. Eka Tjipta muda dan tua). Antigravity membuat character sheet per usia dari foto ini, lalu semua shot memakai sheet itu supaya wajahnya konsisten. Bisa juga ditambahkan nanti di tab Tokoh.</span>
           <div class="thumbs" id="tokohPrev"></div></div>` : ""}
         <div class="fld" id="lookFld" style="display:none"><span class="lb">Gaya visual</span><span class="seg" id="lookSeg"></span><span class="hint" id="lookHint"></span></div>
         <div class="fld"><label for="speaker">Suara</label><select id="speaker" class="sel"></select></div>
@@ -1381,9 +1381,9 @@ function viewNewMusafo(channelId) {
       <div class="panel">
         <div class="panel-h">Alurnya</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
-          <li><b>Claude</b> menyusun storyline dari bahanmu (alur, tokoh, titik balik, pelajaran${moh ? ", sebab yang dicari, dan dalil Al-Qur'an" : ""})${series ? ", langsung dibagi jadi series bila lebih dari 2 menit" : ""}. <b>Kamu</b> bisa mengeditnya di tab Storyline, lalu setujui.</li>
-          ${bkh ? `<li><b>Tokoh</b>: dari fotomu Claude membuat character sheet per usia, dipakai di setiap shot.</li>` : ""}
-          <li><b>Claude</b> memecah storyline jadi kalimat lisan + terjemahan Inggris per shot. <b>Kamu</b> setujui naskahnya.</li>
+          <li><b>Antigravity</b> menyusun storyline dari bahanmu (alur, tokoh, titik balik, pelajaran${moh ? ", sebab yang dicari, dan dalil Al-Qur'an" : ""})${series ? ", langsung dibagi jadi series bila lebih dari 2 menit" : ""}. <b>Kamu</b> bisa mengeditnya di tab Storyline, lalu setujui.</li>
+          ${bkh ? `<li><b>Tokoh</b>: dari fotomu Antigravity membuat character sheet per usia, dipakai di setiap shot.</li>` : ""}
+          <li><b>Antigravity</b> memecah storyline jadi kalimat lisan + terjemahan Inggris per shot. <b>Kamu</b> setujui naskahnya.</li>
           <li><b>Suara</b> satu take penuh di Google AI Studio (Gemini TTS).</li>
           <li><b>Gambar</b> ${bkh ? "satu adegan Indonesia tempo dulu dengan gaya visual pilihanmu (PRESET1 3D sinematik amber-teal, atau PRESET2 lukisan cerah keemasan; wajah tokoh terlihat)" : bdp ? "satu lukisan arang, pastel, dan cat air di kertas cokelat muda" : "satu ilustrasi 3D golden hour"} per shot di Google Flow (gratis), gaya dari <span class="mono">${bkh ? "berakitkehulu/reference" : bdp ? "musafo/channels/bumidipijak/reference" : "musafo/reference"}</span>.</li>
           <li><b>Klip</b> tiap gambar jadi video image-to-video di RunningHub (koin, dilaporkan).</li>
@@ -1460,7 +1460,7 @@ function viewNewMusafo(channelId) {
       }
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast(j.library?.error ? `Proyek dibuat, tapi gagal masuk Library Cerita: ${j.library.error}` : j.library ? `Proyek dibuat${j.library.existed ? "; sumbernya sudah ada di Library Cerita dan kini tertaut" : "; sumbernya masuk Library Cerita"}${j.library.scanning === false ? " (pemindaian menunggu sumber lain selesai)" : ""}.` : "Proyek dibuat. Claude mulai bekerja.");
+      toast(j.library?.error ? `Proyek dibuat, tapi gagal masuk Library Cerita: ${j.library.error}` : j.library ? `Proyek dibuat${j.library.existed ? "; sumbernya sudah ada di Library Cerita dan kini tertaut" : "; sumbernya masuk Library Cerita"}${j.library.scanning === false ? " (pemindaian menunggu sumber lain selesai)" : ""}.` : "Proyek dibuat. Antigravity mulai bekerja.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat proyek"; }
   };
 }
@@ -1477,7 +1477,7 @@ function viewNewCinematic(lookId) {
     <div class="form-grid">
       <form class="panel pad" id="form">
         <div class="fld"><label for="title">Judul film</label><input type="text" id="title" placeholder="Canting" required autofocus></div>
-        <div class="fld"><label for="idea">Ide · apa yang terjadi</label><textarea id="idea" placeholder="Satu benda atau satu peristiwa, dari awal sampai momen puncaknya. Contoh: garis malam dari canting menjalar di kain putih lalu berubah jadi sungai dan sawah." required></textarea><span class="hint">Tanpa narasi: tulis apa yang terlihat. Shot dan detailnya disusun Claude, lalu kamu lihat shotlist-nya dulu.</span></div>
+        <div class="fld"><label for="idea">Ide · apa yang terjadi</label><textarea id="idea" placeholder="Satu benda atau satu peristiwa, dari awal sampai momen puncaknya. Contoh: garis malam dari canting menjalar di kain putih lalu berubah jadi sungai dan sawah." required></textarea><span class="hint">Tanpa narasi: tulis apa yang terlihat. Shot dan detailnya disusun Antigravity, lalu kamu lihat shotlist-nya dulu.</span></div>
         <div class="two">
           <div class="fld"><span class="lb">Durasi</span><div class="seg">
             <label><input type="radio" name="seconds" value="6" checked>6 s</label><label><input type="radio" name="seconds" value="10">10 s</label><label><input type="radio" name="seconds" value="15">15 s</label></div>
@@ -1496,7 +1496,7 @@ function viewNewCinematic(lookId) {
         <div class="panel-h">Cara kerjanya</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
           <li><b>Kamu</b> menulis idenya di sini.</li>
-          <li><b>Claude</b> menyusun shotlist (shot, waktu, suara) dan menunjukkannya dulu.</li>
+          <li><b>Antigravity</b> menyusun shotlist (shot, waktu, suara) dan menunjukkannya dulu.</li>
           <li><b>Blender</b> membangun dunia, material, cahaya, dan kamera dari Python. Still uji dicek sebelum render penuh.</li>
           <li><b>Assemble</b>: grade, letterbox, bloom, grain, SFX, −14 LUFS, contact sheet.</li>
         </ol>
@@ -1521,7 +1521,7 @@ function viewNewCinematic(lookId) {
       await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast("Film dibuat. Claude menyusun shotlist-nya.");
+      toast("Film dibuat. Antigravity menyusun shotlist-nya.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat film"; }
   };
 }
@@ -1541,7 +1541,7 @@ function viewNewAws(lookId = "aws") {
         <div class="fld"><span class="lb">Format master</span><div class="seg">
           <label><input type="radio" name="format" value="horizontal" checked>16:9</label><label><input type="radio" name="format" value="vertical">9:16</label><label><input type="radio" name="format" value="square">1:1</label></div>
           <span class="hint">Versi rasio lain dibuat ulang dari data yang sama di tab ${esc(lk.label)} (bukan dipotong).</span></div>
-        ${[["reference", "File brief (opsional)", ".docx,.pdf,.txt,.md,image/*", "Dokumen brief klien, storyboard, atau contoh gaya."], ["footage", "Footage (opsional, bisa nanti)", "video/*,image/*", "Video/foto asli acara. Bisa juga diunggah per slot di tab AWS setelah Claude menyusun adegan."], ["logos", "Logo (opsional)", "image/png,image/svg+xml,image/jpeg", "PNG transparan, satu file per mitra."]].map(([k, lb, acc, hint]) => `
+        ${[["reference", "File brief (opsional)", ".docx,.pdf,.txt,.md,image/*", "Dokumen brief klien, storyboard, atau contoh gaya."], ["footage", "Footage (opsional, bisa nanti)", "video/*,image/*", "Video/foto asli acara. Bisa juga diunggah per slot di tab AWS setelah Antigravity menyusun adegan."], ["logos", "Logo (opsional)", "image/png,image/svg+xml,image/jpeg", "PNG transparan, satu file per mitra."]].map(([k, lb, acc, hint]) => `
         <div class="fld"><span class="lb">${lb}</span>
           <div class="drop" data-bin="${k}">Tarik file ke sini atau klik<input type="file" accept="${acc}" multiple></div>
           <span class="hint">${hint}</span><div class="muted" id="list-${k}" style="font-size:12.5px"></div></div>`).join("")}
@@ -1550,7 +1550,7 @@ function viewNewAws(lookId = "aws") {
       <div class="panel">
         <div class="panel-h">Cara kerjanya</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
-          <li><b>Claude</b> membaca brief, menyusun data (angka, label Thai + Inggris) dan adegan per detik, lalu membuat <b>animatic</b>: slot footage berlabel, angka TBC.</li>
+          <li><b>Antigravity</b> membaca brief, menyusun data (angka, label Thai + Inggris) dan adegan per detik, lalu membuat <b>animatic</b>: slot footage berlabel, angka TBC.</li>
           <li><b>Kamu</b> mengunggah footage per slot dan mengisi angka final di tab ${esc(lk.label)}.</li>
           <li><b>Render</b> master, lalu 9:16 + 1:1 disusun ulang dari data yang sama. Subtitle Inggris jadi file SRT.</li>
           <li><b>Paket After Effects</b>: plate footage, grafis alpha, stem audio, dan skrip .jsx yang membuat semua teks dan angka jadi text layer yang bisa diedit.</li>
@@ -1576,7 +1576,7 @@ function viewNewAws(lookId = "aws") {
       await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast("Proyek dibuat. Claude membaca brief dan menyusun animatic-nya.");
+      toast("Proyek dibuat. Antigravity membaca brief dan menyusun animatic-nya.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat proyek"; }
   };
 }
@@ -1590,7 +1590,7 @@ function viewNewAnimation(styleId) {
     <div class="form-grid">
       <form class="panel pad" id="form">
         <div class="fld"><label for="title">Judul</label><input type="text" id="title" placeholder="Rubah dan Hujan Pertama" required autofocus></div>
-        <div class="fld"><label for="idea">Ide · apa yang terjadi</label><textarea id="idea" placeholder="Apa yang dilihat penonton, dari awal sampai akhir. Teks layar yang diinginkan (bahasa Inggris pendek), suasana musik." required></textarea><span class="hint">Tanpa narasi: rubah pemandu berjalan melewati dunia gaya ini. Claude menyusun shot, teks, dan waktunya; dunia, tokoh, dan musik dibuat dari kode, $0.</span></div>
+        <div class="fld"><label for="idea">Ide · apa yang terjadi</label><textarea id="idea" placeholder="Apa yang dilihat penonton, dari awal sampai akhir. Teks layar yang diinginkan (bahasa Inggris pendek), suasana musik." required></textarea><span class="hint">Tanpa narasi: rubah pemandu berjalan melewati dunia gaya ini. Antigravity menyusun shot, teks, dan waktunya; dunia, tokoh, dan musik dibuat dari kode, $0.</span></div>
         <div class="fld"><span class="lb">Durasi</span><div class="seg">
           <label><input type="radio" name="seconds" value="15">15 s</label><label><input type="radio" name="seconds" value="30" checked>30 s</label><label><input type="radio" name="seconds" value="60">60 s</label><label><input type="radio" name="seconds" value="150">150 s</label></div>
           <span class="hint">Render ±3 detik per detik video di laptop ini.</span></div>
@@ -1610,7 +1610,7 @@ function viewNewAnimation(styleId) {
       const j = await r.json(); if (!r.ok) throw new Error(j.error);
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast("Animasi dibuat. Claude menyusun shot-nya.");
+      toast("Animasi dibuat. Antigravity menyusun shot-nya.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat animasi"; }
   };
 }
@@ -1644,7 +1644,7 @@ function viewNewClone(modelId) {
         <div class="panel-h">Cara kerjanya</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
           <li><b>Kode</b> mengukur acuannya: cut, panjang tiap shot, gerak kamera, keyframe, suara.</li>
-          <li><b>Claude</b> membedah tiap shot (isi, kamera, cahaya, transisi, perannya) dan menulis versi klonnya: prompt gambar, gerak, dan suara. Kamu lihat dan setujui di tab Clone.</li>
+          <li><b>Antigravity</b> membedah tiap shot (isi, kamera, cahaya, transisi, perannya) dan menulis versi klonnya: prompt gambar, gerak, dan suara. Kamu lihat dan setujui di tab Clone.</li>
           <li><b>Generate</b>: key visual di Google Flow (gratis), lalu klip multi-shot H3 di RunningHub, ≤ 15 s per generate. Koin dicatat di costs.md. Acuan 30 detik ≈ 3 generate.</li>
           <li><b>Rakit</b>: tiap shot dipotong ke panjang acuannya, −14 LUFS, contact sheet, dan perbandingan acuan vs klon per shot.</li>
         </ol>
@@ -1675,7 +1675,7 @@ function viewNewClone(modelId) {
       if (!rd.ok) throw new Error((await rd.json()).error);
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast("Proyek dibuat. Video acuan sedang diukur; setelah itu Claude membedahnya per shot.");
+      toast("Proyek dibuat. Video acuan sedang diukur; setelah itu Antigravity membedahnya per shot.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat proyek"; }
   };
 }
@@ -1710,7 +1710,7 @@ function viewNewKvAd(cat, pr) {
         <div class="panel-h">Alurnya</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
           <li><b>Kamu</b> mengisi teks dan artwork dari KV di sini. Logo Danantara, 131, BRI, dan kartu QR BRImo sudah tersimpan.</li>
-          <li><b>Claude</b> menggerakkan key visual di Flow (kredit dilaporkan), lalu menyusun teks kinetik di belakang orang, angka promo, dan end frame persis KV.</li>
+          <li><b>Antigravity</b> menggerakkan key visual di Flow (kredit dilaporkan), lalu menyusun teks kinetik di belakang orang, angka promo, dan end frame persis KV.</li>
           <li><b>Musik</b> dibuat dari kode, jatuh di ketukan, bebas lisensi.</li>
           <li><b>Render</b> MP4 9:16 sekitar 13 detik, −14 LUFS, contact sheet dibaca sebelum diserahkan.</li>
         </ol>
@@ -1748,7 +1748,7 @@ function viewNewKvAd(cat, pr) {
       await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast("Iklan dibuat. Claude mulai bekerja.");
+      toast("Iklan dibuat. Antigravity mulai bekerja.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat iklan"; }
   };
 }
@@ -1768,7 +1768,7 @@ function viewNewAppDemo(cat, pr) {
       <form class="panel pad" id="form">
         <div class="fld"><label for="title">Judul proyek</label><input type="text" id="title" placeholder="Demo BRImo Transfer" required autofocus></div>
         <div class="fld"><label for="app">Nama aplikasi</label><input type="text" id="app" placeholder="BRImo" required><span class="hint">Tampil di penutup, di bawah ikon.</span></div>
-        <div class="fld"><label for="idea">Pesan dan alur</label><textarea id="idea" style="min-height:110px" placeholder="Apa yang ingin ditunjukkan, urut adegan. Contoh: buka aplikasi → transfer dalam 3 langkah → notifikasi berhasil → riwayat rapi."></textarea><span class="hint">Headline tiap adegan ditulis Claude dari sini (format judul). Klaim dan angka hanya yang kamu tulis atau yang terlihat di screenshot.</span></div>
+        <div class="fld"><label for="idea">Pesan dan alur</label><textarea id="idea" style="min-height:110px" placeholder="Apa yang ingin ditunjukkan, urut adegan. Contoh: buka aplikasi → transfer dalam 3 langkah → notifikasi berhasil → riwayat rapi."></textarea><span class="hint">Headline tiap adegan ditulis Antigravity dari sini (format judul). Klaim dan angka hanya yang kamu tulis atau yang terlihat di screenshot.</span></div>
         <div class="fld"><label for="benefits">Manfaat (opsional)</label><textarea id="benefits" style="min-height:80px" placeholder="Satu per baris, 3-4 baris. Jadi daftar bercentang sebelum penutup."></textarea></div>
         <div class="fld"><label for="closing">Kalimat penutup (opsional)</label><input type="text" id="closing" placeholder="Kenalan Dengan *BRImo.*"><span class="hint">Kata di antara *bintang* jadi miring biru.</span></div>
         <div class="fld"><label for="seconds">Durasi kira-kira (detik)</label><input type="number" id="seconds" min="10" max="60" value="25"></div>
@@ -1781,7 +1781,7 @@ function viewNewAppDemo(cat, pr) {
         <div class="panel-h">Alurnya</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
           <li><b>Kamu</b> mengunggah screenshot UI asli, ikon, dan pesannya di sini.</li>
-          <li><b>Claude</b> menyusun storyboard: headline serif yang diketik, ponsel berisi screenshot, potongan UI yang melayang keluar, kartu bertumpuk, daftar manfaat, ikon penutup.</li>
+          <li><b>Antigravity</b> menyusun storyboard: headline serif yang diketik, ponsel berisi screenshot, potongan UI yang melayang keluar, kartu bertumpuk, daftar manfaat, ikon penutup.</li>
           <li><b>Warna</b> shade biru BRI, musik dan SFX dibuat dari kode, $0.</li>
           <li><b>Render</b> MP4 9:16, −14 LUFS, contact sheet dibaca sebelum diserahkan.</li>
         </ol>
@@ -1818,7 +1818,7 @@ function viewNewAppDemo(cat, pr) {
       await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast("Demo dibuat. Claude mulai bekerja.");
+      toast("Demo dibuat. Antigravity mulai bekerja.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat demo"; }
   };
 }
@@ -1846,7 +1846,7 @@ function viewNewAd(productId) {
         <div class="fld"><span class="lb">5 · Musik</span><div class="seg">
           <label><input type="radio" name="music" value="app" checked>Tambah sendiri di aplikasi</label><label><input type="radio" name="music" value="file">Pakai musik saya</label></div>
           <span class="hint" id="musicHint">Video berisi SFX saja dengan volume −20 LUFS, supaya musik dari TikTok/Instagram tetap terdengar.</span></div>
-        ${drop("music", "File musik", "Satu lagu; Claude memotong bagian yang pas dengan ritme cut. Video jadi −14 LUFS, siap unggah.", false)}
+        ${drop("music", "File musik", "Satu lagu; Antigravity memotong bagian yang pas dengan ritme cut. Video jadi −14 LUFS, siap unggah.", false)}
         <div class="fld"><span class="lb">SFX</span><div class="seg">
           <label><input type="radio" name="sfx" value="library" checked>Otomatis dari library (CC0)</label><label><input type="radio" name="sfx" value="mine">Tambah SFX saya</label></div>
           <span class="hint">Library: bunyi klik, hit, whoosh CC0 dari Freesound yang sudah terdaftar di <span class="mono">npm run stock</span>.</span></div>
@@ -1859,7 +1859,7 @@ function viewNewAd(productId) {
         <div class="panel-h">Alurnya</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
           <li><b>Kamu</b> mengisi foto, logo, dan CTA di sini.</li>
-          <li><b>Claude</b> memilih detail tiap shot dari foto (fokus, zoom, kilatan), menyusun ritme ±11 detik dan SFX bebas lisensi di <span class="mono">ad.json</span>.</li>
+          <li><b>Antigravity</b> memilih detail tiap shot dari foto (fokus, zoom, kilatan), menyusun ritme ±11 detik dan SFX bebas lisensi di <span class="mono">ad.json</span>.</li>
           <li><b>Gerbang</b> memeriksa durasi, produk utuh sebelum detik 2, teks di area aman, dan asal setiap aset.</li>
           <li><b>Render</b> MP4 9:16, volume −20 LUFS. Musik ditambahkan di aplikasi saat upload.</li>
         </ol>
@@ -1914,7 +1914,7 @@ function viewNewAd(productId) {
       await fetch(`/api/videos/${j.slug}/ready`, { method: "POST" });
       await loadVideos();
       location.hash = `#/v/${j.slug}`;
-      toast("Iklan dibuat. Claude mulai bekerja.");
+      toast("Iklan dibuat. Antigravity mulai bekerja.");
     } catch (err) { alert(err.message); go.disabled = false; go.textContent = "Buat iklan"; }
   };
 }
@@ -2003,7 +2003,7 @@ async function viewEditor(slug, startTab) {
       return `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : "<br>Setujui storyline dan naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${pr.ready ? 1 : ""}" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
     }
     const ready = v.approval.approved && v.scriptState !== "old", voice = !!v.voice?.seconds && !v.voice.draft, done = voice && v.beats.length > 0;
-    return `<div class="notice ${done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${voice ? "✓" : "–"} · beat ${v.beats.length || "–"}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}<br><small class="muted">Claude membuat suara, beat, dan scene sampai lolos check. Render menunggu thumbnail kamu setujui.</small>${ready ? "" : "<br>Setujui naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${ready ? 1 : ""}" ${!ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : done ? "Production lagi" : "Production"}</button></span></div>`;
+    return `<div class="notice ${done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${voice ? "✓" : "–"} · beat ${v.beats.length || "–"}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}<br><small class="muted">Antigravity membuat suara, beat, dan scene sampai lolos check. Render menunggu thumbnail kamu setujui.</small>${ready ? "" : "<br>Setujui naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${ready ? 1 : ""}" ${!ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : done ? "Production lagi" : "Production"}</button></span></div>`;
   };
   const body = {
     beat: () => v.oneTake ? beatTableView(v) : v.kvBeats ? `
@@ -2019,20 +2019,20 @@ async function viewEditor(slug, startTab) {
       <ul class="blist" style="border-top:1px solid var(--line)">${v.beats.map((b, i) => `
         <li data-i="${i}" style="--rc:${REG[b.register]?.[0]}">${thumb(b) ? `<img class="bt" src="${thumb(b)}" alt="" loading="lazy">` : `<span class="bt"></span>`}
           <div style="min-width:0"><b>${esc(b.hero)}</b><small>${esc(b.job)}</small></div><time>${fmt(b.start)}<br>${b.duration.toFixed(1)}s</time></li>`).join("")}</ul>`
-      : `<div class="pad"><div class="empty"><b>Belum ada rencana beat</b>Claude membuatnya setelah naskah dan suara siap.</div></div>`,
+      : `<div class="pad"><div class="empty"><b>Belum ada rencana beat</b>Antigravity membuatnya setelah naskah dan suara siap.</div></div>`,
     naskah: () => {
       const a = v.approval;
       const bar = !v.script ? "" : v.scriptState === "old"
-        ? `<div class="notice"><span><b>Ini naskah lama.</b> Storyline belum disetujui${v.musafo?.draftApproval?.needed && !v.musafo.draftApproval.approved ? " (draft cerita juga belum)" : ""}, jadi naskah ini belum bisa disetujui. Claude menulis naskah baru dari storyline yang kamu setujui.</span></div>`
+        ? `<div class="notice"><span><b>Ini naskah lama.</b> Storyline belum disetujui${v.musafo?.draftApproval?.needed && !v.musafo.draftApproval.approved ? " (draft cerita juga belum)" : ""}, jadi naskah ini belum bisa disetujui. Antigravity menulis naskah baru dari storyline yang kamu setujui.</span></div>`
         : a.approved
         ? `<div class="notice ok"><span><b>Naskah disetujui</b> · ${new Date(a.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}</span><span class="sp"><button class="btn sm" id="unapprove">Batalkan</button></span></div>`
-        : `<div class="notice"><span>${a.stale ? (STORY[v.type] ? "<b>Naskah berubah setelah disetujui.</b> Setujui lagi supaya Claude melanjutkan suara, gambar, dan klip." : "<b>Naskah berubah setelah disetujui.</b> Prompt Flow yang lama tidak berlaku.") : (STORY[v.type] ? "<b>Naskah menunggu persetujuanmu.</b> Setelah disetujui, Claude membuat suara, lalu gambar dan klip per shot." : v.oneTake ? "<b>Naskah menunggu persetujuanmu.</b> Setelah disetujui, Claude membuat suara lalu beat table (waktu, narasi, hero, teks layar) untuk kamu setujui." : "<b>Naskah menunggu persetujuanmu.</b> Setelah disetujui, Claude menulis prompt Google Flow.")}</span><span class="sp"><button class="btn pri sm" id="approve">Setujui naskah</button></span></div>`;
+        : `<div class="notice"><span>${a.stale ? (STORY[v.type] ? "<b>Naskah berubah setelah disetujui.</b> Setujui lagi supaya Antigravity melanjutkan suara, gambar, dan klip." : "<b>Naskah berubah setelah disetujui.</b> Prompt Flow yang lama tidak berlaku.") : (STORY[v.type] ? "<b>Naskah menunggu persetujuanmu.</b> Setelah disetujui, Antigravity membuat suara, lalu gambar dan klip per shot." : v.oneTake ? "<b>Naskah menunggu persetujuanmu.</b> Setelah disetujui, Antigravity membuat suara lalu beat table (waktu, narasi, hero, teks layar) untuk kamu setujui." : "<b>Naskah menunggu persetujuanmu.</b> Setelah disetujui, Antigravity menulis prompt Google Flow.")}</span><span class="sp"><button class="btn pri sm" id="approve">Setujui naskah</button></span></div>`;
       // the user's own edits (tools/script-edit.mjs): Storytelling per shot (Indonesian + English), explainer per paragraph
       const shots = isM ? v.musafo.shots : [];
       const voiced = !!v.voice?.seconds;
       const canEdit = isM ? shots.length > 0 : (v.paragraphs?.length ?? 0) > 0;
-      const pend = v.edits?.length ? `<div class="notice"><span><b>${v.edits.length} perubahan naskah darimu</b> menunggu Claude${v.edits.some((e) => e.voiced && e.spoken !== false) ? ": kalimat yang berubah dibuat ulang suaranya satu per satu (swap)" : ""}. Klik "Setujui naskah" setelah selesai mengedit.</span></div>` : "";
-      const warns = naskahWarns[slug]?.length ? `<div class="notice"><span><b>Perlu dicek Claude:</b> ${naskahWarns[slug].map(esc).join(" · ")}</span></div>` : "";
+      const pend = v.edits?.length ? `<div class="notice"><span><b>${v.edits.length} perubahan naskah darimu</b> menunggu Antigravity${v.edits.some((e) => e.voiced && e.spoken !== false) ? ": kalimat yang berubah dibuat ulang suaranya satu per satu (swap)" : ""}. Klik "Setujui naskah" setelah selesai mengedit.</span></div>` : "";
+      const warns = naskahWarns[slug]?.length ? `<div class="notice"><span><b>Perlu dicek Antigravity:</b> ${naskahWarns[slug].map(esc).join(" · ")}</span></div>` : "";
       if (!editing) {
         const doc = isM && shots.length
           ? shots.map((s) => `<div class="sline"><b class="mono">${esc(s.id)}${s.stat ? `<br><small class="${s.stat.over ? "over" : "muted"}" title="maks ±${v.musafo.shotLimit?.words} kata ≈ ${v.musafo.shotLimit?.seconds} s per shot">${s.stat.words} kata<br>${s.stat.measured ? "" : "±"}${s.stat.sec}s${s.stat.over ? " ⚠" : ""}</small>` : ""}</b><div>${s.lines.map((l) => `<div>${esc(l.text)}<br><small class="muted">${esc(l.en)}</small></div>`).join("")}</div></div>`).join("")
@@ -2085,7 +2085,7 @@ async function viewEditor(slug, startTab) {
           <button class="btn pri sm" id="clMake" ${s.cloneKey ? "" : "disabled"}>Buat clone</button>
           <span class="hint" style="margin-left:8px">Satu orang bicara, tanpa musik, tanpa gema. Lebih panjang dan lebih bersih = lebih mirip.</span>
         </div>
-        ${String(s.speaker || "").startsWith("clone:") ? `<div class="notice ok" style="margin-bottom:16px"><span>Video ini memakai suara clone. Take dibuat Claude lewat ElevenLabs: <span class="mono">npm run voice -- ${esc(slug)} --force</span>. Teks AI Studio di bawah tidak dipakai.</span></div>` : ""}
+        ${String(s.speaker || "").startsWith("clone:") ? `<div class="notice ok" style="margin-bottom:16px"><span>Video ini memakai suara clone. Take dibuat Antigravity lewat ElevenLabs: <span class="mono">npm run voice -- ${esc(slug)} --force</span>. Teks AI Studio di bawah tidak dipakai.</span></div>` : ""}
         ${(s.samples.length ? s.samples : s.voices.filter((v) => v.sample).map((v) => ({ name: v.name, url: v.sample }))).length ? `<div class="eyebrow sub">Sampel suara${s.samples.length ? "" : " (kalimat contoh yang sama untuk semua speaker)"}</div><div style="display:grid;gap:8px;margin-bottom:16px">${(s.samples.length ? s.samples : s.voices.filter((v) => v.sample).map((v) => ({ name: v.name, url: v.sample }))).map((x) => { const nm = x.name.replace(/^\d+-/, ""); return `<div style="display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center"><b style="font-size:13px">${esc(x.name)}</b><audio controls preload="none" src="${x.url}" style="width:100%;height:34px"></audio><button class="btn sm" data-pick="${esc(nm.charAt(0).toUpperCase() + nm.slice(1))}">Pakai</button></div>`; }).join("")}</div>` : ""}
         <div class="eyebrow sub">Teks untuk AI Studio (satu blok = satu take)</div>
         <div class="prompt"><span class="lb">${s.text.length} karakter</span><button class="btn sm" data-copy="${esc(s.text)}">Salin</button>${esc(s.text) || '<span class="muted">Naskah belum ditulis.</span>'}</div>
@@ -2096,7 +2096,7 @@ async function viewEditor(slug, startTab) {
     flow: () => {
       const f = v.flowCheck;
       if (!v.approval.approved) return `<div class="pad"><div class="empty"><b>Setujui naskah dulu</b>Prompt Flow ditulis untuk naskah yang sudah kamu setujui, supaya tidak ada kredit terbuang untuk naskah yang masih berubah.<br><button class="btn pri" data-goto="naskah">Buka naskah</button></div></div>`;
-      if (!f.shots.length) return `<div class="pad"><div class="empty"><b>Naskah sudah disetujui</b>Claude menulis prompt Flow dari naskah ini; hasilnya muncul di sini.<br><br><small class="muted">Claude mengerjakannya otomatis. Kalau lama tidak muncul, ketik “lanjut” di Claude Code.</small></div></div>`;
+      if (!f.shots.length) return `<div class="pad"><div class="empty"><b>Naskah sudah disetujui</b>Antigravity menulis prompt Flow dari naskah ini; hasilnya muncul di sini.<br><br><small class="muted">Antigravity mengerjakannya otomatis.</small></div></div>`;
       const issues = f.errors.map((e) => `<li class="e">✗ ${esc(e)}</li>`).join("") + f.warns.map((w) => `<li class="w">⚠ ${esc(w)}</li>`).join("");
       const st = { draft: "Draft", generated: "Sudah dibuat", library: "Di library" };
       return `<div class="pad">
@@ -2118,20 +2118,20 @@ async function viewEditor(slug, startTab) {
       const m = v.musafo, a = m.draftApproval;
       const bar = !a.written ? "" : a.approved
         ? `<div class="notice ok"><span><b>Draft disetujui</b> · ${new Date(a.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}. Storyline dibuat dari draft ini; mengubahnya lagi membuat persetujuan gugur.</span></div>`
-        : `<div class="notice"><span>${a.stale ? "<b>Draft berubah setelah disetujui.</b>" : "<b>Draft menunggu persetujuanmu.</b>"} Bandingkan dengan teks buku di kiri, ubah yang perlu, lalu setujui. Claude menulis storyline dari draft ini.</span><span class="sp"><button class="btn pri sm" id="drApprove">Setujui draft</button></span></div>`;
+        : `<div class="notice"><span>${a.stale ? "<b>Draft berubah setelah disetujui.</b>" : "<b>Draft menunggu persetujuanmu.</b>"} Bandingkan dengan teks buku di kiri, ubah yang perlu, lalu setujui. Antigravity menulis storyline dari draft ini.</span><span class="sp"><button class="btn pri sm" id="drApprove">Setujui draft</button></span></div>`;
       const right = a.written
         ? `<textarea id="drText" class="drtext" spellcheck="false">${esc(m.draft)}</textarea>
-           <div class="meta-row" style="justify-content:flex-end;gap:8px;margin-top:10px"><span class="muted" id="drNote" style="margin-right:auto;font-size:12.5px">${a.editedAt ? "Terakhir kamu edit " + new Date(a.editedAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "Draft dari Claude"}</span><button class="btn" id="drSave" disabled>Simpan draft</button></div>`
-        : `<div class="empty"><b>Draft belum ditulis</b>Claude menceritakan ulang kisah ini utuh dan berurutan dari teks bukunya.<br><br><button class="btn pri" data-start-story>Tulis draft</button></div>`;
+           <div class="meta-row" style="justify-content:flex-end;gap:8px;margin-top:10px"><span class="muted" id="drNote" style="margin-right:auto;font-size:12.5px">${a.editedAt ? "Terakhir kamu edit " + new Date(a.editedAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "Draft dari Antigravity"}</span><button class="btn" id="drSave" disabled>Simpan draft</button></div>`
+        : `<div class="empty"><b>Draft belum ditulis</b>Antigravity menceritakan ulang kisah ini utuh dan berurutan dari teks bukunya.<br><br><button class="btn pri" data-start-story>Tulis draft</button></div>`;
       return `<div class="pad">${bar}<div class="drgrid">
         <div><div class="eyebrow sub">Teks buku</div><div class="doc drsrc">${m.sourceText ? esc(m.sourceText) : '<span class="muted">Tidak ada teks sumber (bahan mentah ada di tab Brief).</span>'}</div></div>
         <div><div class="eyebrow sub">Draft cerita · bisa kamu edit</div>${right}</div></div></div>`;
     },
     storyline: () => {
       const m = v.musafo, a = m.storylineApproval;
-      if (!a.written) return `<div class="pad"><div class="empty"><b>Storyline belum ditulis</b>Claude menyusunnya dari ${m.draftApproval.needed ? "draft yang kamu setujui" : "bahan mentahmu (lihat tab Brief)"}.<br><br>${m.draftApproval.needed && !m.draftApproval.approved ? `<small class="muted">Setujui draft dulu.</small>` : `<button class="btn pri" data-start-story>Tulis storyline</button>`}</div></div>`;
+      if (!a.written) return `<div class="pad"><div class="empty"><b>Storyline belum ditulis</b>Antigravity menyusunnya dari ${m.draftApproval.needed ? "draft yang kamu setujui" : "bahan mentahmu (lihat tab Brief)"}.<br><br>${m.draftApproval.needed && !m.draftApproval.approved ? `<small class="muted">Setujui draft dulu.</small>` : `<button class="btn pri" data-start-story>Tulis storyline</button>`}</div></div>`;
       const bar = a.approved
-        ? `<div class="notice ok"><span><b>Storyline disetujui</b> · hook ${esc(a.hook ?? "–")} · ${new Date(a.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}. Claude menulis naskah per shot.</span></div>`
+        ? `<div class="notice ok"><span><b>Storyline disetujui</b> · hook ${esc(a.hook ?? "–")} · ${new Date(a.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}. Antigravity menulis naskah per shot.</span></div>`
         : `<div class="notice"><span>${a.stale ? "<b>Storyline berubah setelah disetujui.</b>" : "<b>Storyline menunggu persetujuanmu.</b>"} Edit langsung di bawah bila perlu, simpan, pilih satu hook, lalu setujui.</span><span class="sp"><button class="btn pri sm" id="slApprove" ${m.hooks?.options?.length && !m.hooks.chosen ? "disabled" : ""}>${m.hooks?.options?.length && !m.hooks.chosen ? "Pilih hook di bawah dulu" : "Setujui storyline"}</button></span></div>`;
       const hk = m.hooks, typeName = { "cold open": "Langsung ke kejadian", pertanyaan: "Pertanyaan", kutipan: "Kutipan dari buku" };
       const hooksHtml = hk?.options?.length ? `<div class="eyebrow sub">Hook (2-3 detik pertama) · pilih satu</div>
@@ -2146,7 +2146,7 @@ async function viewEditor(slug, startTab) {
       const src = m.sourceText ? `<details style="margin-top:16px"><summary class="eyebrow sub" style="cursor:pointer">Teks sumber (bandingkan dengan "Alur asli")</summary><div class="doc" style="margin-top:8px">${esc(m.sourceText)}</div></details>` : "";
       // editable (user 2026-11-07): the user's words from then on; saving an approved storyline makes the approval lapse
       const editor = `<textarea id="slText" class="drtext" spellcheck="false">${esc(m.storyline)}</textarea>
-        <div class="meta-row" style="justify-content:flex-end;gap:8px;margin-top:10px"><span class="muted" style="margin-right:auto;font-size:12.5px">${m.storylineEditedAt ? "Terakhir kamu edit " + new Date(m.storylineEditedAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "Storyline dari Claude · bisa kamu edit"}</span><button class="btn" id="slSave" disabled>Simpan storyline</button></div>`;
+        <div class="meta-row" style="justify-content:flex-end;gap:8px;margin-top:10px"><span class="muted" style="margin-right:auto;font-size:12.5px">${m.storylineEditedAt ? "Terakhir kamu edit " + new Date(m.storylineEditedAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "Storyline dari Antigravity · bisa kamu edit"}</span><button class="btn" id="slSave" disabled>Simpan storyline</button></div>`;
       // a series part shares the whole series storyline; show this project's own "## Bagian n" first (part 2 used to open on Bagian 1)
       const part = m.series?.part, partSec = part ? (m.storyline.match(new RegExp(`^## Bagian ${part}\\b[^\\n]*\\n[\\s\\S]*?(?=^## |(?![\\s\\S]))`, "m")) ?? [""])[0].trim() : "";
       const partBox = partSec ? `<div class="notice ok" style="display:block;margin-bottom:14px"><div style="margin-bottom:6px"><b>Proyek ini Bagian ${part} dari ${m.series.total ?? "?"}.</b> Storyline di bawah berisi seluruh series; naskah proyek ini mengikuti bagian ini:</div><div class="doc" style="white-space:pre-wrap;margin:0">${esc(partSec)}</div></div>` : "";
@@ -2162,7 +2162,7 @@ async function viewEditor(slug, startTab) {
       const sheets = m.characters.length ? m.characters.map((c) => `<div class="shot"><div class="shot-h"><b>${esc(c.name)} · ${esc(c.age)}</b><span class="muted" style="margin-left:auto">${c.shots.length ? "shot " + c.shots.map(esc).join(", ") : "belum dipakai di shot"}</span></div>
           <div class="shot-b">${c.sheetUrl ? `<a href="${c.sheetUrl}" target="_blank"><img src="${c.sheetUrl}" alt="" style="width:100%;border-radius:10px;border:1px solid var(--line)"></a>` : '<div class="notice"><span>Character sheet belum dibuat.</span></div>'}
           <dl class="kv" style="margin-top:8px"><dt>Kalimat tokoh</dt><dd class="mono" style="font-size:12.5px">${esc(c.desc)}</dd></dl></div></div>`).join("")
-        : `<div class="notice"><span>Character sheet dibuat Claude setelah storyline disetujui: satu per usia tokoh (mis. anak, remaja, dewasa), dari foto di atas.</span></div>`;
+        : `<div class="notice"><span>Character sheet dibuat Antigravity setelah storyline disetujui: satu per usia tokoh (mis. anak, remaja, dewasa), dari foto di atas.</span></div>`;
       return `<div class="pad"><div class="eyebrow sub">Foto asli tokoh utama</div>${refs}
         <div class="drop" id="tkDrop">Tambah foto: tarik ke sini atau klik<input type="file" accept="image/png,image/jpeg,image/webp" multiple></div>
         <div class="eyebrow sub" style="margin-top:18px">Character sheet per usia</div>${sheets}</div>`;
@@ -2170,7 +2170,7 @@ async function viewEditor(slug, startTab) {
     shot: () => {
       const m = v.musafo;
       const lookBar = m.looks?.length ? `<div class="notice" style="margin-bottom:14px"><span><b>Gaya visual</b> · ${esc(m.looks.find((l) => l.id === m.look)?.description ?? "")}</span><span class="sp"><select class="sel" id="lookSel">${m.looks.map((l) => `<option value="${esc(l.id)}" ${l.id === m.look ? "selected" : ""}>${esc(l.label)}</option>`).join("")}</select></span></div>` : "";
-      if (!m.shots.length) return `<div class="pad">${lookBar}<div class="empty"><b>Belum ada shot</b>Claude memecah cerita jadi shot (kalimat + terjemahan + prompt gambar dan gerak) setelah storyline disetujui.<br><br><small class="muted">Claude mengerjakannya otomatis. Kalau lama tidak muncul, ketik “lanjut” di Claude Code.</small></div></div>`;
+      if (!m.shots.length) return `<div class="pad">${lookBar}<div class="empty"><b>Belum ada shot</b>Antigravity memecah cerita jadi shot (kalimat + terjemahan + prompt gambar dan gerak) setelah storyline disetujui.<br><br><small class="muted">Antigravity mengerjakannya otomatis.</small></div></div>`;
       const issues = m.errors.map((e) => `<li class="e">✗ ${esc(e)}</li>`).join("") + m.warns.map((w) => `<li class="w">⚠ ${esc(w)}</li>`).join("");
       const prodBar = prodBarHtml();
       return `<div class="pad">${lookBar}${prodBar}
@@ -2209,8 +2209,8 @@ async function viewEditor(slug, startTab) {
         : !v.reference.length ? `<div class="notice"><span><b>Belum ada video referensi.</b> Unggah file, atau tempel link saat membuat video.</span>${v.refStatus ? "" : `<span class="sp"><button class="btn sm" id="refRun">Analisis</button></span>`}</div>` : "";
       const picked = v.concept && c.concepts.find((k) => k.id === v.concept.id);
       const cards = c.concepts.length && !c.errors.length ? `
-        ${picked ? `<div class="notice ok"><span><b>Konsep ${esc(picked.id)} dipilih</b> · ${esc(picked.title)}. Claude menulis naskah dari konsep ini.</span></div>`
-          : `<div class="notice"><span><b>Pilih satu konsep.</b> Setelah itu kembali ke Claude dan bilang "lanjut".</span></div>`}
+        ${picked ? `<div class="notice ok"><span><b>Konsep ${esc(picked.id)} dipilih</b> · ${esc(picked.title)}. Antigravity menulis naskah dari konsep ini.</span></div>`
+          : `<div class="notice"><span><b>Pilih satu konsep.</b> Setelah itu kembali ke Antigravity dan lanjutkan.</span></div>`}
         ${c.concepts.map((k) => `<div class="shot" style="${picked?.id === k.id ? "border-color:var(--accent)" : ""}">
           <div class="shot-h"><b>${esc(k.id)} · ${esc(k.title)}</b>${k.recommended ? '<span class="pill acc">disarankan</span>' : ""}<span class="pill">${k.duration}s</span><span class="pill">$${k.total.toFixed(2)}</span>
             <span style="margin-left:auto">${picked?.id === k.id ? '<span class="pill acc">dipilih</span>' : `<button class="btn ${k.recommended ? "pri " : ""}sm" data-concept="${esc(k.id)}">Pilih konsep ini</button>`}</span></div>
@@ -2219,10 +2219,10 @@ async function viewEditor(slug, startTab) {
             <dt>Hook</dt><dd>“${esc(k.hook)}”</dd><dt>Visual</dt><dd>${esc(k.visual)}</dd><dt>Audio</dt><dd>${esc(k.audio)}</dd>
             <dt>Biaya</dt><dd>${k.cost.map((x) => `${esc(x.item)}: $${(+x.usd).toFixed(2)}`).join("<br>")}</dd>
             <dt>Jujurnya</dt><dd>${esc(k.honest)}</dd></dl></div></div>`).join("")}`
-        : `<div class="empty" style="margin:10px 0"><b>Konsep belum ditulis</b>${c.errors.length && c.errors[0] !== "concepts.json belum ada" ? esc(c.errors.join("; ")) : "Setelah analisis selesai, Claude membaca hasilnya dan menawarkan 2-3 konsep di sini."}<br><br><small class="muted">Claude mengerjakannya otomatis. Kalau lama tidak muncul, ketik “lanjut” di Claude Code.</small></div>`;
+        : `<div class="empty" style="margin:10px 0"><b>Konsep belum ditulis</b>${c.errors.length && c.errors[0] !== "concepts.json belum ada" ? esc(c.errors.join("; ")) : "Setelah analisis selesai, Antigravity membaca hasilnya dan menawarkan 2-3 konsep di sini."}<br><br><small class="muted">Antigravity mengerjakannya otomatis.</small></div>`;
       const g = (title, items) => items.length ? `<div class="eyebrow sub">${title}</div><div class="gal">${items.map((u) => `<a href="${u}" target="_blank"><img src="${u}" alt="" loading="lazy"></a>`).join("")}</div>` : "";
       return `<div class="pad">${run}${cards}
-        ${v.refAnalysis ? `<div class="eyebrow sub">Analisis Claude (5 aspek)</div><div class="doc" style="font-size:13px">${esc(v.refAnalysis)}</div>` : ""}
+        ${v.refAnalysis ? `<div class="eyebrow sub">Analisis Antigravity (5 aspek)</div><div class="doc" style="font-size:13px">${esc(v.refAnalysis)}</div>` : ""}
         ${g("Satu gambar per shot", v.refShots)}${g("Ritme (1 tile = 1 detik)", v.refSheets)}
         ${v.refData ? `<div class="eyebrow sub">Data terukur</div><div class="doc mono" style="font-size:12px">${esc(v.refData)}</div>` : ""}</div>`;
     },
@@ -2272,7 +2272,7 @@ async function viewEditor(slug, startTab) {
     // AWS (tools/aws.mjs, user 2026-11-17): numbers, footage slots, logos, renders, After Effects package
     aws: () => {
       const a = v.awsData;
-      if (!a) return `<div class="pad"><div class="empty"><b>Belum ada aws.json</b>Claude sedang membaca brief dan menyusun adegan.</div></div>`;
+      if (!a) return `<div class="pad"><div class="empty"><b>Belum ada aws.json</b>Antigravity sedang membaca brief dan menyusun adegan.</div></div>`;
       const job = v.awsJob, busy = (k) => (job === k ? " disabled" : job ? " disabled" : "");
       const lab = { render: "Merender…", formats: "Membuat 9:16 + 1:1…", ae: "Membuat paket AE…" };
       const got = a.slots.filter((x) => x.url).length;
@@ -2289,7 +2289,7 @@ async function viewEditor(slug, startTab) {
           ${a.variants.map((x) => `<li>${x.video ? `✔ ${x.kind.replace("x", ":")}: <a href="${x.video}" target="_blank">MP4</a> · <a href="#/v/${x.slug}">buka</a>` : x.exists ? `○ ${x.kind.replace("x", ":")} sudah disusun, belum dirender` : `○ ${x.kind.replace("x", ":")} belum dibuat`}</li>`).join("")}
           <li>${a.ae ? `✔ Paket After Effects: <span class="mono">${esc(a.ae.dir)}</span> (jalankan <a href="${a.ae.jsx}" target="_blank">.jsx</a> lewat File › Scripts › Run Script File)` : "○ Paket After Effects belum dibuat"}</li>
         </ul>` : `<div class="notice" style="margin-bottom:14px"><span>Versi rasio dari master: ubah data dan footage di proyek master, lalu klik "9:16 + 1:1" di sana.</span></div>`}
-        <div class="eyebrow sub">Angka di layar · isi di aws.json → data (atau minta Claude)</div>
+        <div class="eyebrow sub">Angka di layar · isi di aws.json → data (atau minta Antigravity)</div>
         <table class="mono" style="font-size:12.5px;border-collapse:collapse;width:100%;margin-bottom:14px">${a.data.map((d) => `<tr><td style="padding:3px 10px 3px 0">${esc(d.key)}</td><td style="padding:3px 10px 3px 0">${esc(d.th)}<br><span class="muted">${esc(d.en)}</span></td><td style="padding:3px 10px 3px 0;white-space:nowrap">${d.value == null ? (d.used ? '<span class="pill">TBC</span>' : '<span class="muted">tidak dipakai</span>') : `<b>${esc(d.prefix)} ${Number(d.value).toLocaleString("en-US")}${esc(d.suffix)}</b>`}</td><td class="muted" style="padding:3px 0">${esc(d.note)}</td></tr>`).join("")}</table>
         <div class="eyebrow sub">Footage per slot · ${got}/${a.slots.length}${a.master ? "" : " (unggah di proyek master)"}</div>
         ${a.slots.map((x) => `<div class="shot"><div class="shot-h"><b>${esc(x.scene)} · ${x.index + 1}</b><span class="muted" style="font-size:12.5px">${esc(x.need)}${x.theme ? ` · tema ${esc(x.theme)}` : ""}</span>
@@ -2299,7 +2299,7 @@ async function viewEditor(slug, startTab) {
         <ul class="issues">${a.logos.map((l) => `<li>${l.url ? "✔" : "○"} ${esc(l.name)} <span class="muted mono">${esc(l.src)}</span></li>`).join("")}</ul>
         ${a.master ? `<label class="btn sm" style="margin-top:8px">Unggah logo<input type="file" accept="image/*" id="awsLogo" multiple hidden></label>
         <label class="btn sm" style="margin-top:8px">Unggah lagu berlisensi<input type="file" accept="audio/*" id="awsMusic" hidden></label>
-        <span class="hint">Nama file logo disamakan dengan daftar di atas, atau minta Claude memasangnya. Lagu: Claude mengisi aws.json → music.track + lisensinya.</span>` : ""}
+        <span class="hint">Nama file logo disamakan dengan daftar di atas, atau minta Antigravity memasangnya. Lagu: Claude mengisi aws.json → music.track + lisensinya.</span>` : ""}
       </div>`;
     },
     aset: () => {
@@ -2312,7 +2312,7 @@ async function viewEditor(slug, startTab) {
       const c = v.cloneData;
       if (!c?.planned) {
         const st = v.refStatus;
-        return `<div class="pad"><div class="empty"><b>${v.refRunning || st?.state === "running" ? "Video acuan sedang diukur…" : st?.state === "error" ? "Analisis video acuan gagal" : "Belum ada breakdown"}</b>${st?.state === "error" ? esc(st.msg) + "<br>Unggah filenya di tab Aset atau lewat Claude." : "Cut, panjang shot, gerak, dan keyframe diukur dulu, lalu Claude membedah tiap shot."}<br><br><button class="btn sm" data-reload-clone>Muat ulang</button></div></div>`;
+        return `<div class="pad"><div class="empty"><b>${v.refRunning || st?.state === "running" ? "Video acuan sedang diukur…" : st?.state === "error" ? "Analisis video acuan gagal" : "Belum ada breakdown"}</b>${st?.state === "error" ? esc(st.msg) + "<br>Unggah filenya di tab Aset atau lewat Antigravity." : "Cut, panjang shot, gerak, dan keyframe diukur dulu, lalu Antigravity membedah tiap shot."}<br><br><button class="btn sm" data-reload-clone>Muat ulang</button></div></div>`;
       }
       const wide = c.format.aspect === "16:9", ar = wide ? "16/9" : "9/16", tile = wide ? "minmax(0,1fr)" : "110px";
       const cols = (n) => wide ? `repeat(${n},minmax(0,1fr))` : `repeat(${n},110px) minmax(0,1fr)`;
@@ -2320,8 +2320,8 @@ async function viewEditor(slug, startTab) {
       const ap = c.approval, run = workingNow.find((w) => w.slug === slug && w.type === "clone-approved");
       const ready = !c.errors.length && c.look;
       const bar = ap.approved
-        ? `<div class="notice ok"><span><b>Breakdown disetujui</b> · ${new Date(ap.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}${run ? ` · Claude membuat key visual dan klip sejak ${hhmm(run.since)}` : ""}</span><span class="sp"><button class="btn sm" id="clUnapprove">Batalkan</button></span></div>`
-        : `<div class="notice"><span>${ap.stale ? "<b>Breakdown berubah setelah disetujui.</b> Setujui lagi sebelum generate." : ready ? `<b>Breakdown menunggu persetujuanmu.</b> Setelah disetujui, Claude membuat ${c.clips.length} key visual di Flow lalu ${c.clips.length} generate H3 (koin RunningHub), lalu merakitnya.` : "<b>Claude sedang menulis breakdown.</b> Tombol setujui aktif setelah semua shot punya analisis dan prompt."}</span><span class="sp"><button class="btn pri sm" id="clApprove" ${ready ? "" : "disabled"}>Setujui breakdown</button></span></div>`;
+        ? `<div class="notice ok"><span><b>Breakdown disetujui</b> · ${new Date(ap.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}${run ? ` · Antigravity membuat key visual dan klip sejak ${hhmm(run.since)}` : ""}</span><span class="sp"><button class="btn sm" id="clUnapprove">Batalkan</button></span></div>`
+        : `<div class="notice"><span>${ap.stale ? "<b>Breakdown berubah setelah disetujui.</b> Setujui lagi sebelum generate." : ready ? `<b>Breakdown menunggu persetujuanmu.</b> Setelah disetujui, Antigravity membuat ${c.clips.length} key visual di Flow lalu ${c.clips.length} generate H3 (koin RunningHub), lalu merakitnya.` : "<b>Antigravity sedang menulis breakdown.</b> Tombol setujui aktif setelah semua shot punya analisis dan prompt."}</span><span class="sp"><button class="btn pri sm" id="clApprove" ${ready ? "" : "disabled"}>Setujui breakdown</button></span></div>`;
       const issues = c.errors.slice(0, 12).map((e) => `<li class="e">✗ ${esc(e)}</li>`).join("") + (c.errors.length > 12 ? `<li class="e">… ${c.errors.length - 12} lagi</li>` : "") + c.warns.map((w) => `<li class="w">⚠ ${esc(w)}</li>`).join("");
       const A = c.analysis ?? {}, rf = c.reference;
       const total = c.shots.reduce((a, s) => a + s.seconds, 0);
@@ -2427,7 +2427,7 @@ async function viewEditor(slug, startTab) {
         const inp = $(id); if (!inp) continue;
         inp.onchange = async () => {
           for (const f of inp.files) await fetch(`/api/videos/${slug}/upload?kind=${k}&name=${encodeURIComponent(f.name)}`, { method: "PUT", body: f });
-          toast(k === "logos" ? "Logo tersimpan di assets/logos." : "Lagu tersimpan di assets/music. Minta Claude memasangnya."); await loadVideos(); viewEditor(slug, "aws");
+          toast(k === "logos" ? "Logo tersimpan di assets/logos." : "Lagu tersimpan di assets/music. Minta Antigravity memasangnya."); await loadVideos(); viewEditor(slug, "aws");
         };
       }
     }
@@ -2530,7 +2530,7 @@ async function viewEditor(slug, startTab) {
       b.disabled = true; b.textContent = "Mengirim…";
       const r = await fetch(`/api/videos/${slug}/ready`, { method: "POST" });
       if (!r.ok) { b.disabled = false; b.textContent = label; return alert((await r.json().catch(() => ({}))).error || "Gagal"); }
-      b.textContent = "Terkirim ke Claude";
+      b.textContent = "Terkirim ke Antigravity";
       showWorking(slug, r.status === 202);
     }));
     const dt = $("#drText"), ds = $("#drSave"), da = $("#drApprove");
@@ -2557,8 +2557,8 @@ async function viewEditor(slug, startTab) {
     };
     const pg = $("#prodGo");
     if (pg) pg.onclick = async () => {
-      if (isM ? v.musafo.production.done && !confirm("Suara dan key visual sudah ada. Jalankan production lagi? Claude akan membuat ulang yang belum cocok dengan naskah.")
-        : v.beats.length && !confirm("Suara dan beat sudah ada. Jalankan production lagi? Claude melanjutkan dari yang belum selesai dan memperbarui yang tidak cocok dengan naskah.")) return;
+      if (isM ? v.musafo.production.done && !confirm("Suara dan key visual sudah ada. Jalankan production lagi? Antigravity akan membuat ulang yang belum cocok dengan naskah.")
+        : v.beats.length && !confirm("Suara dan beat sudah ada. Jalankan production lagi? Antigravity melanjutkan dari yang belum selesai dan memperbarui yang tidak cocok dengan naskah.")) return;
       const here = document.querySelector("#tabs button.on")?.dataset.t || (isM ? "shot" : "naskah");
       pg.disabled = true; pg.textContent = "Memulai…";
       const r = await fetch(`/api/videos/${slug}/production`, { method: "POST" });
@@ -2843,7 +2843,7 @@ async function viewEditor(slug, startTab) {
       const vOf = (k) => st.variants.find((x) => x.kind === k);
       const ratioRows = st.ratios.map((k) => {
         const made = vOf(k.kind), mv = made && videos.find((x) => x.slug === made.slug);
-        const status = made ? '<small>' + esc(mv ? (mv.next === "Selesai" ? "selesai" : "Claude: " + mv.next.toLowerCase()) : "dibuat") + '</small><a class="btn sm" href="#/v/' + made.slug + '">Buka</a>' : "";
+        const status = made ? '<small>' + esc(mv ? (mv.next === "Selesai" ? "selesai" : "Antigravity: " + mv.next.toLowerCase()) : "dibuat") + '</small><a class="btn sm" href="#/v/' + made.slug + '">Buka</a>' : "";
         return '<div class="fmtrow"><label>' + (canEdit && !made ? '<input type="checkbox" data-ratio="' + k.kind + '">' : "") + esc(k.label) + "</label>" + status + "</div>";
       }).join("");
       const fileRows = st.kinds.map((k) => {
@@ -2872,7 +2872,7 @@ async function viewEditor(slug, startTab) {
         $("#fmtRatioGo").disabled = true;
         const j = await post({ ratios });
         if (!j) return;
-        toast((j.made.length > 1 ? j.made.length + " versi dibuat" : "Versi dibuat") + ": Claude membuat ulang gambar dan tata letaknya" + (j.errors.length ? " · " + j.errors.join(" ") : ""));
+        toast((j.made.length > 1 ? j.made.length + " versi dibuat" : "Versi dibuat") + ": Antigravity membuat ulang gambar dan tata letaknya" + (j.errors.length ? " · " + j.errors.join(" ") : ""));
         try { videos = await (await fetch("/api/videos")).json(); } catch {}
         draw(j);
       };
@@ -2979,7 +2979,7 @@ async function viewEditor(slug, startTab) {
     box.className = "modal";
     box.innerHTML = `<div class="panel pad" style="max-width:560px;width:100%"><div class="eyebrow">Preset gaya untuk video ini</div><div class="presets" style="margin:12px 0">${presets.map((p) => presetCard(p, p.id === v.preset)).join("")}</div>
       <div class="eyebrow" style="margin-top:4px">Color tone</div><div id="toneBox" style="margin:10px 0 12px"></div>
-      <p class="muted" style="font-size:12.5px">Warna, font, dan caption langsung ikut. Scene yang sudah didesain tetap memakai tata letaknya; minta Claude mendesain ulang untuk gaya penuh.</p>
+      <p class="muted" style="font-size:12.5px">Warna, font, dan caption langsung ikut. Scene yang sudah didesain tetap memakai tata letaknya; minta Antigravity mendesain ulang untuk gaya penuh.</p>
       <div class="meta-row" style="justify-content:flex-end;margin-top:12px"><button class="btn" data-x>Batal</button><button class="btn pri" data-ok>Pakai preset</button></div></div>`;
     document.body.appendChild(box);
     const drawTones = () => { const p = presets.find((x) => x.id === box.querySelector("input[name=preset]:checked")?.value) ?? presets[0]; box.querySelector("#toneBox").innerHTML = toneRow(p, p.id === v.preset ? v.accent : null); };
@@ -3201,7 +3201,7 @@ async function viewStories(chSel, bookSel, host = $("#main")) {
       b.disabled = true;
       const r = await fetch("/api/stories/use", { method: "POST", body: JSON.stringify({ book: b.dataset.book, id: b.dataset.use }) });
       const j = await r.json(); if (!r.ok) { b.disabled = false; return toast(j.error); }
-      await loadVideos(); location.hash = `#/v/${j.slug}`; toast(`Proyek ${STORY[ch.type]?.label ?? "Musafo"} dibuat. Claude menyusun storyline-nya.`);
+      await loadVideos(); location.hash = `#/v/${j.slug}`; toast(`Proyek ${STORY[ch.type]?.label ?? "Musafo"} dibuat. Antigravity menyusun storyline-nya.`);
     }));
   };
   document.querySelectorAll("input[name=sf], input[name=so]").forEach((x) => (x.onchange = () => { page = 0; render(); }));
@@ -3233,7 +3233,7 @@ async function viewLibrary(place, host = $("#main")) {
     $("#lib").innerHTML = hit.length ? hit.map((c) => `
       <div class="clip"><video src="/files/library/${c.file}" muted loop preload="metadata" onmouseenter="this.play()" onmouseleave="this.pause()"></video>
       <div><b>${esc(c.tags.slice(0, 3).join(" · ") || c.id)}</b><br>${c.duration}s · ${esc(c.source)} · dipakai ${c.usedIn.length}×</div></div>`).join("")
-      : `<div class="empty" style="grid-column:1/-1"><b>${clips.length ? "Tidak ada yang cocok" : "Library masih kosong"}</b>${clips.length ? "Coba kata kunci lain." : "Footage yang dibuat Claude di Google Flow otomatis masuk ke sini."}</div>`;
+      : `<div class="empty" style="grid-column:1/-1"><b>${clips.length ? "Tidak ada yang cocok" : "Library masih kosong"}</b>${clips.length ? "Coba kata kunci lain." : "Footage yang dibuat Antigravity di Google Flow otomatis masuk ke sini."}</div>`;
   };
   $("#q").oninput = render; render();
 }
@@ -3373,13 +3373,13 @@ function chatRender(st) {
   $("#chatFab").classList.toggle("busy", chat.busy);
   $("#chatStop").hidden = !chat.busy;
   const since = st.startedAt ? Math.round((Date.now() - Date.parse(st.startedAt)) / 1000) : 0;
-  $("#chatWork").textContent = st.running ? `Claude sedang bekerja… ${since}s${st.queued.length ? ` · ${st.queued.length} pesan antre` : ""}` : "";
+  $("#chatWork").textContent = st.running ? `Antigravity sedang bekerja… ${since}s${st.queued.length ? ` · ${st.queued.length} pesan antre` : ""}` : "";
   const key = st.messages.length + "|" + (st.messages.at(-1)?.at ?? "");
   if (key === chat.last) return;
   chat.last = key;
   const log = $("#chatLog"), atEnd = log.scrollHeight - log.scrollTop - log.clientHeight < 80;
   log.innerHTML = st.messages.length ? st.messages.map((m) => `<div class="chat-m ${m.role}">${m.role === "assistant" ? chatMd(m.text) : esc(m.text)}</div>`).join("")
-    : `<div class="chat-empty"><b>Ngobrol dengan Claude dari sini.</b><br>Claude jalan di laptop, di folder TERTORTOR LITE, dan membaca CLAUDE.md yang sama. Kalau kamu sedang membuka satu video, Claude tahu video yang mana.<br><br>Edit file dan perintah npm/node boleh. Commit, push, kirim ke Tebar, dan publish tetap minta izinmu dulu.</div>`;
+    : `<div class="chat-empty"><b>Ngobrol dengan Antigravity dari sini.</b><br>Antigravity jalan di laptop, di folder TERTORTOR LITE, dan membaca panduan proyek yang sama. Kalau kamu sedang membuka satu video, Claude tahu video yang mana.<br><br>Edit file dan perintah npm/node boleh. Commit, push, kirim ke Tebar, dan publish tetap minta izinmu dulu.</div>`;
   if (atEnd || st.running) log.scrollTop = log.scrollHeight;
 }
 async function chatPoll() {

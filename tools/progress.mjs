@@ -20,38 +20,38 @@ const typeOf = (d) => (existsSync(join(d, "meta.json")) ? readJSON(join(d, "meta
 const isOneTake = (d) => { const id = existsSync(join(d, "meta.json")) ? readJSON(join(d, "meta.json")).preset : null; const f = id && join(d, "..", "..", "presets", id, "preset.json"); return !!(f && existsSync(f) && readJSON(f).oneTake); };
 const isStory = (d) => ["musafo", "berakitkehulu", "bumidipijak", "miracleofhajj"].includes(typeOf(d));
 
-// event type → what Claude does next, default estimate in minutes, the file that marks it done, and what the user does then
+// event type → what Antigravity does next, default estimate in minutes, the file that marks it done, and what the user does then
 export const PROCESSES = {
-  "musafo-new": { label: "Claude menulis draft cerita", eta: [3, 8], out: (d) => (existsSync(join(d, "assets", "reference", "bahan.md")) && !["berakitkehulu", "bumidipijak", "miracleofhajj"].includes(typeOf(d)) ? "draft.md" : "storyline.md"), next: "draft siap kamu edit dan setujui" },
+  "musafo-new": { label: "Antigravity menulis draft cerita", eta: [3, 8], out: (d) => (existsSync(join(d, "assets", "reference", "bahan.md")) && !["berakitkehulu", "bumidipijak", "miracleofhajj"].includes(typeOf(d)) ? "draft.md" : "storyline.md"), next: "draft siap kamu edit dan setujui" },
   // Berakit ke Hulu (user 2026-11-07): no draft step; the series storyline comes straight from the source and the user edits it
-  "berakitkehulu-new": { label: "Claude menulis storyline (series bila lebih dari 2 menit)", eta: [4, 10], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
-  "bumidipijak-new": { label: "Claude menulis storyline (series bila lebih dari 2 menit)", eta: [4, 10], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
+  "berakitkehulu-new": { label: "Antigravity menulis storyline (series bila lebih dari 2 menit)", eta: [4, 10], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
+  "bumidipijak-new": { label: "Antigravity menulis storyline (series bila lebih dari 2 menit)", eta: [4, 10], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
   // Miracle of Hajj (user 2026-11-08): a short anecdote → storyline with the cause looked for and the verse, one video
-  "miracleofhajj-new": { label: "Claude menyusun storyline: sebab yang dicari + dalil Al-Qur'an", eta: [3, 8], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
+  "miracleofhajj-new": { label: "Antigravity menyusun storyline: sebab yang dicari + dalil Al-Qur'an", eta: [3, 8], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
   // photos of the main character added to a project later (tab Tokoh)
-  characters: { label: "Claude membuat character sheet per usia dari foto tokoh", eta: [5, 15], out: () => "musafo.json", next: "character sheet siap dilihat di tab Tokoh" },
+  characters: { label: "Antigravity membuat character sheet per usia dari foto tokoh", eta: [5, 15], out: () => "musafo.json", next: "character sheet siap dilihat di tab Tokoh" },
   // Ubah format (user 2026-11-13): a ticked ratio → its own project; pictures, clips and layout are remade, then rendered
-  "format-new": { label: "Claude membuat ulang gambar, klip, dan tata letak untuk rasio baru, lalu merender", eta: [30, 90], done: (d, at) => { const s = d.split(/[\\/]/).pop(), f = join(d, "out", `${s}.mp4`); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; }, next: "versi rasio baru siap ditonton" },
-  "draft-approved": { label: "Claude menulis storyline dari draftmu", eta: [3, 6], out: () => "storyline.md", next: "storyline siap disetujui" },
-  "storyline-approved": { label: "Claude menulis naskah per shot", eta: [5, 12], out: () => "script.md", next: "naskah siap disetujui" },
-  "docucine-new": { label: "Claude menulis naskah dari sumber dan idemu", eta: [4, 10], out: () => "script.md", next: "naskah siap kamu edit dan setujui" },
-  "beats-approved": { label: "Claude membangun dunia, mengecek still dan gerak kamera, lalu thumbnail", eta: [20, 45], out: () => "compositions/world.html", next: "dunia siap; setujui thumbnail lalu render" },
-  // Video Explainer baru (user 2026-11-22: progres sesudah brief): Studio memanggil /ready → Claude melengkapi brief, lalu
-  // naskah; dengan video referensi Claude berhenti di 2-3 konsep (concepts.json) dan user memilih dulu (event concept)
+  "format-new": { label: "Antigravity membuat ulang gambar, klip, dan tata letak untuk rasio baru, lalu merender", eta: [30, 90], done: (d, at) => { const s = d.split(/[\\/]/).pop(), f = join(d, "out", `${s}.mp4`); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; }, next: "versi rasio baru siap ditonton" },
+  "draft-approved": { label: "Antigravity menulis storyline dari draftmu", eta: [3, 6], out: () => "storyline.md", next: "storyline siap disetujui" },
+  "storyline-approved": { label: "Antigravity menulis naskah per shot", eta: [5, 12], out: () => "script.md", next: "naskah siap disetujui" },
+  "docucine-new": { label: "Antigravity menulis naskah dari sumber dan idemu", eta: [4, 10], out: () => "script.md", next: "naskah siap kamu edit dan setujui" },
+  "beats-approved": { label: "Antigravity membangun dunia, mengecek still dan gerak kamera, lalu thumbnail", eta: [20, 45], out: () => "compositions/world.html", next: "dunia siap; setujui thumbnail lalu render" },
+  // Video Explainer baru (user 2026-11-22: progres sesudah brief): Studio memanggil /ready → Antigravity melengkapi brief, lalu
+  // naskah; dengan video referensi Antigravity berhenti di 2-3 konsep (concepts.json) dan user memilih dulu (event concept)
   "explainer-new": {
-    label: (d) => (explainerWithRef(d) ? "Claude membaca brief dan video referensi, lalu menyusun 2-3 konsep" : "Claude melengkapi brief dan menulis naskah"),
+    label: (d) => (explainerWithRef(d) ? "Antigravity membaca brief dan video referensi, lalu menyusun 2-3 konsep" : "Antigravity melengkapi brief dan menulis naskah"),
     eta: (d) => (explainerWithRef(d) ? [8, 20] : [5, 12]),
     done: (d, at) => { const f = explainerWithRef(d) ? "concepts.json" : "script.md"; const t = mtime(d, f); return t > at && (f !== "script.md" || realScript(d)) ? t : 0; },
     steps: (d, at) => explainerNewSteps(d, at),
     next: (d) => (explainerWithRef(d) ? "konsep siap; pilih satu di tab Konsep" : "naskah siap kamu edit dan setujui"),
   },
-  // done = a real script written after the concepts were offered. Not "after the click": Claude (or a pick made in chat) can
+  // done = a real script written after the concepts were offered. Not "after the click": Antigravity (or a pick made in chat) can
   // write the script seconds before Studio logs the click (user 2026-11-22: naskah selesai tapi Studio masih 50 %)
-  concept: { label: "Claude menulis naskah dari konsep pilihanmu", eta: [5, 10], done: (d, at) => conceptScriptAt(d, at), steps: (d, at) => [{ label: "Konsep dipilih", done: 1 }, { label: "Naskah", done: conceptScriptAt(d, at) ? 1 : 0 }], next: "naskah siap disetujui" },
+  concept: { label: "Antigravity menulis naskah dari konsep pilihanmu", eta: [5, 10], done: (d, at) => conceptScriptAt(d, at), steps: (d, at) => [{ label: "Konsep dipilih", done: 1 }, { label: "Naskah", done: conceptScriptAt(d, at) ? 1 : 0 }], next: "naskah siap disetujui" },
   "script-approved": {
     // Storytelling (user 2026-11-07): approving the script starts nothing; voice and images wait for the Production button
     skip: (d) => isStory(d),
-    label: (d) => (isStory(d) ? "Claude membuat suara (Gemini TTS)" : isOneTake(d) ? "Claude membuat suara (Gemini TTS), lalu beat table" : "Claude menulis prompt Google Flow"),
+    label: (d) => (isStory(d) ? "Antigravity membuat suara (Gemini TTS)" : isOneTake(d) ? "Antigravity membuat suara (Gemini TTS), lalu beat table" : "Antigravity menulis prompt Google Flow"),
     eta: (d) => (isStory(d) ? [10, 20] : isOneTake(d) ? [12, 25] : [5, 10]),
     out: (d) => (isStory(d) ? "voice/words.json" : isOneTake(d) ? "build/timeline.json" : "flow.json"),
     // measurable steps (user 2026-11-22: "berhenti di 95 %" while nothing had been written)
@@ -63,12 +63,12 @@ export const PROCESSES = {
   // done(d, at) → end time in ms (0 = not yet), for processes with more than one output file
   // Video Explainer (user 2026-11-20): tombol Production di tab Naskah → suara, beat, scene, gerbang check; render menunggu thumbnail
   // done = the gate passed after the click (tools/check.mjs writes build/check.json), not the first timeline.json
-  "explainer-production": { label: "Claude membuat suara, beat, dan scene sampai lolos check", eta: [20, 50], done: (d, at) => (mtime(d, "build/check.json") > at ? mtime(d, "build/check.json") : 0), steps: (d) => explainerSteps(d), next: "scene siap dicek di preview HyperFrames; setujui thumbnail lalu render" },
-  production: { label: "Claude membuat suara (Gemini TTS), lalu key visual per shot", eta: [20, 45], done: (d, at) => productionDone(d, at), steps: (d) => storySteps(d), next: "suara dan semua key visual sudah jadi" },
+  "explainer-production": { label: "Antigravity membuat suara, beat, dan scene sampai lolos check", eta: [20, 50], done: (d, at) => (mtime(d, "build/check.json") > at ? mtime(d, "build/check.json") : 0), steps: (d) => explainerSteps(d), next: "scene siap dicek di preview HyperFrames; setujui thumbnail lalu render" },
+  production: { label: "Antigravity membuat suara (Gemini TTS), lalu key visual per shot", eta: [20, 45], done: (d, at) => productionDone(d, at), steps: (d) => storySteps(d), next: "suara dan semua key visual sudah jadi" },
   // App Demo (product appdemo) writes demo.json, builds and renders: done when an MP4 is newer than the click
-  "ad-new": { label: (d) => (existsSync(join(d, "demo.json")) ? "Claude menyusun storyboard demo aplikasi, membangun, lalu merender" : "Claude menyusun iklan"), eta: (d) => (existsSync(join(d, "demo.json")) ? [8, 20] : [10, 25]), done: (d, at) => { if (!existsSync(join(d, "demo.json"))) { const f = join(d, "ad.json"); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; } const mp4 = existsSync(join(d, "out")) ? readdirSync(join(d, "out")).filter((x) => x.endsWith(".mp4")).map((x) => statSync(join(d, "out", x)).mtimeMs).sort((a, b) => b - a)[0] ?? 0 : 0; return mp4 > at ? mp4 : 0; }, next: (d) => (existsSync(join(d, "demo.json")) ? "demo aplikasi siap ditonton" : "iklan siap dicek") },
+  "ad-new": { label: (d) => (existsSync(join(d, "demo.json")) ? "Antigravity menyusun storyboard demo aplikasi, membangun, lalu merender" : "Antigravity menyusun iklan"), eta: (d) => (existsSync(join(d, "demo.json")) ? [8, 20] : [10, 25]), done: (d, at) => { if (!existsSync(join(d, "demo.json"))) { const f = join(d, "ad.json"); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; } const mp4 = existsSync(join(d, "out")) ? readdirSync(join(d, "out")).filter((x) => x.endsWith(".mp4")).map((x) => statSync(join(d, "out", x)).mtimeMs).sort((a, b) => b - a)[0] ?? 0 : 0; return mp4 > at ? mp4 : 0; }, next: (d) => (existsSync(join(d, "demo.json")) ? "demo aplikasi siap ditonton" : "iklan siap dicek") },
   // AWS (Cinematic, user 2026-11-17) answers with aws.json (data + scenes) and a first build: the animatic with slates and TBC chips
-  "cinematic-new": { label: "Claude menyusun data, adegan, dan animatic rekap", eta: [5, 15], done: (d, at) => { if (!isAws(d)) return 0; const f = join(d, "build", "timeline.json"); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; }, next: "animatic dan daftar footage siap di tab AWS" },
+  "cinematic-new": { label: "Antigravity menyusun data, adegan, dan animatic rekap", eta: [5, 15], done: (d, at) => { if (!isAws(d)) return 0; const f = join(d, "build", "timeline.json"); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; }, next: "animatic dan daftar footage siap di tab AWS" },
 };
 
 // ---------- measured steps for every process (user 2026-11-22: "cek di semua preset dan channel") ----------
@@ -114,7 +114,7 @@ PROCESSES["cinematic-new"].steps = (d, at) => [
 ];
 const productOf = (d) => (existsSync(join(d, "meta.json")) ? readJSON(join(d, "meta.json")).product : null) ?? (existsSync(join(d, "demo.json")) ? "appdemo" : "flashcut");
 Object.assign(PROCESSES["ad-new"], {
-  label: (d) => ({ appdemo: "Claude menyusun storyboard demo aplikasi, membangun, lalu merender", bri: "Claude menggerakkan key visual, menyusun iklan BRI, lalu merender" }[productOf(d)] ?? "Claude menyusun iklan, lalu merender"),
+  label: (d) => ({ appdemo: "Antigravity menyusun storyboard demo aplikasi, membangun, lalu merender", bri: "Antigravity menggerakkan key visual, menyusun iklan BRI, lalu merender" }[productOf(d)] ?? "Antigravity menyusun iklan, lalu merender"),
   eta: (d) => ({ appdemo: [8, 20], bri: [20, 45] }[productOf(d)] ?? [10, 25]),
   steps: (d, at) => {
     const render = { label: "Render MP4", done: mp4At(d) > at ? 1 : 0 };
@@ -202,8 +202,8 @@ function progressOf(type, d, at, eta) {
       return { pct: Math.min(99, Math.round((100 * sum) / steps.length)), step: now?.label ?? steps.at(-1).label, steps: steps.map((s) => ({ label: s.label, done: s.done >= 1 })), estimated: false };
     }
   }
-  // time-based estimate only once Claude has visibly started: a click nobody picked up must not crawl to 95 %
-  if (!activitySince(d, at)) return { pct: 0, step: claudeWaiting() ? "Claude mulai sebentar lagi" : "Menunggu Claude (ketik “lanjut” di Claude Code)", steps: [], estimated: true, idle: true };
+  // time-based estimate only once Antigravity has visibly started: a click nobody picked up must not crawl to 95 %
+  if (!activitySince(d, at)) return { pct: 0, step: claudeWaiting() ? "Antigravity mulai sebentar lagi" : "Menunggu Antigravity (menunggu giliran / klik di Studio)", steps: [], estimated: true, idle: true };
   const mid = ((eta[0] + eta[1]) / 2) * 60e3;
   return { pct: Math.min(90, Math.round((100 * (Date.now() - at)) / mid)), step: null, steps: [], estimated: true };
 }
@@ -263,6 +263,7 @@ function estimate(type, d) {
 }
 
 export const claudeWaiting = () => existsSync(BEAT) && Date.now() - statSync(BEAT).mtimeMs < 10e3;
+export const antigravityWaiting = claudeWaiting;
 
 // running processes: the newest process event of each project that has no newer output yet (and is under 6 hours old)
 export function working() {

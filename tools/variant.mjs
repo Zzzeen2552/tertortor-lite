@@ -37,7 +37,7 @@ export function createVariant(slug, kind) {
 
   writeFileSync(join(dst, "meta.json"), JSON.stringify({ ...meta, id: out, name: `${meta.name ?? slug} (${KIND_LABEL[kind]})`, format: fmt, variantOf: slug, variantKind: kind }, null, 2));
   const req = readJSON(join(dst, "request.json"), null);
-  if (req) writeFileSync(join(dst, "request.json"), JSON.stringify({ ...req, title: `${req.title ?? meta.name ?? slug} (${KIND_LABEL[kind]})`, variantOf: slug, created: new Date().toISOString(), status: `menunggu Claude: ubah format ke ${KIND_LABEL[kind]}` }, null, 2));
+  if (req) writeFileSync(join(dst, "request.json"), JSON.stringify({ ...req, title: `${req.title ?? meta.name ?? slug} (${KIND_LABEL[kind]})`, variantOf: slug, created: new Date().toISOString(), status: `menunggu Antigravity: ubah format ke ${KIND_LABEL[kind]}` }, null, 2));
 
   // frame size in the HTML: index.html (page, root, every host) and the root of every scene; the layout inside the
   // scenes is Claude's job (event format-new), these numbers only make the canvas the right size

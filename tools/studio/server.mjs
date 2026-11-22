@@ -368,13 +368,13 @@ function createVideo({ title, idea, duration, voice = "Gemini TTS", voiceSpeaker
   if (r.status !== 0) throw new Error(r.stderr || r.stdout);
   const d = join(VIDEOS, slug);
   for (const sub of ["assets/reference", "assets/keyvisuals"]) mkdirSync(join(d, sub), { recursive: true });
-  const req = { title, idea, duration, voice: String(voiceSpeaker || "").startsWith("clone:") ? voiceLabel(voiceSpeaker) : voice, ...(voiceSpeaker ? { voiceSpeaker } : {}), refLink: refLink || "", created: new Date().toISOString(), status: "menunggu Claude" };
+  const req = { title, idea, duration, voice: String(voiceSpeaker || "").startsWith("clone:") ? voiceLabel(voiceSpeaker) : voice, ...(voiceSpeaker ? { voiceSpeaker } : {}), refLink: refLink || "", created: new Date().toISOString(), status: "menunggu Antigravity" };
   writeFileSync(join(d, "request.json"), JSON.stringify(req, null, 2));
   writeFileSync(
     join(d, "brief.md"),
     `# Brief: ${title}
 
-> Dibuat dari TERTORTOR. Claude: lengkapi bagian kosong dari ide di bawah, lalu ikuti /video-vertikal.
+> Dibuat dari TERTORTOR. Antigravity: lengkapi bagian kosong dari ide di bawah, lalu ikuti panduan /video-vertikal.
 
 ## Ide / konsep / storyline (dari user, jangan diubah)
 
@@ -383,10 +383,10 @@ ${idea.trim()}
 ## Masukan
 - **Target durasi:** ${duration} detik (maks 179)
 - **Suara:** ${voice}
-- **Video referensi:** ${refLink ? refLink + " (link)" : "lihat assets/reference/"} — gaya, tempo, dan cara buka hook yang ditiru; bukan isinya. Data terukur di assets/reference/*.ref.md (npm run ref); Claude menawarkan 2-3 konsep (concepts.json) dan user memilih satu sebelum naskah.
+- **Video referensi:** ${refLink ? refLink + " (link)" : "lihat assets/reference/"} — gaya, tempo, dan cara buka hook yang ditiru; bukan isinya. Data terukur di assets/reference/*.ref.md (npm run ref); Antigravity menawarkan 2-3 konsep (concepts.json) dan user memilih satu sebelum naskah.
 - **Key visual:** assets/keyvisuals/ — wajib muncul / jadi first frame footage / acuan look.
 
-## Diisi Claude
+## Diisi Antigravity
 - **Penonton:**
 - **Masalah (hook):**
 - **Janji:**
@@ -572,7 +572,7 @@ createServer(async (req, res) => {
       return send(res, 405, { error: "method" });
     }
     // what Claude is doing after the user's clicks, with estimates, and whether a Claude session is listening at all
-    if (p === "/api/working" && req.method === "GET") return send(res, 200, { claude: claudeWaiting(), items: working() });
+    if (p === "/api/working" && req.method === "GET") return send(res, 200, { claude: claudeWaiting(), antigravity: claudeWaiting(), items: working() });
     if (p === "/api/videos" && req.method === "GET") {
       const slugs = existsSync(VIDEOS) ? readdirSync(VIDEOS).filter((s) => !s.startsWith(".") && statSync(join(VIDEOS, s)).isDirectory()) : [];
       // buffered: networks that got a post for this video (tebar.json, plus buffer.json from before Buffer was removed), a badge on the card
