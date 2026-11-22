@@ -2000,10 +2000,10 @@ async function viewEditor(slug, startTab) {
     const run = workingNow.find((w) => w.slug === slug && (w.type === "production" || w.type === "explainer-production"));
     if (isM) {
       const pr = v.musafo.production;
-      return `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : "<br>Setujui storyline dan naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${pr.ready ? 1 : ""}" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
+      return `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : "<br>Setujui storyline dan naskah dulu."}${v.voiceKey ? `<br><span class="warn" data-voicekey="${esc(v.voiceKey.key)}">⚠ ${esc(v.voiceKey.msg)}</span>` : ""}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${pr.ready ? 1 : ""}" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
     }
     const ready = v.approval.approved && v.scriptState !== "old", voice = !!v.voice?.seconds && !v.voice.draft, done = voice && v.beats.length > 0;
-    return `<div class="notice ${done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${voice ? "✓" : "–"} · beat ${v.beats.length || "–"}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}<br><small class="muted">Antigravity membuat suara, beat, dan scene sampai lolos check. Render menunggu thumbnail kamu setujui.</small>${ready ? "" : "<br>Setujui naskah dulu."}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${ready ? 1 : ""}" ${!ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : done ? "Production lagi" : "Production"}</button></span></div>`;
+    return `<div class="notice ${done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${voice ? "✓" : "–"} · beat ${v.beats.length || "–"}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}<br><small class="muted">Antigravity membuat suara, beat, dan scene sampai lolos check. Render menunggu thumbnail kamu setujui.</small>${ready ? "" : "<br>Setujui naskah dulu."}${v.voiceKey ? `<br><span class="warn" data-voicekey="${esc(v.voiceKey.key)}">⚠ ${esc(v.voiceKey.msg)}</span>` : ""}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${ready ? 1 : ""}" ${!ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : done ? "Production lagi" : "Production"}</button></span></div>`;
   };
   const body = {
     beat: () => v.oneTake ? beatTableView(v) : v.kvBeats ? `
@@ -2562,7 +2562,14 @@ async function viewEditor(slug, startTab) {
       const here = document.querySelector("#tabs button.on")?.dataset.t || (isM ? "shot" : "naskah");
       pg.disabled = true; pg.textContent = "Memulai…";
       const r = await fetch(`/api/videos/${slug}/production`, { method: "POST" });
-      if (!r.ok) { pg.disabled = false; pg.textContent = "Production"; return alert((await r.json()).error); }
+      if (!r.ok) {
+        pg.disabled = false; pg.textContent = "Production";
+        const j = await r.json().catch(() => ({}));
+        alert(j.error || "Production gagal dimulai.");
+        // missing Gemini key: open the place where it is entered
+        if (j.need === "GEMINI_API_KEY") { const t = document.querySelector('[data-ct="gemini"]'); if (t) { t.click(); t.scrollIntoView({ behavior: "smooth", block: "center" }); } }
+        return;
+      }
       await loadVideos(); await viewEditor(slug, here); showWorking(slug, r.status === 202);
     };
     const cap = $("#clApprove"), cun = $("#clUnapprove");
@@ -3044,6 +3051,7 @@ async function geminiPanel(host) {
       const r = await fetch("/api/settings/gemini", opts).catch(() => null);
       const j = r ? await r.json().catch(() => ({})) : { error: "Server Studio tidak menjawab." };
       if (!r?.ok) { btn.disabled = false; btn.textContent = old; return draw(st, { ok: false, text: j.error || "Gagal." }); }
+      if (j.set) document.querySelectorAll('[data-voicekey="GEMINI_API_KEY"]').forEach((x) => x.remove());
       draw(j, "ok" in j ? { ok: j.ok, text: j.ok ? "Kunci diterima Google dan siap dipakai." : `Tersimpan, tapi tes gagal: ${j.error}` } : { ok: true, text: j.set ? "" : "API key dihapus dari .env." });
     };
     $("#gemSave", host).onclick = () => {

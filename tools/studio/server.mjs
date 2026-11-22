@@ -454,6 +454,18 @@ const emit = (type, slug, data = {}) => appendFileSync(EVENTS, JSON.stringify({ 
 // a short sample of every Gemini speaker (tools/voice-samples.mjs → library/voices/<Name>.mp3), played before picking
 // cloned voices (tools/voice-clone.mjs, MOTION user 2026-11-17): picked like a speaker, value "clone:<id>"
 const cloneList = () => voiceClones().map((c) => ({ id: c.id, name: c.name, speaker: `clone:${c.id}`, seconds: c.seconds, createdAt: c.createdAt, sample: existsSync(cloneSampleFile(c.id)) ? `/files/library/voices/clone-${c.id}.mp3` : null }));
+// Production starts with the voice: Gemini TTS needs GEMINI_API_KEY, a clone/ElevenLabs voice ELEVENLABS_API_KEY.
+// Without it the click reached Antigravity and nothing happened, with no message (user 2026-11-22). null = nothing missing.
+function voiceKeyProblem(d) {
+  if (existsSync(join(d, "voice", "words.json"))) return null; // the voice is already made
+  const r = existsSync(join(d, "request.json")) ? JSON.parse(readFileSync(join(d, "request.json"), "utf8")) : {};
+  const v = String(r.voice ?? ""), sp = String(r.voiceSpeaker ?? "");
+  if (/rekam sendiri|nanti/i.test(v)) return null;
+  if (sp.startsWith("clone:") || /elevenlabs/i.test(v)) {
+    return process.env.ELEVENLABS_API_KEY ? null : { key: "ELEVENLABS_API_KEY", msg: "Kunci API ElevenLabs belum diisi (ELEVENLABS_API_KEY di .env), jadi suara ElevenLabs/clone belum bisa dibuat. Isi kuncinya, lalu klik Production lagi." };
+  }
+  return process.env.GEMINI_API_KEY ? null : { key: "GEMINI_API_KEY", msg: "Kunci API Gemini belum diisi. Production dimulai dari suara (Gemini TTS). Buka kartu Suara → tab API Gemini, tempel kuncimu dari Google AI Studio, lalu klik Production lagi." };
+}
 const voiceLabel = (speaker) => (String(speaker || "").startsWith("clone:") ? "Clone suara (ElevenLabs)" : "Gemini TTS");
 const withSamples = (voices = []) => voices.map((v) => ({ ...v, sample: existsSync(join(ROOT, "library", "voices", `${v.name}.mp3`)) ? `/files/library/voices/${encodeURIComponent(v.name)}.mp3` : null }));
 function runStories(args) {
@@ -1168,10 +1180,15 @@ createServer(async (req, res) => {
         if (isAd(d) || isAws(d) || isOneTake(d)) return send(res, 400, { error: "Production satu tombol hanya untuk Video Explainer dan Storytelling." });
         const a = approval(d);
         if (!a.approved) return send(res, 400, { error: a.stale ? "Naskah berubah setelah disetujui. Setujui lagi dulu." : "Setujui naskah dulu." });
+        const k = voiceKeyProblem(d);
+        if (k) return send(res, 400, { error: k.msg, need: k.key });
         emit("explainer-production", prod[1]);
         return send(res, 200, { ok: true });
       }
       try {
+        // approvals first (startProduction says what is missing), then the voice key
+        const k = productionState(d).ready ? voiceKeyProblem(d) : null;
+        if (k) return send(res, 400, { error: k.msg, need: k.key });
         const st = startProduction(d);
         emit("production", prod[1]);
         return send(res, 200, st);
@@ -1471,6 +1488,7 @@ createServer(async (req, res) => {
         screens: ls("assets/screens").filter((f) => /\.(png|jpe?g|webp)$/i.test(f)).map((f) => url("assets/screens", f)),
         footage: ls("assets/footage").filter((f) => /\.(mp4|mov|webm)$/i.test(f)).map((f) => url("assets/footage", f)),
         approval: approval(d),
+        voiceKey: voiceKeyProblem(d),
         flowCheck: (() => { const f = checkFlow(d); return { errors: f.errors, warns: f.warns, total: f.total ?? 0, shots: f.flow?.shots ?? [], model: f.flow?.model ?? "" }; })(),
         musafo: isMusafo(d) ? (() => {
           const r = checkMusafo(d);
