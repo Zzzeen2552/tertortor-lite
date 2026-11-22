@@ -27,6 +27,7 @@ export const MOODS = {
   musafo: { key: "D", mode: "dorian", bpm: 64, prog: [1, 7, 6, 7], vol: 0.45 },
   bumidipijak: { key: "E", mode: "minor", bpm: 60, prog: [1, 6, 4, 5], vol: 0.45 },
   miracleofhajj: { key: "F", mode: "major", bpm: 62, prog: [1, 5, 6, 4], vol: 0.45 },
+  cinestory: { key: "C", mode: "aeolian", bpm: 84, prog: [1, 6, 3, 7], vol: 0.32, duck: 0.4 },
 };
 const hz = (m) => 440 * 2 ** ((m - 69) / 12);
 const mulberry = (a) => () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
@@ -122,9 +123,13 @@ function writeWav(out, { L, R, N, norm }) {
   writeFileSync(out, buf);
 }
 
-export function storyMusic(slug, { off = false, moodId, vol } = {}) {
+export function storyMusic(slug, { off = false, moodId, vol, track } = {}) {
   const dir = videoDir(slug), mj = join(dir, "music.json");
   if (off) { writeJSON(mj, { mode: "off" }); return { off: true }; }
+  // a song the user uploaded (Studio tab Musik, user 2026-11-22) stays the music on every rebuild until a mood is asked for
+  const prev = existsSync(mj) ? readJSON(mj) : {};
+  const song = track ?? (!moodId && prev.source === "upload" && prev.file && existsSync(join(dir, prev.file)) ? prev.file : null);
+  if (song) return fitTrack(dir, slug, song, vol ?? prev.volume);
   const meta = readJSON(join(dir, "meta.json"));
   const tl = join(dir, "build", "timeline.json");
   if (!existsSync(tl) || !existsSync(join(dir, "voice", "words.json"))) die("Belum ada suara + build (voice/words.json, build/timeline.json).");
@@ -148,10 +153,24 @@ export function storyMusic(slug, { off = false, moodId, vol } = {}) {
   return { total, cuts: cuts.length, mood: id, cliff, file: "assets/music.wav", seconds: probeDuration(join(dir, "assets", "music.wav")) };
 }
 
+// the user's song fitted to the video: cut at its length, faded in/out, 44.1 kHz stereo wav; ducking stays with the volume
+function fitTrack(dir, slug, rel, vol) {
+  const tl = join(dir, "build", "timeline.json");
+  if (!existsSync(tl)) die("Belum ada build (build/timeline.json): lagu dipasang setelah suara dan shot.");
+  const total = readJSON(tl).duration, src = join(dir, rel), out = join(dir, "assets", "music.wav");
+  const r = spawnSync("ffmpeg", ["-v", "error", "-y", "-i", src, "-t", String(total), "-af", `afade=t=in:d=0.8,afade=t=out:st=${Math.max(0, total - 2).toFixed(2)}:d=2`, "-ar", String(SR), "-ac", "2", out], { encoding: "utf8" });
+  if (r.status !== 0) die(`lagu tidak bisa dipakai: ${(r.stderr || "").trim().slice(-300)}`);
+  writeJSON(join(dir, "music.json"), { mode: "story", source: "upload", file: rel, volume: vol ?? 0.3, at: new Date().toISOString() });
+  const s = join(dir, "sources.txt"), line = `assets/music.wav\tlagu dari user (${rel}); lisensi menjadi tanggung jawab pemilik proyek`;
+  const cur = existsSync(s) ? readFileSync(s, "utf8").split("\n").filter((l) => !l.startsWith("assets/music.wav\t")).join("\n") : "";
+  writeFileSync(s, cur.replace(/\s*$/, "\n") + line + "\n");
+  return { total, cuts: 0, mood: "upload", cliff: false, file: "assets/music.wav", seconds: probeDuration(out) };
+}
+
 if (process.argv[1]?.endsWith("story-music.mjs")) {
   const [slug] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
   const opt = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : undefined; };
-  if (!slug) die("Usage: node tools/story-music.mjs <slug> [--off] [--mood berakitkehulu|musafo|bumidipijak|miracleofhajj|story] [--vol 0.5]");
-  const r = storyMusic(slug, { off: process.argv.includes("--off"), moodId: opt("--mood"), vol: opt("--vol") ? +opt("--vol") : undefined });
+  if (!slug) die("Usage: node tools/story-music.mjs <slug> [--off] [--mood berakitkehulu|musafo|bumidipijak|miracleofhajj|cinestory|story] [--track assets/music/<lagu>] [--vol 0.5]");
+  const r = storyMusic(slug, { off: process.argv.includes("--off"), moodId: opt("--mood"), vol: opt("--vol") ? +opt("--vol") : undefined, track: opt("--track") });
   console.log(r.off ? "musik dimatikan" : `✔ ${r.file} ${r.seconds.toFixed(1)} s, mood ${r.mood}, ${r.cuts} cut${r.cliff ? ", cliffhanger" : ""}`);
 }

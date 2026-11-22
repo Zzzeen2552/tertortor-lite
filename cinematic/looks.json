@@ -21,6 +21,18 @@
     "id": "sport-strava",
     "label": "Sport Strava",
     "draft": true,
-    "description": "video short kegiatan olahraga kalcer"
+    "description": "video short kegiatan olahraga kalcer",
+    "base": "musafo",
+    "engine": "story",
+    "narration": true,
+    "format": {
+      "width": 1080,
+      "height": 1920,
+      "aspect": "9:16",
+      "fps": 30,
+      "formats": [
+        "vertical"
+      ]
+    }
   }
 ]

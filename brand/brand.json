@@ -292,6 +292,40 @@
     },
     "lookNote": "User 2026-11-08: BKH punya dua gaya visual. PRESET1 = 3D Pixar (gaya awal), PRESET2 = lukisan cerah. Dipilih per proyek di formulir Buat video atau editor (meta.json → look; node tools/musafo.mjs look <slug> <id>). Field di looks.<id> menimpa styleAnchor/clipLook/clipKeep/grain/refs di atas (yang di atas = PRESET1, cadangan)."
   },
+  "cinestory": {
+    "note": "Cinematic gaya cerita (user 2026-11-22): setiap gaya Cinematic selain AWS = video cerita bernarasi 9:16 seperti Berakit ke Hulu (type cinestory, channel = id gaya, skill /cinestory, engine tools/musafo.mjs). Blok ini dasar semua gaya; blok brand.json → <id gaya> (styleAnchor, clipLook, clipKeep, voice, music) menimpanya setelah gaya didesain dari cinematic/<id>/brief.md. Lebih dari 2 menit = series.",
+    "maxSeconds": 120,
+    "styleAnchor": "Cinematic film still with natural light, shallow depth of field, rich but true-to-life colour, fine film grain, vertical 9:16 composition with a calm lower third for captions.",
+    "clipLook": "Cinematic, natural light, shallow depth of field, true-to-life colour, fine film grain",
+    "clipKeep": "Every shot keeps the same cinematic look, light and faces as its key visual; one continuous action, no text, no logos, no letters, no dialogue.",
+    "image": {
+      "tool": "Google Flow",
+      "page": "https://labs.google/fx/tools/flow",
+      "model": "Nano Banana",
+      "ratio": "9:16",
+      "fallback": "Meta Muse (muse4ai)"
+    },
+    "video": {
+      "tool": "Meta Muse (muse4ai)",
+      "script": "node tools/muse.mjs video <out> --prompt-file <txt> --ref <key visual>",
+      "fallback": "Google Flow",
+      "ratio": "9:16",
+      "head": 0.5
+    },
+    "music": {
+      "key": "C",
+      "mode": "aeolian",
+      "bpm": 84,
+      "prog": [
+        1,
+        6,
+        3,
+        7
+      ],
+      "vol": 0.32,
+      "duck": 0.4
+    }
+  },
   "bumidipijak": {
     "note": "Channel Storytelling BumiDiPijak (sumber: Babad Tanah Jawa) (user 2026-11-07): jenis proyek sendiri sejak 2026-11-08 (type bumidipijak, channel bumidipijak, preset presets/bumidipijak, skill /bumidipijak), engine tools/musafo.mjs; lebih dari 2 menit = series (maxSeconds 120); gaya gambar sejak 2026-11-08: lukisan minyak gelap dari grid acuan user (reference/Screenshot 2026-11-08 060132.png), menggantikan arang-pastel di kertas.",
     "maxSeconds": 120,

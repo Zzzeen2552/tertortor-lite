@@ -8,7 +8,7 @@
 import { existsSync, readFileSync, writeFileSync, statSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT, readJSON, sceneTemplate } from "./lib.mjs";
-import { productionDone, productionState, storylineApproval, draftApproval, checkHooks, loadMusafo, charSheet } from "./musafo.mjs";
+import { productionDone, productionState, storylineApproval, draftApproval, checkHooks, loadMusafo, charSheet, STORY_TYPES, NO_DRAFT } from "./musafo.mjs";
 import { approval, checkFlow } from "./flow.mjs";
 import { isAws } from "./aws.mjs";
 
@@ -18,13 +18,15 @@ const mtime = (d, f) => (existsSync(join(d, f)) ? statSync(join(d, f)).mtimeMs :
 const typeOf = (d) => (existsSync(join(d, "meta.json")) ? readJSON(join(d, "meta.json")).type ?? "" : "");
 // one-take explainer preset (Docucine): no Flow step; voice → beat table → world
 const isOneTake = (d) => { const id = existsSync(join(d, "meta.json")) ? readJSON(join(d, "meta.json")).preset : null; const f = id && join(d, "..", "..", "presets", id, "preset.json"); return !!(f && existsSync(f) && readJSON(f).oneTake); };
-const isStory = (d) => ["musafo", "berakitkehulu", "bumidipijak", "miracleofhajj"].includes(typeOf(d));
+const isStory = (d) => !!STORY_TYPES[typeOf(d)];
 
 // event type → what Antigravity does next, default estimate in minutes, the file that marks it done, and what the user does then
 export const PROCESSES = {
-  "musafo-new": { label: "Antigravity menulis draft cerita", eta: [3, 8], out: (d) => (existsSync(join(d, "assets", "reference", "bahan.md")) && !["berakitkehulu", "bumidipijak", "miracleofhajj"].includes(typeOf(d)) ? "draft.md" : "storyline.md"), next: "draft siap kamu edit dan setujui" },
+  "musafo-new": { label: "Antigravity menulis draft cerita", eta: [3, 8], out: (d) => (existsSync(join(d, "assets", "reference", "bahan.md")) && !NO_DRAFT.includes(typeOf(d)) ? "draft.md" : "storyline.md"), next: "draft siap kamu edit dan setujui" },
   // Berakit ke Hulu (user 2026-11-07): no draft step; the series storyline comes straight from the source and the user edits it
   "berakitkehulu-new": { label: "Antigravity menulis storyline (series bila lebih dari 2 menit)", eta: [4, 10], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
+  // Cinematic gaya cerita (user 2026-11-22): same start as Berakit ke Hulu
+  "cinestory-new": { label: "Antigravity menulis storyline dari brief gaya Cinematic", eta: [4, 10], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
   "bumidipijak-new": { label: "Antigravity menulis storyline (series bila lebih dari 2 menit)", eta: [4, 10], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
   // Miracle of Hajj (user 2026-11-08): a short anecdote → storyline with the cause looked for and the verse, one video
   "miracleofhajj-new": { label: "Antigravity menyusun storyline: sebab yang dicari + dalil Al-Qur'an", eta: [3, 8], out: () => "storyline.md", next: "storyline siap kamu edit dan setujui" },
@@ -84,7 +86,7 @@ const storylineSteps = (d, at) => [
   { label: "3 pilihan hook", done: mtime(d, "storyline.md") > at && hooksOk(d) ? 1 : 0 },
 ];
 const storylineDone = (d, at) => { const t = mtime(d, "storyline.md"); return t > at && hooksOk(d) ? Math.max(t, mtime(d, "hooks.json")) : 0; };
-for (const k of ["berakitkehulu-new", "bumidipijak-new", "miracleofhajj-new", "draft-approved"]) Object.assign(PROCESSES[k], { steps: storylineSteps, done: storylineDone });
+for (const k of ["berakitkehulu-new", "bumidipijak-new", "miracleofhajj-new", "cinestory-new", "draft-approved"]) Object.assign(PROCESSES[k], { steps: storylineSteps, done: storylineDone });
 // Musafo with a source text writes a draft first; without one it goes straight to the storyline
 const musafoDraft = (d) => val(PROCESSES["musafo-new"].out, d) === "draft.md";
 Object.assign(PROCESSES["musafo-new"], {

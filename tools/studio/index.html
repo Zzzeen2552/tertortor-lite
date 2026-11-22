@@ -914,8 +914,8 @@ function paintWork() {
 // re-renders (MutationObserver), and restored to its own state once the process is done. #prodGo has its own rule above.
 const LOCK_SEL = ["#approve", "#unapprove", "#bApprove", "#bUnapprove", "#clApprove", "#clUnapprove", "#slApprove", "#slSave",
   "#drApprove", "#drSave", "#sSave", "#refRun", "[data-concept]", "[data-start-story]",
-  // rendering or remaking while Claude still changes voice, beats or scenes gives a broken video; a new voice choice too
-  "#thVideo", "#awsRender", "#kvRender", "#fmtRatioGo", "#vSave"].join(",");
+  // rendering or remaking while Antigravity still changes voice, beats or scenes gives a broken video; a new voice choice too
+  "#thVideo", "#awsRender", "#kvRender", "#fmtRatioGo", "#vSave", "#muApprove", "#muUnapprove", "#muRemake"].join(",");
 function applyLocks() {
   const slug = document.querySelector("[data-workbar]")?.dataset.workbar;
   const run = !!slug && workingNow.some((x) => x.slug === slug);
@@ -1052,7 +1052,7 @@ const stepPills = (v) => v.steps.map((s) => `<span class="pill ${s.ok ? "ok" : s
 // "Buat video" path: Buat video › category › sub
 const crumb = (cat, sub) => `<div class="crumb"><a href="#/baru">Buat video</a>${cat ? ` › <a href="#/baru/${cat.id}">${esc(cat.label)}</a>` : ""}${sub ? ` › <b>${esc(sub.label)}</b>` : ""}</div>`;
 // story project types sharing the Musafo flow (tools/musafo.mjs → STORY_TYPES): label + slash command
-const STORY = { musafo: { label: "Musafo", skill: "musafo" }, berakitkehulu: { label: "Berakit ke Hulu", skill: "berakit-ke-hulu" }, bumidipijak: { label: "BumiDiPijak", skill: "bumidipijak" }, miracleofhajj: { label: "Miracle of Hajj", skill: "miracle-of-hajj" } };
+const STORY = { cinestory: { label: "Cinematic", skill: "cinestory" }, musafo: { label: "Musafo", skill: "musafo" }, berakitkehulu: { label: "Berakit ke Hulu", skill: "berakit-ke-hulu" }, bumidipijak: { label: "BumiDiPijak", skill: "bumidipijak" }, miracleofhajj: { label: "Miracle of Hajj", skill: "miracle-of-hajj" } };
 
 // ---------- views ----------
 const videoCard = (v) => `
@@ -1351,11 +1351,13 @@ function speakerPreview(voices) {
 
 // ---------- Musafo (kisah islami) and Berakit ke Hulu (kisah merek & pendiri usaha): same flow, own image style ----------
 // one Storytelling channel = one project type's flow; a Musafo channel (Musafo, Miracle of Hajj) tags the project
-function viewNewMusafo(channelId) {
-  const cat = catOf("storytelling"), ch = cat.subs.find((s) => s.id === channelId);
-  const type = ch.type, bkh = type === "berakitkehulu", bdp = type === "bumidipijak", moh = type === "miracleofhajj", series = bkh || bdp;
+// also the form of a Cinematic look with engine "story" (user 2026-11-22): project type cinestory, the look is its channel
+function viewNewMusafo(channelId, catId = "storytelling") {
+  const cat = catOf(catId), ch = cat.subs.find((s) => s.id === channelId);
+  const cine = catId === "cinematic";
+  const type = cine ? "cinestory" : ch.type, withTokoh = type === "berakitkehulu" || cine, bkh = type === "berakitkehulu", bdp = type === "bumidipijak", moh = type === "miracleofhajj", series = bkh || bdp;
   $("#main").innerHTML = `
-    <div class="vh"><div><div class="eyebrow">Proyek baru · ${esc(cat.label)}</div><h1>${esc(ch.label)}</h1><p>${bkh ? "Kisah asal-usul merek dan pendiri usaha Indonesia. " : bdp ? "Sejarah dan legenda Jawa dari Babad Tanah Jawa. " : moh ? "Pengalaman jamaah haji dan umrah. Cukup dua-tiga kalimat: Antigravity mencari sebabnya, mencari dalil Al-Qur'an (dicek ke equran.id), dan menutup dengan Wallahu a'lam bishawab. " : ""}Masukkan bahan mentah: ide kasar, artikel, atau kutipan buku. Antigravity menyusunnya jadi storyline, lalu naskah lisan, suara Gemini TTS, ${bdp ? "satu lukisan minyak gelap" : bkh ? "satu adegan bergaya visual pilihanmu" : "satu ilustrasi 3D"} dan satu klip per kalimat, dan caption Indonesia + Inggris.</p></div></div>
+    <div class="vh"><div><div class="eyebrow">Proyek baru · ${esc(cat.label)}</div><h1>${esc(ch.label)}</h1><p>${cine ? "Gaya Cinematic cerita: narasi, vertikal 9:16, dikerjakan seperti Berakit ke Hulu. " : bkh ? "Kisah asal-usul merek dan pendiri usaha Indonesia. " : bdp ? "Sejarah dan legenda Jawa dari Babad Tanah Jawa. " : moh ? "Pengalaman jamaah haji dan umrah. Cukup dua-tiga kalimat: Antigravity mencari sebabnya, mencari dalil Al-Qur'an (dicek ke equran.id), dan menutup dengan Wallahu a'lam bishawab. " : ""}Masukkan bahan mentah: ide kasar, artikel, atau kutipan buku. Antigravity menyusunnya jadi storyline, lalu naskah lisan, suara Gemini TTS, ${cine ? `satu adegan bergaya ${esc(ch.label)}` : bdp ? "satu lukisan minyak gelap" : bkh ? "satu adegan bergaya visual pilihanmu" : "satu ilustrasi 3D"} dan satu klip per kalimat, dan caption Indonesia + Inggris.</p></div></div>
     ${crumb(cat, ch)}
     <div class="form-grid">
       <form class="panel pad" id="form">
@@ -1369,9 +1371,9 @@ function viewNewMusafo(channelId) {
         <div data-sk="lib"><div class="fld"><label for="libBook">Sumber di Library Cerita ${esc(ch.label)}</label><select id="libBook" class="sel"></select></div>
           <div class="fld"><label for="libStory">Kisah</label><select id="libStory" class="sel"></select><span class="hint" id="libInfo"></span></div>
           <a class="btn sm" href="#/s/storytelling/${ch.id}/cerita">Buka Library Cerita</a></div>
-        ${bkh ? `<div class="fld"><span class="lb">Foto tokoh utama (opsional)</span>
+        ${withTokoh ? `<div class="fld"><span class="lb">${cine ? "Foto tokoh atau character sheet (opsional)" : "Foto tokoh utama (opsional)"}</span>
           <div class="drop" id="tokohDrop">Tarik foto ke sini atau klik<input type="file" accept="image/png,image/jpeg,image/webp" multiple></div>
-          <span class="hint">Foto asli tokohnya (mis. Eka Tjipta muda dan tua). Antigravity membuat character sheet per usia dari foto ini, lalu semua shot memakai sheet itu supaya wajahnya konsisten. Bisa juga ditambahkan nanti di tab Tokoh.</span>
+          <span class="hint">${cine ? "Foto tokoh, atau character sheet yang sudah jadi (dipakai langsung). Dari foto biasa Antigravity membuat character sheet per usia. Semua shot memakai sheet itu supaya wajahnya konsisten. Bisa juga ditambahkan nanti di tab Tokoh." : `Foto asli tokohnya (mis. Eka Tjipta muda dan tua). Antigravity membuat character sheet per usia dari foto ini, lalu semua shot memakai sheet itu supaya wajahnya konsisten. Bisa juga ditambahkan nanti di tab Tokoh.`}</span>
           <div class="thumbs" id="tokohPrev"></div></div>` : ""}
         <div class="fld" id="lookFld" style="display:none"><span class="lb">Gaya visual</span><span class="seg" id="lookSeg"></span><span class="hint" id="lookHint"></span></div>
         <div class="fld"><label for="speaker">Suara</label><select id="speaker" class="sel"></select></div>
@@ -1382,10 +1384,10 @@ function viewNewMusafo(channelId) {
         <div class="panel-h">Alurnya</div>
         <ol class="pad tips" style="margin:0;padding-left:34px">
           <li><b>Antigravity</b> menyusun storyline dari bahanmu (alur, tokoh, titik balik, pelajaran${moh ? ", sebab yang dicari, dan dalil Al-Qur'an" : ""})${series ? ", langsung dibagi jadi series bila lebih dari 2 menit" : ""}. <b>Kamu</b> bisa mengeditnya di tab Storyline, lalu setujui.</li>
-          ${bkh ? `<li><b>Tokoh</b>: dari fotomu Antigravity membuat character sheet per usia, dipakai di setiap shot.</li>` : ""}
+          ${withTokoh ? `<li><b>Tokoh</b>: dari fotomu Antigravity membuat character sheet per usia${cine ? " (sheet yang sudah jadi langsung dipakai)" : ""}, dipakai di setiap shot.</li>` : ""}
           <li><b>Antigravity</b> memecah storyline jadi kalimat lisan + terjemahan Inggris per shot. <b>Kamu</b> setujui naskahnya.</li>
           <li><b>Suara</b> satu take penuh di Google AI Studio (Gemini TTS).</li>
-          <li><b>Gambar</b> ${bkh ? "satu adegan Indonesia tempo dulu dengan gaya visual pilihanmu (PRESET1 3D sinematik amber-teal, atau PRESET2 lukisan cerah keemasan; wajah tokoh terlihat)" : bdp ? "satu lukisan arang, pastel, dan cat air di kertas cokelat muda" : "satu ilustrasi 3D golden hour"} per shot di Google Flow (gratis), gaya dari <span class="mono">${bkh ? "berakitkehulu/reference" : bdp ? "musafo/channels/bumidipijak/reference" : "musafo/reference"}</span>.</li>
+          <li><b>Gambar</b> ${cine ? `satu adegan per shot dengan gaya ${esc(ch.label)} (cinematic/${esc(ch.id)}/style.md)` : bkh ? "satu adegan Indonesia tempo dulu dengan gaya visual pilihanmu (PRESET1 3D sinematik amber-teal, atau PRESET2 lukisan cerah keemasan; wajah tokoh terlihat)" : bdp ? "satu lukisan arang, pastel, dan cat air di kertas cokelat muda" : "satu ilustrasi 3D golden hour"} per shot di Google Flow (gratis), gaya dari <span class="mono">${bkh ? "berakitkehulu/reference" : bdp ? "musafo/channels/bumidipijak/reference" : "musafo/reference"}</span>.</li>
           <li><b>Klip</b> tiap gambar jadi video image-to-video di RunningHub (koin, dilaporkan).</li>
           <li><b>Render</b> MP4 9:16 dengan caption dua bahasa, ${series ? "tiap bagian di bawah 2 menit" : moh ? "satu cerita satu video, maksimal 2,5 menit, ditutup Wallahu a'lam bishawab" : "satu video utuh sampai 179 detik. Kamu yang memendekkannya lewat Edit naskah"}.</li>
         </ol>
@@ -1468,7 +1470,7 @@ function viewNewMusafo(channelId) {
 // ---------- Advertisement (tools/ad.mjs): product angles + logo + optional model + CTA → Claude writes ad.json ----------
 // ---------- Cinematic (user 2026-11-09): procedural Blender short, no narration; Claude writes shotlist + scene ----------
 function viewNewCinematic(lookId) {
-  return viewNewAws(lookId); // semua gaya Cinematic memakai alur AWS (user 2026-11-21)
+  return viewNewAws(lookId); // gaya AWS (gaya cerita memakai viewNewMusafo, user 2026-11-22)
   const cat = catOf("cinematic"), lk = cat.subs.find((s) => s.id === lookId);
   const files = [];
   $("#main").innerHTML = `
@@ -1942,9 +1944,10 @@ async function viewEditor(slug, startTab) {
           ${isM ? `<button data-t="brief">Brief</button>
           ${v.musafo.draftApproval.needed || v.musafo.draft ? `<button data-t="draft">Draft ${v.musafo.draftApproval.approved ? "<span>✓</span>" : ""}</button>` : ""}
           <button data-t="storyline">Storyline ${v.musafo.storylineApproval.approved ? "<span>✓</span>" : ""}</button>
-          ${v.type === "berakitkehulu" || v.musafo.charRefs.length || v.musafo.characters.length ? `<button data-t="tokoh">Tokoh <span>${v.musafo.characters.length ? v.musafo.characters.filter((c) => c.sheetUrl).length + "/" + v.musafo.characters.length : v.musafo.charRefs.length || "–"}</span></button>` : ""}
+          ${v.type === "berakitkehulu" || v.type === "cinestory" || v.musafo.charRefs.length || v.musafo.characters.length ? `<button data-t="tokoh">Tokoh <span>${v.musafo.characters.length ? v.musafo.characters.filter((c) => c.sheetUrl).length + "/" + v.musafo.characters.length : v.musafo.charRefs.length || "–"}</span></button>` : ""}
           <button data-t="naskah">Naskah ${v.approval.approved && v.scriptState !== "old" ? "<span>✓</span>" : ""}</button>
           <button data-t="shot">Shot <span>${v.musafo.shots.length}</span></button>
+          ${v.music?.needed ? `<button data-t="musik">Musik ${v.music.approved ? "<span>✓</span>" : ""}</button>` : ""}
 ` : `<button data-t="brief">Brief</button>
           ${v.aws ? `<button data-t="aws">${esc(v.lookLabel || "AWS")} <span>${v.awsData?.tbc.length ? v.awsData.tbc.length + " TBC" : "✓"}</span></button>` : ""}
           ${v.clone ? `<button data-t="clone">Clone <span>${v.cloneData?.shots.length || "–"}${v.cloneData?.approval?.approved ? " ✓" : ""}</span></button>` : ""}
@@ -2155,7 +2158,23 @@ async function viewEditor(slug, startTab) {
         : `<div class="eyebrow sub">Storyline · bisa kamu edit</div>${editor}`;
       return `<div class="pad">${bar}${partBox}${hooksHtml}${main}</div>`;
     },
-    // main characters (user 2026-11-07): the user's photos of the real person, Claude's character sheets per life stage
+    // main characters (user 2026-11-07): the user's photos of the real person, Antigravity's character sheets per life stage
+    // tab Musik (Cinematic gaya cerita, user 2026-11-22): dengarkan, setujui, buat ulang, atau unggah lagu sendiri;
+    // render video menunggu persetujuan ini
+    musik: () => {
+      const mu = v.music ?? {};
+      const src = mu.source === "upload" ? `lagu dari kamu (${esc(mu.file || "")})` : mu.source === "komposisi" ? `dikomposisi otomatis (mood ${esc(mu.mood || "cinestory")}), bebas lisensi` : mu.source === "off" ? "musik dimatikan" : "";
+      const status = mu.approved
+        ? `<div class="notice ok"><span><b>Musik disetujui</b> · ${new Date(mu.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}. Editing dan render video bisa jalan.</span><span class="sp"><button class="btn sm" id="muUnapprove">Batalkan</button></span></div>`
+        : `<div class="notice"><span><b>Dengarkan musiknya, lalu setujui.</b> Render video menunggu persetujuan ini.</span><span class="sp"><button class="btn pri sm" id="muApprove" ${mu.url ? "" : "disabled"}>Setujui musik</button></span></div>`;
+      return `<div class="pad">${status}
+        ${mu.url ? `<audio controls preload="none" src="${mu.url}" style="width:100%;margin:12px 0 4px"></audio><p class="muted" style="font-size:12.5px;margin:0 0 14px">${src}</p>`
+          : `<div class="empty" style="margin:12px 0"><b>Musik belum ada</b>Musik latar dibuat otomatis setelah suara dan shot jadi (Production). Bisa juga unggah lagu sendiri di bawah.</div>`}
+        <div class="meta-row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" id="muRemake" ${mu.url || v.musafo.shots.length ? "" : "disabled"}>Buat ulang musik otomatis</button></div>
+        <div class="eyebrow sub" style="margin-top:18px">Lagu sendiri</div>
+        <div class="drop" id="muDrop">Tarik lagu ke sini atau klik (MP3, WAV, M4A)<input type="file" accept="audio/*"></div>
+        <p class="muted" style="font-size:12.5px">Lagu dipotong sepanjang video dan diberi fade. Pastikan kamu punya izin memakainya.</p></div>`;
+    },
     tokoh: () => {
       const m = v.musafo;
       const refs = m.charRefs.length ? `<div class="thumbs" style="margin-bottom:10px">${m.charRefs.map((u) => `<a href="${u}" target="_blank"><img src="${u}" alt=""></a>`).join("")}</div>` : '<p class="muted" style="margin:0 0 10px">Belum ada foto tokoh.</p>';
@@ -2505,6 +2524,34 @@ async function viewEditor(slug, startTab) {
       if (!r.ok) { slS.disabled = false; return toast((await r.json()).error); }
       toast("Storyline disimpan"); await loadVideos(); viewEditor(slug, "storyline");
     };
+    // tab Musik
+    const muPost = async (btn, body, label) => {
+      const old = btn.textContent; btn.disabled = true; btn.textContent = label;
+      const r = await fetch(`/api/videos/${slug}/music`, { method: "POST", body: JSON.stringify(body) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { btn.disabled = false; btn.textContent = old; return alert(j.error || "Gagal."); }
+      await loadVideos(); viewEditor(slug, "musik");
+    };
+    if ($("#muApprove")) $("#muApprove").onclick = () => muPost($("#muApprove"), { action: "approve" }, "Menyimpan…");
+    if ($("#muUnapprove")) $("#muUnapprove").onclick = () => muPost($("#muUnapprove"), { action: "unapprove" }, "Membatalkan…");
+    if ($("#muRemake")) $("#muRemake").onclick = () => muPost($("#muRemake"), { action: "remake" }, "Membuat musik…");
+    const md = $("#muDrop");
+    if (md) {
+      const input = $("input", md);
+      const sendSong = async (list) => {
+        const f = [...list].find((x) => x.type.startsWith("audio/") || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(x.name));
+        if (!f) return;
+        md.textContent = "Mengunggah…";
+        const u = await fetch(`/api/videos/${slug}/upload?kind=song&name=${encodeURIComponent(f.name)}`, { method: "PUT", body: f });
+        if (!u.ok) { toast((await u.json()).error); return viewEditor(slug, "musik"); }
+        toast("Lagu dipasang. Dengarkan, lalu setujui."); await loadVideos(); viewEditor(slug, "musik");
+      };
+      md.onclick = () => input.click();
+      input.onchange = () => sendSong(input.files);
+      md.ondragover = (e) => { e.preventDefault(); md.classList.add("over"); };
+      md.ondragleave = () => md.classList.remove("over");
+      md.ondrop = (e) => { e.preventDefault(); md.classList.remove("over"); sendSong(e.dataTransfer.files); };
+    }
     const tk = $("#tkDrop");
     if (tk) {
       const input = $("input", tk);
@@ -3343,7 +3390,7 @@ async function route(fresh = false) {
     const cat = catOf(catId), sub = cat?.subs.find((s) => s.id === subId);
     if (!sub) return viewPick(cat?.id);
     if (sub.draft) return viewDraft(cat, sub);
-    return cat.id === "storytelling" ? viewNewMusafo(sub.id) : cat.id === "explainer" ? viewNew(sub.id) : cat.id === "cinematic" ? viewNewCinematic(sub.id) : cat.id === "cinemaclone" ? viewNewClone(sub.id) : cat.id === "animation" ? viewNewAnimation(sub.id) : viewNewAd(sub.id);
+    return cat.id === "storytelling" ? viewNewMusafo(sub.id) : cat.id === "explainer" ? viewNew(sub.id) : cat.id === "cinematic" ? (sub.engine === "story" ? viewNewMusafo(sub.id, "cinematic") : viewNewCinematic(sub.id)) : cat.id === "cinemaclone" ? viewNewClone(sub.id) : cat.id === "animation" ? viewNewAnimation(sub.id) : viewNewAd(sub.id);
   }
   // #/s/<category>/<sub>[/footage | /cerita[/<book>]]: the page of one preset / channel / product
   const sp = h.match(/^#\/s\/([\w-]+)\/([\w-]+)(?:\/(\w+))?(?:\/([\w-]+))?/);

@@ -7,9 +7,9 @@ description: AWS (Cinematic) di MOTION/TERTORTOR. Video rekap sinematik + motion
 
 Aturan lengkap: **`cinematic/aws/style.md`** (baca dulu).
 
-**Semua gaya Cinematic memakai alur ini** (user 2026-11-21). Untuk proyek dengan `meta.json → look` selain `aws`, baca juga
-`cinematic/<look>/style.md` (gaya look itu: grade, warna, font, grafis) dan pakai `presets/<look>/`; alur, `aws.json`, gerbang,
-render, 9:16 + 1:1, dan paket After Effects tetap sama. Gaya yang masih `draft` di `cinematic/looks.json` memakai gaya visual AWS.
+**Alur ini hanya untuk gaya AWS** (user 2026-11-22). Gaya Cinematic lain (`engine: "story"` di `cinematic/looks.json`, proyek
+`type: "cinestory"`) memakai alur cerita seperti Berakit ke Hulu: skill `/cinestory`. Proyek lama `type: "cinematic"` dengan
+`look` selain `aws` (dibuat sebelum 2026-11-22) tetap dikerjakan dengan alur ini.
 Engine: `tools/aws.mjs` (build/check/formats), `tools/aws-ae.mjs` (paket After Effects).
 
 ## Langkah

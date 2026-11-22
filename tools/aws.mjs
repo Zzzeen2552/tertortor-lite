@@ -38,7 +38,7 @@ const r1 = (n) => Math.round(n * 10) / 10;
 const esc = (s = "") => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const fmtN = (n) => Number(n).toLocaleString("en-US");
 const readMeta = (dir) => (existsSync(join(dir, "meta.json")) ? readJSON(join(dir, "meta.json")) : {});
-// Semua gaya Cinematic memakai alur kerja AWS (user 2026-11-21): mesin, aws.json, tab, render, 9:16 + 1:1, paket After
+// Alur kerja AWS (user 2026-11-21; sejak 2026-11-22 hanya gaya AWS, gaya lain = proyek cinestory): mesin, aws.json, tab, render, 9:16 + 1:1, paket After
 // Effects. Gaya baru punya preset sendiri di presets/<look>/ (disalin dari presets/aws saat dibuat); berkas yang tidak ada di
 // sana diambil dari presets/aws. Font Amazon Ember berlisensi tetap hanya di presets/aws/fonts/ember/.
 export const isAws = (dir) => readMeta(dir).type === "cinematic";

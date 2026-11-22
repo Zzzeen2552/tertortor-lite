@@ -466,6 +466,18 @@ function voiceKeyProblem(d) {
   }
   return process.env.GEMINI_API_KEY ? null : { key: "GEMINI_API_KEY", msg: "Kunci API Gemini belum diisi. Production dimulai dari suara (Gemini TTS). Buka kartu Suara → tab API Gemini, tempel kuncimu dari Google AI Studio, lalu klik Production lagi." };
 }
+// Music approval (user 2026-11-22, Cinematic gaya cerita): the user listens in tab Musik and approves; editing/render
+// waits for it. The approval is tied to the exact file (size + time), so a remade or uploaded song needs a new one.
+const musicFile = (d) => join(d, "assets", "music.wav");
+const musicSig = (d) => (existsSync(musicFile(d)) ? `${statSync(musicFile(d)).size}-${Math.round(statSync(musicFile(d)).mtimeMs)}` : null);
+const reqOf = (d) => (existsSync(join(d, "request.json")) ? JSON.parse(readFileSync(join(d, "request.json"), "utf8")) : {});
+const musicApproved = (d) => { const a = reqOf(d).musicApproval; return !!a && !!musicSig(d) && a.sig === musicSig(d); };
+const needsMusicApproval = (d) => storyType(d) === "cinestory";
+function musicInfo(d, slug) {
+  const mj = existsSync(join(d, "music.json")) ? JSON.parse(readFileSync(join(d, "music.json"), "utf8")) : {};
+  const f = musicFile(d);
+  return { needed: needsMusicApproval(d), url: existsSync(f) ? `/files/videos/${slug}/assets/music.wav?t=${Math.round(statSync(f).mtimeMs)}` : null, source: mj.source === "upload" ? "upload" : mj.mode === "off" ? "off" : mj.mode ? "komposisi" : null, file: mj.file ?? null, mood: mj.mood ?? null, approved: musicApproved(d), at: reqOf(d).musicApproval?.at ?? null };
+}
 const voiceLabel = (speaker) => (String(speaker || "").startsWith("clone:") ? "Clone suara (ElevenLabs)" : "Gemini TTS");
 const withSamples = (voices = []) => voices.map((v) => ({ ...v, sample: existsSync(join(ROOT, "library", "voices", `${v.name}.mp3`)) ? `/files/library/voices/${encodeURIComponent(v.name)}.mp3` : null }));
 function runStories(args) {
@@ -625,7 +637,9 @@ createServer(async (req, res) => {
         let slug = slugify(title);
         for (let i = 2; existsSync(join(VIDEOS, slug)); i++) slug = `${slugify(title)}-${i}`;
         if (listChannels().find((c) => c.id === body.channel)?.draft) return send(res, 400, { error: "Channel ini belum didesain." });
-        const type = body.type, channel = type === "musafo" ? (listChannels().some((c) => c.id === body.channel && (c.type ?? "musafo") === "musafo") ? body.channel : "musafo") : type;
+        // cinestory: the channel is the Cinematic look (cinematic/looks.json, engine "story"); never AWS
+        if (body.type === "cinestory" && !listLooks().some((l) => l.id === body.channel && l.engine === "story")) return send(res, 400, { error: "Gaya Cinematic ini tidak memakai alur cerita." });
+        const type = body.type, channel = type === "cinestory" ? body.channel : type === "musafo" ? (listChannels().some((c) => c.id === body.channel && (c.type ?? "musafo") === "musafo") ? body.channel : "musafo") : type;
         createMusafo(slug, title, story || `(teks artikel di assets/reference/bahan.md, dari ${link})`, source, { type, channel, look: body.look ? String(body.look) : undefined });
         if (article) {
           mkdirSync(join(VIDEOS, slug, "assets", "reference"), { recursive: true });
@@ -784,6 +798,20 @@ createServer(async (req, res) => {
       await new Promise((ok, bad) => req.pipe(createWriteStream(join(raw, name))).on("finish", ok).on("error", bad));
       const file = audio ? importAudio(d, adKind, join(raw, name), name, String(url.searchParams.get("license") || "").slice(0, 200)) : importAsset(d, adKind, join(raw, name), name);
       return send(res, 200, { ok: true, file });
+    }
+    // a song for a story project's music (tab Musik): saved, fitted to the video when the build exists, approval reset
+    if (up && req.method === "PUT" && adKind === "song") {
+      const d = join(VIDEOS, up[1]);
+      if (!existsSync(d) || !isMusafo(d)) return send(res, 400, { error: "lagu hanya untuk proyek cerita" });
+      const name = safeName(url.searchParams.get("name") || "lagu");
+      if (!/\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(name)) return send(res, 400, { error: "Hanya audio MP3, WAV, M4A, AAC, OGG, atau FLAC." });
+      mkdirSync(join(d, "assets", "music"), { recursive: true });
+      await new Promise((ok, bad) => req.pipe(createWriteStream(join(d, "assets", "music", name))).on("finish", ok).on("error", bad));
+      const rel = `assets/music/${name}`;
+      const r = existsSync(join(d, "build", "timeline.json")) ? spawnSync(process.execPath, [join(ROOT, "tools", "story-music.mjs"), up[1], "--track", rel], { cwd: ROOT, encoding: "utf8" }) : null;
+      if (!r) writeFileSync(join(d, "music.json"), JSON.stringify({ mode: "story", source: "upload", file: rel, volume: 0.3, at: new Date().toISOString() }, null, 2));
+      else if (r.status !== 0) return send(res, 400, { error: (r.stderr || r.stdout).trim().split("\n").at(-1) });
+      return send(res, 200, { ok: true, music: musicInfo(d, up[1]) });
     }
     if (up && req.method === "PUT" && adKind === "tokoh") {
       const d = join(VIDEOS, up[1]);
@@ -1238,12 +1266,34 @@ createServer(async (req, res) => {
         return send(res, 400, { error: e.message });
       }
     }
+    // tab Musik (story projects): approve / unapprove the current music, or remake it with a mood
+    const mus = p.match(/^\/api\/videos\/([a-z0-9-]+)\/music$/);
+    if (mus && req.method === "POST") {
+      const d = join(VIDEOS, mus[1]);
+      if (!existsSync(d) || !isMusafo(d)) return send(res, 404, { error: "proyek cerita tidak ditemukan" });
+      const body = JSON.parse((await readBody(req)).toString() || "{}");
+      const rp = join(d, "request.json"), r = reqOf(d);
+      if (body.action === "approve") {
+        if (!musicSig(d)) return send(res, 400, { error: "Belum ada musik. Musik dibuat setelah suara dan shot jadi, atau unggah lagu sendiri." });
+        r.musicApproval = { sig: musicSig(d), at: new Date().toISOString(), by: "studio" };
+        writeFileSync(rp, JSON.stringify(r, null, 2));
+      } else if (body.action === "unapprove") {
+        delete r.musicApproval;
+        writeFileSync(rp, JSON.stringify(r, null, 2));
+      } else if (body.action === "remake") {
+        const mood = /^[a-z]+$/.test(String(body.mood || "")) ? body.mood : storyType(d);
+        const t = spawnSync(process.execPath, [join(ROOT, "tools", "story-music.mjs"), mus[1], "--mood", mood], { cwd: ROOT, encoding: "utf8" });
+        if (t.status !== 0) return send(res, 400, { error: (t.stderr || t.stdout).trim().split("\n").at(-1) });
+      } else return send(res, 400, { error: "action: approve | unapprove | remake" });
+      return send(res, 200, { ok: true, music: musicInfo(d, mus[1]) });
+    }
     // "Render video" in the Thumbnail tab: the user approves the thumbnail, then the video is (re)made with it
     const thv = p.match(/^\/api\/videos\/([a-z0-9-]+)\/thumbnail\/video$/);
     if (thv && req.method === "POST") {
       const d = join(VIDEOS, thv[1]);
       if (!existsSync(d)) return send(res, 404, { error: "video not found" });
       if (!existsSync(thumbPng(d)) || thumbStale(d)) return send(res, 400, { error: "simpan & render thumbnail dulu, baru render video" });
+      if (needsMusicApproval(d) && !musicApproved(d)) return send(res, 400, { error: "Setujui musiknya dulu di tab Musik, baru render video." });
       const t = loadThumb(d);
       t.approvedAt = new Date().toISOString();
       writeFileSync(join(d, "thumbnail.json"), JSON.stringify(t, null, 2) + "\n");
@@ -1489,6 +1539,7 @@ createServer(async (req, res) => {
         footage: ls("assets/footage").filter((f) => /\.(mp4|mov|webm)$/i.test(f)).map((f) => url("assets/footage", f)),
         approval: approval(d),
         voiceKey: voiceKeyProblem(d),
+        music: isMusafo(d) ? musicInfo(d, det[1]) : null,
         flowCheck: (() => { const f = checkFlow(d); return { errors: f.errors, warns: f.warns, total: f.total ?? 0, shots: f.flow?.shots ?? [], model: f.flow?.model ?? "" }; })(),
         musafo: isMusafo(d) ? (() => {
           const r = checkMusafo(d);

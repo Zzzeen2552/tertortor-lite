@@ -37,11 +37,13 @@ const FRAMINGS = ["wide", "medium", "close"];
 // refs, clipLook, clipKeep, video, maxSeconds, ...).
 // BumiDiPijak (user 2026-11-08, "fully independent"): its own type too, legends and history from Babad Tanah Jawa,
 // dark oil paintings (standard since 2026-11-08, brand.json → bumidipijak), own preset (presets/bumidipijak) and skill (/bumidipijak)
-export const STORY_TYPES = { musafo: { label: "Musafo", skill: "musafo" }, berakitkehulu: { label: "Berakit ke Hulu", skill: "berakit-ke-hulu" }, bumidipijak: { label: "BumiDiPijak", skill: "bumidipijak" }, miracleofhajj: { label: "Miracle of Hajj", skill: "miracle-of-hajj" } };
+// cinestory (user 2026-11-22): every Cinematic look except AWS is a narrated 9:16 story made like Berakit ke Hulu
+// (storyline → naskah → tokoh → production → klip → persetujuan musik → editing); the look is the project's channel
+export const STORY_TYPES = { musafo: { label: "Musafo", skill: "musafo" }, berakitkehulu: { label: "Berakit ke Hulu", skill: "berakit-ke-hulu" }, bumidipijak: { label: "BumiDiPijak", skill: "bumidipijak" }, miracleofhajj: { label: "Miracle of Hajj", skill: "miracle-of-hajj" } , cinestory: { label: "Cinematic", skill: "cinestory" } };
 // types that go from the source straight to a storyline the user edits (no Draft step); BKH and BDP split past 2 minutes,
 // Miracle of Hajj (user 2026-11-08: Musafo look, pilgrims' experiences, one story up to 150 s) builds a whole story out of a
 // two-sentence anecdote, so a draft of the source would add nothing
-export const NO_DRAFT = ["berakitkehulu", "bumidipijak", "miracleofhajj"];
+export const NO_DRAFT = ["berakitkehulu", "bumidipijak", "miracleofhajj", "cinestory"];
 export const storyType = (dir) => (dir && existsSync(join(dir, "meta.json")) ? readJSON(join(dir, "meta.json")).type : null);
 // a Musafo channel with its own look (BumiDiPijak, kisah Babad Tanah Jawa, user 2026-11-07: same flow, hand-drawn plates instead of 3D)
 // overrides the type's style from brand.json → <channel id>; channels without a block (Miracle of Hajj) stay Musafo
@@ -282,8 +284,9 @@ export function approveStoryline(dir, by = "user", hook) {
 }
 
 export function createMusafo(slug, title, story, source = "", { type = "musafo", channel, look } = {}) {
-  // a story type with its own preset (presets/<type>, e.g. BumiDiPijak) uses it; the others share presets/musafo
-  const preset = existsSync(join(ROOT, "presets", type, "preset.json")) ? type : "musafo";
+  // the channel's own preset (a Cinematic look: presets/<look>), else the type's (presets/<type>, e.g. BumiDiPijak), else
+  // the shared presets/musafo
+  const preset = [channel, type].find((id) => id && existsSync(join(ROOT, "presets", id, "preset.json"))) ?? "musafo";
   const r = spawnSync("node", [join(ROOT, "tools", "new.mjs"), slug, title, "--preset", preset], { encoding: "utf8" });
   if (r.status !== 0) throw new Error(r.stderr || r.stdout);
   const dir = join(ROOT, "videos", slug);
