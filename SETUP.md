@@ -19,7 +19,7 @@ Siapkan TERTORTOR LITE di PC Windows ini. Kerjakan berurutan, cek tiap langkah, 
 3. Di folder TERTORTOR-LITE: npm install, lalu npx hyperframes skills (memasang skill HyperFrames ke ~/.claude/skills).
 4. Bangun kit efek suara: node tools/sfx.mjs.
 5. Pasang whisper.cpp: unduh rilis Windows resmi whisper-bin-x64.zip dari github.com/ggml-org/whisper.cpp/releases, ekstrak sehingga ada tools/bin/whisper/Release/whisper-cli.exe. Sebutkan ukuran file sebelum mengunduh. Folder tools/bin tidak ikut git.
-6. Buat file .env kosong di root (tidak ikut git) dengan baris GEMINI_API_KEY= dan ELEVENLABS_API_KEY=. Saya yang mengisi nilainya sendiri.
+6. Buat file .env di root (tidak ikut git) dengan baris AGENT=claude, GEMINI_API_KEY= dan ELEVENLABS_API_KEY=. Saya yang mengisi nilai kuncinya sendiri. AGENT memilih otak yang bekerja: claude (default) atau antigravity.
 7. Buat shortcut Desktop: powershell -NoProfile -ExecutionPolicy Bypass -File tools\install-shortcut.ps1
 8. Uji: npm run studio, buka http://localhost:4331 di browser pane. Pastikan "Buat video" hanya punya 3 kategori: Video Explainer (Hyperframe, SNAPCN, VOX), Storytelling (Berakit ke Hulu, BumiDiPijak), Advertisement (Flashcut, BRI, App Demo). Jalankan juga npx hyperframes --version. Catatan: videos/uji-hyperframe di git tidak membawa suara dan footage, jadi npm run check di proyek itu boleh gagal karena file suara tidak ada. Itu bukan error pemasangan.
 9. Baca CLAUDE.md, README.md, .claude/skills/video-vertikal/SKILL.md, .claude/skills/video-vertikal/LESSONS.md, .claude/skills/berakit-ke-hulu/SKILL.md, .claude/skills/bumidipijak/SKILL.md, dan .claude/skills/flashcut/SKILL.md supaya paham alur dan aturan proyek ini.
@@ -34,3 +34,10 @@ Siapkan TERTORTOR LITE di PC Windows ini. Kerjakan berurutan, cek tiap langkah, 
 
 Catatan: proyek videos/ lama, footage, suara, key visual, dan video acuan tidak ada di git. Jangan anggap itu error. Kalau saya butuh proyek lama, saya salin sendiri folder videos/<slug>/ dari laptop utama.
 ```
+
+## Memakai Antigravity, bukan Claude
+
+TERTORTOR LITE satu repo untuk dua otak. Di komputer yang memakai Google Antigravity: buka folder `TERTORTOR-LITE` di
+Antigravity, isi `.env` dengan `AGENT=antigravity` dan `GEMINI_API_KEY=...`, lalu jalankan ulang Studio. Antigravity membaca
+`GEMINI.md` dan `.gemini/skills/`; Studio dan chat-nya ikut memakai Antigravity. Tanpa baris `AGENT`, LITE memakai Claude.
+

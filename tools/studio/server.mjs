@@ -8,6 +8,7 @@ import { join, extname, normalize, basename } from "node:path";
 import { tmpdir } from "node:os";
 import { spawn, spawnSync } from "node:child_process";
 import { ROOT, spokenText, loadBrand, listPresets, presetOf, isHex } from "../lib.mjs";
+import { AGENT, AGENT_NAME, agentText } from "../agent.mjs";
 import { approval, approve, unapprove, checkFlow, loadFlow } from "../flow.mjs";
 import { checkConcepts, pickConcept, refFiles } from "../ref.mjs";
 import { isMusafo, checkMusafo, shotStats, shotWordLimit, createMusafo, STORY_TYPES, storyType, storylineApproval, approveStoryline, loadHooks, checkHooks, editScript, fillEnglish, sourceFlowErrors, draftApproval, saveDraft, approveDraft, productionState, startProduction, saveStoryline, charRefs, charSheet, looksOf, setLook } from "../musafo.mjs";
@@ -44,7 +45,8 @@ const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".
 
 const send = (res, code, body, type = "application/json") => {
   res.writeHead(code, { "content-type": type });
-  res.end(typeof body === "string" || Buffer.isBuffer(body) ? body : JSON.stringify(body));
+  // every page and API answer names the brain chosen in .env AGENT (tools/agent.mjs), whatever the source text says
+  res.end(Buffer.isBuffer(body) ? body : agentText(typeof body === "string" ? body : JSON.stringify(body)));
 };
 const readBody = (req) => new Promise((ok) => { const b = []; req.on("data", (d) => b.push(d)); req.on("end", () => ok(Buffer.concat(b))); });
 const slugify = (s) => s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "video";
@@ -368,13 +370,13 @@ function createVideo({ title, idea, duration, voice = "Gemini TTS", voiceSpeaker
   if (r.status !== 0) throw new Error(r.stderr || r.stdout);
   const d = join(VIDEOS, slug);
   for (const sub of ["assets/reference", "assets/keyvisuals"]) mkdirSync(join(d, sub), { recursive: true });
-  const req = { title, idea, duration, voice: String(voiceSpeaker || "").startsWith("clone:") ? voiceLabel(voiceSpeaker) : voice, ...(voiceSpeaker ? { voiceSpeaker } : {}), refLink: refLink || "", created: new Date().toISOString(), status: "menunggu Antigravity" };
+  const req = { title, idea, duration, voice: String(voiceSpeaker || "").startsWith("clone:") ? voiceLabel(voiceSpeaker) : voice, ...(voiceSpeaker ? { voiceSpeaker } : {}), refLink: refLink || "", created: new Date().toISOString(), status: "menunggu " + AGENT_NAME };
   writeFileSync(join(d, "request.json"), JSON.stringify(req, null, 2));
   writeFileSync(
     join(d, "brief.md"),
     `# Brief: ${title}
 
-> Dibuat dari TERTORTOR. Antigravity: lengkapi bagian kosong dari ide di bawah, lalu ikuti panduan /video-vertikal.
+> Dibuat dari TERTORTOR. ${AGENT_NAME}: lengkapi bagian kosong dari ide di bawah, lalu ikuti panduan /video-vertikal.
 
 ## Ide / konsep / storyline (dari user, jangan diubah)
 
@@ -383,10 +385,10 @@ ${idea.trim()}
 ## Masukan
 - **Target durasi:** ${duration} detik (maks 179)
 - **Suara:** ${voice}
-- **Video referensi:** ${refLink ? refLink + " (link)" : "lihat assets/reference/"} — gaya, tempo, dan cara buka hook yang ditiru; bukan isinya. Data terukur di assets/reference/*.ref.md (npm run ref); Antigravity menawarkan 2-3 konsep (concepts.json) dan user memilih satu sebelum naskah.
+- **Video referensi:** ${refLink ? refLink + " (link)" : "lihat assets/reference/"} — gaya, tempo, dan cara buka hook yang ditiru; bukan isinya. Data terukur di assets/reference/*.ref.md (npm run ref); ${AGENT_NAME} menawarkan 2-3 konsep (concepts.json) dan user memilih satu sebelum naskah.
 - **Key visual:** assets/keyvisuals/ — wajib muncul / jadi first frame footage / acuan look.
 
-## Diisi Antigravity
+## Diisi ${AGENT_NAME}
 - **Penonton:**
 - **Masalah (hook):**
 - **Janji:**
@@ -524,7 +526,7 @@ createServer(async (req, res) => {
     const url = new URL(req.url, "http://x");
     const p = decodeURIComponent(url.pathname);
     if (req.method !== "GET" && req.method !== "HEAD") listEpoch++;
-    if (p === "/") return send(res, 200, readFileSync(join(ROOT, "tools", "studio", "index.html")), MIME[".html"]);
+    if (p === "/") return send(res, 200, readFileSync(join(ROOT, "tools", "studio", "index.html"), "utf8").replace("<head>", `<head><script>window.AGENT = ${JSON.stringify({ id: AGENT, name: AGENT_NAME })};</script>`), MIME[".html"]);
     // browser tab icon = the Desktop shortcut's icon
     if (p === "/favicon.ico") return serveFile(req, res, join(ROOT, "tools", "tertortor.ico"));
     // PWA (user 2026-11-07): manifest, icons, and the push service worker; the relay serves the same files without login
@@ -596,7 +598,7 @@ createServer(async (req, res) => {
       return send(res, 405, { error: "method" });
     }
     // what Claude is doing after the user's clicks, with estimates, and whether a Claude session is listening at all
-    if (p === "/api/working" && req.method === "GET") return send(res, 200, { claude: claudeWaiting(), antigravity: claudeWaiting(), items: working() });
+    if (p === "/api/working" && req.method === "GET") return send(res, 200, { claude: claudeWaiting(), antigravity: claudeWaiting(), agent: AGENT_NAME, items: working() });
     if (p === "/api/videos" && req.method === "GET") {
       const slugs = existsSync(VIDEOS) ? readdirSync(VIDEOS).filter((s) => !s.startsWith(".") && statSync(join(VIDEOS, s)).isDirectory()) : [];
       // buffered: networks that got a post for this video (tebar.json, plus buffer.json from before Buffer was removed), a badge on the card

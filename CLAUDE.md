@@ -1,9 +1,18 @@
-# TERTORTOR LITE — mesin video vertikal versi ramping (Antigravity / Claude + HyperFrames)
+# TERTORTOR LITE — mesin video vertikal versi ramping (Claude Code + HyperFrames)
 
 Duplikat ramping dari MOTION (`Documents/MOTION`), dibuat 2026-11-12. Folder, git, Studio, dan antrean event-nya
 **terpisah total** dari MOTION: jangan menyalin balik ke MOTION, jangan menyentuh `.events.jsonl` MOTION. Studio LITE
 dijalankan **lokal** di tiap komputer; repo GitHub hanya untuk memasangnya di komputer lain (README). **Tidak ada web
 app/relay** (user 2026-11-12): jangan deploy apa pun dan jangan menyentuh VPS.
+
+## Otak (agen) yang bekerja: `.env → AGENT` (user 2026-11-23)
+
+Satu repo, otaknya dipilih per komputer di `.env`: **`AGENT=claude`** (default, Claude Code: `CLAUDE.md`, `.claude/skills/`,
+chat Studio = `claude -p`) atau **`AGENT=antigravity`** (Google Antigravity: `GEMINI.md`, `.gemini/skills/`, chat Studio =
+Gemini API, butuh `GEMINI_API_KEY`). `tools/agent.mjs` membaca pilihan itu; Studio, label progres, dan brief menyebut nama
+otak yang dipilih (teks sumber boleh menulis "Claude" atau "Antigravity", server menggantinya). Skill ditulis di
+`.claude/skills/` dan `.gemini/skills/` dengan isi sama: ubah keduanya bersamaan. Jangan pernah mengganti default ke otak lain
+di repo; pilihan hanya lewat `.env` di komputer masing-masing.
 
 Pabrik video 9:16 (1080×1920, 30 fps, 30–179 s). Prinsipnya: **AI menulis kode, bukan piksel.** Video adalah HTML +
 timeline GSAP yang dirender HyperFrames ke MP4. Uang hanya dikeluarkan untuk suara dan beberapa detik footage/klip.

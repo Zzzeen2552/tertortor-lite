@@ -20,7 +20,7 @@ gratis (Commons, screen, drawn, type; footage berbayar tetap dilaporkan dulu ses
 Studio bila belum ada, screenshot yang harus diberi user, footage berbayar).
 
 1. **Brief.**
-   - Argumen berupa slug yang sudah ada (dibuat di TERTORTOR, `npm run studio`) → baca `videos/<slug>/brief.md` dan `request.json`. Ide/storyline user adalah sumber utama; lengkapi bagian "Diisi Claude".
+   - Argumen berupa slug yang sudah ada (dibuat di TERTORTOR, `npm run studio`) → baca `videos/<slug>/brief.md` dan `request.json`. Ide/storyline user adalah sumber utama; lengkapi bagian "Diisi <nama agen>" (Claude atau Antigravity).
    - Argumen berupa topik → `npm run new -- <slug> "<topik>"`, isi `brief.md`.
    - **Video referensi** (`assets/reference/` atau `request.json → refLink`): ikuti **`reference.md`** di folder skill ini. Ringkasnya: `npm run ref -- <slug> [link]` mengukur shot, gerak, transkrip, dan tempo bicara → kamu menulis `assets/reference/analysis.md` (5 aspek + apa yang membuatnya berhasil + jalur alat yang jujur) → tulis 2-3 konsep di `concepts.json`, `npm run ref -- check <slug>` → **berhenti sampai user memilih konsep** (tombol di tab "Konsep" TERTORTOR, atau di chat lalu `npm run ref -- pick <slug> <id>`). Naskah ditulis dari konsep yang dipilih. Tiru tempo, cara buka hook, gaya, dan pola audio; jangan meniru isinya, orang, atau mereknya.
    - **Key visual** (`assets/keyvisuals/`): lihat setiap gambar. Tentukan perannya: first frame footage (Flow *Frames to Video*), gambar yang tampil di scene, atau acuan palet (perbarui variabel warna video bila perlu).

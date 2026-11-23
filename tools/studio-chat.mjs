@@ -1,12 +1,14 @@
 // studio-chat.mjs: the Chat panel in TERTORTOR Studio.
-// Uses Antigravity (Gemini API) when GEMINI_API_KEY is available, or Claude Code CLI if configured.
-// Continues conversation from .studio-chat.json so the user can talk to Antigravity directly from Studio.
+// The brain follows .env AGENT (tools/agent.mjs, user 2026-11-23): claude (default) runs Claude Code headless
+// (`claude -p`, stream-json, --resume keeps the conversation); antigravity answers through the Gemini API.
+// History in .studio-chat.json.
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync, renameSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { ROOT } from "./lib.mjs";
 import { gemini } from "./gemini-api.mjs";
+import { AGENT, AGENT_NAME } from "./agent.mjs";
 
 const FILE = join(ROOT, ".studio-chat.json");
 const ARCHIVE = join(ROOT, ".studio-chat");
@@ -22,7 +24,7 @@ const DENIED = [
   "Bash(git commit*)", "Bash(git push*)", "Bash(git reset*)", "Bash(git checkout*)", "Bash(git clean*)", "Bash(rm *)",
   "Bash(node tools/tebar.mjs send*)", "Bash(node tools/wait-event.mjs*)", "Bash(npx hyperframes publish*)", "Bash(taskkill*)",
 ];
-const SYSTEM = `You are Antigravity, answering from the Chat panel inside TERTORTOR Studio (the user's dashboard at localhost:4331, TERTORTOR LITE).
+const SYSTEM = `You are ${AGENT_NAME}, answering from the Chat panel inside TERTORTOR Studio (the user's dashboard at localhost:4331, TERTORTOR LITE).
 - Reply in casual Indonesian, short, helpful, and plain: the panel is narrow and often read on a phone.
 - You know all workflows in TERTORTOR LITE: Video Explainer (Hyperframe, VOX, SNAPCN), Storytelling (Berakit ke Hulu, BumiDiPijak), Advertisement (Flashcut, BRI, App Demo), and Cinematic (AWS).
 - Never commit, push, send to Tebar, publish, delete videos, or spend money/credits unless the user asked for that exact action.
@@ -68,8 +70,9 @@ async function next() {
   const s = load();
   startedAt = new Date().toISOString();
 
-  // If GEMINI_API_KEY is available, use Antigravity (Gemini API) directly
-  if (process.env.GEMINI_API_KEY) {
+  // AGENT=antigravity: Gemini API (needs GEMINI_API_KEY)
+  if (AGENT === "antigravity") {
+    if (!process.env.GEMINI_API_KEY) { push({ role: "error", text: "AGENT=antigravity butuh GEMINI_API_KEY di .env." }); return next(); }
     child = { isGemini: true };
     try {
       const recent = s.messages.slice(-8).map((m) => `${m.role === "user" ? "User" : "Antigravity"}: ${m.text}`).join("\n");
@@ -89,13 +92,13 @@ async function next() {
     return;
   }
 
-  // Fallback to Claude Code CLI if GEMINI_API_KEY is not set
+  // AGENT=claude (default): Claude Code CLI
   const args = ["-p", "--output-format", "stream-json", "--verbose", "--permission-mode", "acceptEdits",
     "--allowedTools", ...ALLOWED, "--disallowedTools", ...DENIED, "--append-system-prompt", SYSTEM,
     ...(s.sessionId ? ["--resume", s.sessionId] : [])];
   try {
     child = spawn(BIN, args, { cwd: ROOT, windowsHide: true, env: { ...process.env, TERTORTOR_CHAT: "1" } });
-  } catch (e) { child = null; push({ role: "error", text: `Antigravity/Claude tidak bisa dijalankan: ${e.message}` }); return next(); }
+  } catch (e) { child = null; push({ role: "error", text: `Claude Code tidak bisa dijalankan (${e.message}). Pasang Claude desktop app / CLI, atau set AGENT=antigravity di .env.` }); return next(); }
   const me = child;
   me.stdin.end((job.context ? `[Studio: ${job.context}]\n\n` : "") + job.text);
   let buf = "", errText = "", gotResult = false;

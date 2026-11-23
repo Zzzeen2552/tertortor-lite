@@ -103,7 +103,7 @@ lalu **berhenti**. User memilih di tab "Konsep" TERTORTOR, atau bilang di chat â
 
 ## 5. Sesudah dipilih
 
-Isi bagian "Diisi Claude" di `brief.md` dari konsep terpilih, lalu lanjut ke naskah (langkah 2 SKILL.md). Tempo
+Isi bagian "Diisi <nama agen>" di `brief.md` dari konsep terpilih, lalu lanjut ke naskah (langkah 2 SKILL.md). Tempo
 referensi (rata-rata shot, kata/menit) jadi acuan di rencana beat: catat di brief, misalnya "beat 1,8-2,5 s seperti
 referensi". Data referensi tetap menjadi acuan sampai render; cocokkan contact sheet akhir dengan `sheet.png`
 referensi.
