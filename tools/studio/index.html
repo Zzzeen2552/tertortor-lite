@@ -1109,13 +1109,8 @@ function paintWork() {
     const w = workingNow.find((x) => x.slug === el.dataset.workbar);
     // job lines (tools/jobline.mjs, user 2026-11-23): one line per finished job of the team, last 3 hours
     const jobs = jobsNow[el.dataset.workbar] ?? [];
-<<<<<<< LITE
-    const team = jobs.length ? `<div class="joblines">${jobs.map((j) => `<div><span class="jt">${hhmm(j.at)}</span> <b>${esc(j.role)}:</b> ${esc(j.text)}</div>`).join("")}</div>` : "";
-    el.innerHTML = w ? `<div class="notice work${claudeOn ? "" : " idle"}" style="margin:0 0 12px"><span><b>${esc(w.label)}…</b> sejak ${hhmm(w.since)} · perkiraan ${esc(etaText(w))}${progressHtml(w)}${claudeOn ? "" : `<br><span class="warn">${idleNote()}</span>`}${team}</span></div>`
-=======
     const team = jobs.length ? `<div class="joblines">${jobs.map((j) => `<div><span class="jt">${hhmm(j.at)}</span> <b class="jrole" style="--rc:var(${ROLE_COLOR(j.role)})">${esc(j.role)}:</b> ${esc(j.text)}</div>`).join("")}</div>` : "";
-    el.innerHTML = w ? `<div class="notice work${claudeOn ? "" : " idle"}" style="margin:0 0 12px"><span><b>${esc(w.label)}…</b> sejak ${hhmm(w.since)} · perkiraan ${esc(etaText(w))}${pctBar(w)}${claudeOn ? "" : `<br><span class="warn">${idleNote()}</span>`}${team}</span></div>`
->>>>>>> MOTION
+    el.innerHTML = w ? `<div class="notice work${claudeOn ? "" : " idle"}" style="margin:0 0 12px"><span><b>${esc(w.label)}…</b> sejak ${hhmm(w.since)} · perkiraan ${esc(etaText(w))}${progressHtml(w)}${claudeOn ? "" : `<br><span class="warn">${idleNote()}</span>`}${team}</span></div>`
       : team ? `<div class="notice work" style="margin:0 0 12px"><span><b>Tim sedang bekerja</b>${team}</span></div>` : "";
   });
   // the Production button is drawn once with the editor; keep it locked while Claude works on that video
