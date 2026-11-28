@@ -11,6 +11,10 @@ sama persis dengan Musafo dan memakai engine yang sama (`tools/musafo.mjs`, stat
 gambar. Bahasa jawaban: Indonesia santai.
 
 ## Alur Berakit ke Hulu (user 2026-11-07)
+**Default (user 2026-11-28 "ambil naskah dari library, perkaya faktanya, bagi jadi beberapa series. minimal 4 bagian"):**
+kisah diambil dari **Library Cerita** (bukan ditulis dari nol), faktanya **diperkaya lewat riset web** (langkah 2), dan ceritanya
+selalu jadi **series minimal 4 bagian** (tiap bagian < 120 s, berakhir di titik tegang). Kisah yang terlalu tipis untuk 4 bagian
+setelah riset: laporkan ke user dan tanya, jangan dipadatkan diam-diam.
 1. **Bahan:** user menempel link artikel (Studio mengambil teksnya ke `assets/reference/bahan.md`) atau teks di formulir,
    atau memakai Library Cerita. Opsional: foto asli tokoh utama (`assets/reference/tokoh/`). Link/teks panjang otomatis masuk
    Library Cerita (`request.json → story_ref.book`) dan semua kisahnya tertaut ke proyek ini: setelah storyline ditulis, kembalikan
@@ -29,7 +33,7 @@ gambar. Bahasa jawaban: Indonesia santai.
    dari riset. Bagian series boleh lebih panjang (tetap < 120 s) supaya perjalanan tokoh (kerja, gagal, ide, bangkit) terasa.
 3. **Storyline langsung** (event `berakitkehulu-new`): **tanpa tahap Draft**. Tulis `storyline.md` + `hooks.json` dari
    `bahan.md` (abaikan komentar pembaca di akhir artikel), lengkap dengan `## Alur asli`, `## Beda dari alur asli`, dan
-   `## Tokoh`. Lebih dari 2 menit = series (`## Bagian k`, tiap bagian < 120 s, berakhir di titik tegang; hook/re-hook/
+   `## Tokoh`. Selalu series **minimal 4 bagian** (`## Bagian k`, tiap bagian < 120 s, berakhir di titik tegang; hook/re-hook/
    cliffhanger bagian 2 dst. di `hooks.json → parts`).
 4. **User mengedit storyline di Studio** (tab Storyline, teks sumber di kiri) lalu menyetujuinya. Setelah
    `request.json → storylineEditedAt` ada, storyline itu kata-kata user: naskah mengikutinya, tidak mengembalikan yang ia hapus.

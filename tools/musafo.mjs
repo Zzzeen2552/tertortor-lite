@@ -1232,6 +1232,7 @@ if (process.argv[1]?.endsWith("musafo.mjs")) {
     for (const l of looks) console.log(`${l.id === cur ? "●" : "○"} ${l.id}  ${l.label}`);
   } else if (cmd === "series") {
     try {
+      if (+rest[0] < 4 && storyType(join(ROOT, "videos", slug)) === "berakitkehulu") console.log("⚠ BKH: series minimal 4 bagian (user 2026-11-28); lanjut karena diminta, tapi cek lagi storyline-nya");
       const made = makeSeries(slug, +rest[0]);
       console.log(`✔ series ${made.length} bagian: ${made.join(", ")}. Tulis musafo.json tiap bagian sesuai "## Bagian k" di storyline.md.`);
     } catch (e) {
