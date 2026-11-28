@@ -936,6 +936,9 @@ button.ichip:hover{filter:brightness(1.1)}
 .csw button{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:500;padding:6px 12px;border-radius:9px;cursor:pointer}
 .csw button:hover{color:var(--fg)}
 .csw button[aria-selected="true"]{background:var(--panel);color:var(--fg);box-shadow:0 1px 0 var(--line-2)}
+#edPanel #tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:0}
+#edPanel #tabs::-webkit-scrollbar{display:none}
+#edPanel #tabs button{flex:none;padding-left:9px;padding-right:9px;font-size:13.5px}
 </style>
 </head>
 <body>
@@ -2670,6 +2673,8 @@ async function viewEditor(slug, startTab) {
     if (CARD_TABS[t] && !card) return;
     const host = card || $("#tabBody");
     if (!card) {
+      document.querySelectorAll("#edPanel .tabpane").forEach((p) => (p.hidden = true));
+      if ($("#tabBody")) $("#tabBody").hidden = false;
       document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.t === t));
       document.querySelector(".ed2")?.classList.toggle("pwide", t === "draft" || (t === "storyline" && !!v.musafo?.sourceText));
     }
@@ -3334,9 +3339,28 @@ async function viewEditor(slug, startTab) {
   };
   // editor bergaya aplikasi edit video (user 2026-11-21): rel ikon kiri membuka/menyembunyikan satu panel, video besar di tengah
   const ed2 = $("#ed2");
+  // Suara, Beat, Aset = tabs in the one tab row of the Naskah card (user 2026-11-28 "banyak bgt tab redundant"):
+  // their cards' contents move into the Naskah card as panes; setPanel("suara") opens that pane
+  const PANES = [["suara", "Suara"], ["beat", "Beat"], ["aset", "Aset"]].filter(([k]) => ed2.querySelector(`[data-panel="${k}"]`));
+  const nCard = ed2.querySelector('[data-panel="naskah"]');
+  if (nCard && $("#tabs")) for (const [k, lab] of PANES) {
+    const card = ed2.querySelector(`[data-panel="${k}"]`), pane = document.createElement("div");
+    pane.className = "tabpane"; pane.dataset.pane = k; pane.hidden = true;
+    [...card.children].filter((c) => !c.classList.contains("ocard-h")).forEach((c) => pane.append(c));
+    nCard.append(pane); card.remove(); if (card.id) pane.id = card.id; // #suaraCard keeps its Suara / API Gemini sub-tabs
+    $("#tabs").insertAdjacentHTML("beforeend", `<button type="button" data-pane="${k}">${lab}</button>`);
+  }
+  const showPane = (k) => {
+    if (!ed2.querySelector(`.tabpane[data-pane="${k}"]`)) return false;
+    ed2.querySelectorAll(".tabpane").forEach((p) => (p.hidden = p.dataset.pane !== k));
+    if ($("#tabBody")) $("#tabBody").hidden = true;
+    document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.pane === k));
+    return true;
+  };
   if ($("#edTabs") && ed2.querySelector(".rail")) $("#edTabs").append(ed2.querySelector(".rail"));
   const setPanel = (pnl) => {
     if (pnl === "tebar") pnl = "thumb";
+    if (PANES.some(([k]) => k === pnl)) pnl = showPane(pnl) ? "naskah" : "";
     if (pnl && !ed2.querySelector(`[data-panel="${pnl}"]`)) pnl = "";
     ed2.dataset.p = pnl;
     ed2.querySelectorAll("[data-panel]").forEach((c) => c.classList.toggle("on", c.dataset.panel === pnl));
@@ -3346,6 +3370,7 @@ async function viewEditor(slug, startTab) {
   };
   window.__edPanel = setPanel;
   document.querySelectorAll("#main [data-rail]").forEach((b) => (b.onclick = () => setPanel(b.dataset.rail)));
+  document.querySelectorAll("#tabs [data-pane]").forEach((b) => (b.onclick = () => setPanel(b.dataset.pane)));
   document.querySelectorAll("#main [data-goto-panel]").forEach((b) => (b.onclick = () => setPanel(b.dataset.gotoPanel)));
   document.querySelectorAll("#main [data-ratio]").forEach((b) => (b.onclick = () => {
     if (b.dataset.ratio === v.ratio) return;
@@ -3372,15 +3397,6 @@ async function viewEditor(slug, startTab) {
     }
   }
   ed2.querySelectorAll("[data-panel] > .ocard-h").forEach((h) => h.insertAdjacentHTML("beforeend", '<button type="button" class="pclose" aria-label="Sembunyikan panel" title="Sembunyikan panel">×</button>'));
-  // Suara, Beat, Aset are tabs inside the card, next to Naskah (user 2026-11-28 "Suara beat aset jadiin tab di dalam card")
-  const CSW = [["naskah", "Naskah"], ["suara", "Suara"], ["beat", "Beat"], ["aset", "Aset"]].filter(([k]) => ed2.querySelector(`[data-panel="${k}"]`));
-  if (CSW.length > 1) CSW.forEach(([k]) => {
-    const h = ed2.querySelector(`[data-panel="${k}"] > .ocard-h`);
-    if (!h) return;
-    h.classList.add("has-csw");
-    h.insertAdjacentHTML("afterbegin", `<div class="csw" role="tablist">${CSW.map(([key, lab]) => `<button type="button" role="tab" data-csw="${key}" aria-selected="${key === k}">${lab}</button>`).join("")}</div>`);
-  });
-  ed2.querySelectorAll("[data-csw]").forEach((b) => (b.onclick = () => setPanel(b.dataset.csw)));
   ed2.querySelectorAll(".pclose").forEach((b) => (b.onclick = () => setPanel("")));
   let savedPanel = "naskah"; try { const x = localStorage.getItem("tt_panel"); if (x !== null) savedPanel = x; } catch {}
   setPanel(savedPanel);
@@ -3449,9 +3465,8 @@ async function viewEditor(slug, startTab) {
     const i = cur ? S.indexOf(cur) : S.length;
     // which step is on screen: its panel (Render = Publikasi) or its tab inside the Naskah panel
     const pnl = ed2.dataset.p, tabOn = document.querySelector("#tabs button.on")?.dataset.t;
-    const shows = (s) => (s.tab ? pnl === "naskah" && tabOn === s.tab : !!s.panel && pnl === s.panel);
-    const SUB = [["suara", "Suara"], ["beat", "Beat"], ["aset", "Aset"]].filter(([k]) => ed2.querySelector(`[data-panel="${k}"]`));
-    const subAt = S.findIndex((s) => s.key === "prod") >= 0 ? S.findIndex((s) => s.key === "prod") : S.findIndex((s) => s.key === "render") - 1;
+    const paneOn = ed2.querySelector(".tabpane:not([hidden])")?.dataset.pane;
+    const shows = (s) => (s.tab ? pnl === "naskah" && !paneOn && tabOn === s.tab : !!s.panel && (pnl === s.panel || paneOn === s.panel));
     dock.innerHTML = `<div class="fd-main"><ol class="fd-steps">${S.map((s, k) => `<li class="${s.done ? "done" : k === i ? "now" : ""}${shows(s) ? " view" : ""}"><button type="button" data-step="${k}" title="Buka ${esc(s.label)}"><i>${s.done ? "✓" : k + 1}</i><span>${esc(s.label)}</span></button></li>`).join("")}</ol></div>
       <div class="fd-act">${note ? `<small class="fd-note">${esc(note)}</small>` : ""}
       <button type="button" class="btn pri fd-go${off ? " is-off" : ""}${run ? " is-run" : ""}" id="fdGo" aria-disabled="${off}">${run ? `<span class="fd-spin"></span>` : ""}${esc(label)}${run ? ` <b class="fd-pct">${workPct(run)} %</b>` : ""}</button>${run ? `<div class="wbar fd-bar"><i style="width:${workPct(run)}%"></i></div>` : ""}</div>`;
