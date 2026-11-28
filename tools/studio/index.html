@@ -940,6 +940,23 @@ button.ichip:hover{filter:brightness(1.1)}
 #edPanel #tabs button{flex:none;padding-left:9px;padding-right:9px;font-size:13.5px}
 #edPanel .drgrid{grid-template-columns:minmax(0,1fr)}
 #edPanel .drgrid .drsrc{max-height:260px;overflow:auto}
+/* palet pendukung (user 2026-11-28): oranye tetap warna utama; ungu, merah koral, biru langit, pink untuk penanda sekunder.
+   Avatar Suara narasi tidak memakai palet ini. */
+:root{--c-purple:#7B6CF6;--c-coral:#EF5B5B;--c-sky:#4AA8D8;--c-pink:#D97BC0}
+.mk-cats button{justify-content:flex-start}
+.mk-cats button small{margin-left:auto}
+.mk-cats button::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;background:var(--c-purple)}
+.mk-cats button:nth-child(4n+2)::before{background:var(--c-coral)}
+.mk-cats button:nth-child(4n+3)::before{background:var(--c-sky)}
+.mk-cats button:nth-child(4n+4)::before{background:var(--c-pink)}
+.tl-lab.k-v svg{color:var(--c-sky)} .tl-lab.k-a svg{color:var(--c-purple)} .tl-lab.k-c svg{color:var(--c-coral)}
+.tsh{border-color:color-mix(in srgb,var(--c-sky) 55%,transparent);background:color-mix(in srgb,var(--c-sky) 22%,var(--panel-2))}
+.tl-aud{background:color-mix(in srgb,var(--c-purple) 14%,var(--panel-2));border-color:color-mix(in srgb,var(--c-purple) 35%,transparent)}
+.tl-aud i{background:color-mix(in srgb,var(--c-purple) 75%,#fff)}
+.tl-cap{background:var(--c-coral)}
+.jrole{display:inline-flex;align-items:center;gap:6px}
+.jrole::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--rc)}
+.pill.ok{background:color-mix(in srgb,var(--ok) 12%,transparent)}
 </style>
 </head>
 <body>
@@ -1092,8 +1109,13 @@ function paintWork() {
     const w = workingNow.find((x) => x.slug === el.dataset.workbar);
     // job lines (tools/jobline.mjs, user 2026-11-23): one line per finished job of the team, last 3 hours
     const jobs = jobsNow[el.dataset.workbar] ?? [];
+<<<<<<< LITE
     const team = jobs.length ? `<div class="joblines">${jobs.map((j) => `<div><span class="jt">${hhmm(j.at)}</span> <b>${esc(j.role)}:</b> ${esc(j.text)}</div>`).join("")}</div>` : "";
     el.innerHTML = w ? `<div class="notice work${claudeOn ? "" : " idle"}" style="margin:0 0 12px"><span><b>${esc(w.label)}…</b> sejak ${hhmm(w.since)} · perkiraan ${esc(etaText(w))}${progressHtml(w)}${claudeOn ? "" : `<br><span class="warn">${idleNote()}</span>`}${team}</span></div>`
+=======
+    const team = jobs.length ? `<div class="joblines">${jobs.map((j) => `<div><span class="jt">${hhmm(j.at)}</span> <b class="jrole" style="--rc:var(${ROLE_COLOR(j.role)})">${esc(j.role)}:</b> ${esc(j.text)}</div>`).join("")}</div>` : "";
+    el.innerHTML = w ? `<div class="notice work${claudeOn ? "" : " idle"}" style="margin:0 0 12px"><span><b>${esc(w.label)}…</b> sejak ${hhmm(w.since)} · perkiraan ${esc(etaText(w))}${pctBar(w)}${claudeOn ? "" : `<br><span class="warn">${idleNote()}</span>`}${team}</span></div>`
+>>>>>>> MOTION
       : team ? `<div class="notice work" style="margin:0 0 12px"><span><b>Tim sedang bekerja</b>${team}</span></div>` : "";
   });
   // the Production button is drawn once with the editor; keep it locked while Claude works on that video
@@ -2123,6 +2145,9 @@ function viewNewAd(productId) {
 
 // Editor gaya aplikasi edit video (user 2026-11-27, acuan screenshot "Packing Light"): kolom kanan Suara + Gaya visual,
 // panel Timeline di bawah dengan trek Video / Audio / Caption dan playhead yang ikut video.
+// pendukung aksen oranye (user 2026-11-28, palet ungu / merah koral / biru langit / pink)
+const PALETTE = ["--c-purple", "--c-coral", "--c-sky", "--c-pink"];
+const ROLE_COLOR = (r) => PALETTE[[...String(r)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 997, 3) % PALETTE.length];
 const hueOf = (s) => [...String(s)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
 const subCover = (v) => (v.sub ? `<img src="/api/subs/${v.category}/${encodeURIComponent(v.sub)}/cover" alt="" loading="lazy" onerror="this.remove()">` : "");
 const waveBars = (n, seed) => Array.from({ length: n }, (_, i) => `<i style="height:${Math.round(18 + 78 * Math.abs(Math.sin(i * 0.37 + seed) * Math.cos(i * 0.113 + seed / 3)))}%"></i>`).join("");
@@ -2162,7 +2187,7 @@ const timelineHtml = (v, isM, thumb) => {
   const aud = vs || v.voice?.audio ? `<div class="tl-aud" style="width:${T && vs ? Math.min(100, (vs / T) * 100) : 100}%">${waveBars(160, 1.3)}<em>${vs ? vs.toFixed(1) + "s" : "suara"}${v.voice?.draft ? " · draft" : ""}</em></div>` : empty("Belum ada suara.");
   const cap = segs.filter((x) => x.cap).length ? segs.map((x) => `<div class="tl-cap${x.cap ? "" : " none"}" title="${esc(x.cap)}" style="${w(x)}">${esc(x.cap)}</div>`).join("") : empty("Belum ada teks.");
   const ico = { v: '<path d="M3 6h13v12H3zM16 10l5-3v10l-5-3"/>', a: '<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>', c: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 11h4M7 14h8M13 11h4"/>' };
-  const lab = (k, n) => `<div class="tl-lab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${ico[k]}</svg><span>${n}</span></div>`;
+  const lab = (k, n) => `<div class="tl-lab k-${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${ico[k]}</svg><span>${n}</span></div>`;
   return `<section class="ed2-tl" aria-label="Timeline">
       <div class="tl-h"><b>Timeline${kind === "shot" && !v.duration ? '<small>perkiraan dari naskah</small>' : ""}</b>
         <div class="tl-ctl"><button type="button" class="tl-play" id="tlPlay" ${v.video ? "" : "disabled"} aria-label="Putar" title="${v.video ? "Putar / jeda" : "Belum ada render"}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
