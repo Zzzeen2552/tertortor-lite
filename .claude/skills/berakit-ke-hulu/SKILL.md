@@ -27,8 +27,10 @@ gambar. Bahasa jawaban: Indonesia santai.
 ## Tokoh: foto asli → character sheet per usia (user 2026-11-07)
 - Usia tokoh utama dari `## Tokoh` di storyline (mis. anak 9-12, remaja, pemuda, dewasa, tua). Catat di
   `musafo.json → characters: [{ "id": "eka-anak", "name": "Eka Tjipta", "age": "9-12 tahun", "desc": "<satu kalimat Inggris>" }]`.
-- **Satu character sheet per usia di Google Flow** (Nano Banana, gratis): ingredients = foto asli dari
-  `assets/reference/tokoh/` (pilih yang paling dekat usianya) + 1 adegan gaya dari `berakitkehulu/reference/gambar/`.
+- **Satu character sheet per usia di ChatGPT (GPT Image)**, bukan Muse dan bukan Flow (user 2026-11-18 "character sheet bukannya
+  dibuat di chatgpt?" setelah sheet Bob Sadino tertahan di antrean Muse yang di-pause): lanjutkan chat ChatGPT gaya BKH
+  (memori `bkh-preset2-pipeline`, 3 acuan gaya sudah ada di sana), lampirkan foto asli dari `assets/reference/tokoh/` (pilih
+  yang paling dekat usianya) sebagai acuan wajah. Flow (Nano Banana) hanya cadangan; Muse tidak dipakai untuk sheet.
   Prompt: "Create a character reference sheet, 16:9, of <desc>: front view, three-quarter view, side profile and full
   body standing, plus three facial expressions (worried, determined, smiling), on a plain warm grey background, same face
   in every view, resembling the person in the reference photos at age <usia>." lalu `styleAnchor`. Wajah **mirip foto user**
@@ -140,10 +142,10 @@ dicek manual dulu.
 - `script-approved`: `node tools/script-edit.mjs list <slug>` lalu berhenti. Tombol **Production** (event `production`):
   suara satu take Gemini TTS (style dari `request.json → voiceStyle`) → build → key visual semua shot di **ChatGPT (GPT
   Image)**, lalu laporkan. Klip menunggu keputusan user (skill `/musafo` § 3b, 5).
+- **Gambar ChatGPT di project "TERTORTOR"** (user 2026-11-19): semua key visual dan character sheet dibuat di project ChatGPT bernama TERTORTOR, satu chat per video; pesan pertama melampirkan sheet usia + frame bagian sebelumnya (tokoh lain) + acuan gaya.
 - **Default alat BKH (user 2026-11-14):** gambar (key visual + character sheet) dibuat di **ChatGPT**, video (klip per shot)
-  di **Meta Muse** (`node tools/muse.mjs video` / MCP `muse4ai`, image-to-video dari key visual, satu akun, kuota dicatat di
-  `costs.md`). Flow dan RunningHub H3 jadi cadangan. Aturan Muse lain di CLAUDE.md tetap (`muse_status` dulu, `request_id`
-  unik, job `running`/`needs_review` tidak dikirim ulang). Klip Muse keluar 16:9 1280×720 di uji 2026-11-11: cek rasio
+  di **Meta Muse lewat muse.ai di Chrome** (Muse4AI dihapus user 2026-11-25; image-to-video dari key visual, satu side chat per
+  generate, satu akun, kuota dicatat di `costs.md`). Flow dan RunningHub H3 jadi cadangan. Klip Muse keluar 16:9 1280×720 di uji 2026-11-11: cek rasio
   hasil pertama, dan bila bukan 9:16 laporkan ke user sebelum lanjut.
 - **Prompt Muse = `node tools/musafo.mjs muse <slug> [s01,s02]`** (user 2026-11-15 "wajahnya terus berubah"): jangan
   menulis prompt Muse sendiri. Satu generate = satu adegan tanpa cut kecuali adegan tanpa orang; gaya tidak ditulis ulang

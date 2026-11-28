@@ -1,0 +1,65 @@
+{
+  "id": "cutaway",
+  "label": "Line-Art Cutaway (gambar teknik)",
+  "description": "Gambar teknik garis hitam di atas kertas hangat bertitik grid: benda nyata digambar ulang sebagai garis yang ditelusuri di depan mata, dibuka (potongan, tampilan exploded), diberi callout huruf, lup pembesar dengan garis putus-putus, dan garis ukur. Satu warna aksen hanya untuk satu jalur yang sedang dijelaskan. Label mono kecil, judul sans tebal. Cocok untuk 'apa isi benda ini', cara kerja alat, salah kaprah sehari-hari, dan explainer teknologi.",
+  "colors": {
+    "ground": "#F3F1EA",
+    "ink": "#17171B",
+    "muted": "#8C8A84",
+    "accent": "#FF5A1F",
+    "alert": "#D7261E",
+    "card": "#FFFFFF",
+    "paper": "#F3F1EA"
+  },
+  "fonts": {
+    "display": "Inter",
+    "body": "Inter",
+    "caption": "Inter",
+    "mono": "JetBrains Mono"
+  },
+  "captions": {
+    "y": 1190,
+    "size": 60,
+    "weight": 700,
+    "maxWords": 3,
+    "uppercase": false,
+    "color": "#17171B",
+    "activeColor": "#C8410F",
+    "pill": "#FFFFFF",
+    "radius": 6,
+    "textShadow": "none"
+  },
+  "sfx": {
+    "cut": "tick",
+    "marks": {
+      "path": "tick",
+      "zoom": "pop",
+      "slam": "thump",
+      "tap": "pop",
+      "call": "tick"
+    }
+  },
+  "tones": [
+    {
+      "label": "Oranye",
+      "accent": "#FF5A1F"
+    },
+    {
+      "label": "Biru teknik",
+      "accent": "#1F6FEB"
+    },
+    {
+      "label": "Merah",
+      "accent": "#E5322D"
+    },
+    {
+      "label": "Hijau",
+      "accent": "#12A150"
+    },
+    {
+      "label": "Ungu",
+      "accent": "#7B4DFF"
+    }
+  ],
+  "css": ":root { --line: var(--ink); --face: #E7E4DC; --acc-ink: color-mix(in srgb, var(--accent) 78%, #000); }\n/* paper with a faint dot grid and plus marks every fourth dot */\n.lc-paper { position: absolute; inset: 0; overflow: hidden; background-color: var(--ground); background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cpath d='M120 109v22M109 120h22' stroke='%2317171B' stroke-opacity='.28' stroke-width='2'/%3E%3C/svg%3E\"), radial-gradient(circle, color-mix(in srgb, var(--ink) 20%, transparent) 0 2px, transparent 2.5px); background-size: 240px 240px, 60px 60px; background-position: 0 0, 30px 30px; }\n.lc-paper.plain { background-image: radial-gradient(circle, color-mix(in srgb, var(--ink) 18%, transparent) 0 2px, transparent 2.5px); background-size: 60px 60px; }\n/* drawings: every stroke traces on (script gives each path pathLength 1) */\n.lc-draw { position: absolute; overflow: visible; }\n.lc-draw .l { fill: none; stroke: var(--line); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }\n.lc-draw .t { fill: none; stroke: var(--line); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }\n.lc-draw .g { fill: var(--face); stroke: none; }\n.lc-draw .w { fill: #fff; stroke: none; }\n.lc-draw .a { fill: none; stroke: var(--accent); stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }\n.lc-draw .af { fill: var(--accent); stroke: none; }\n.lc-draw .dash { fill: none; stroke: var(--line); stroke-width: 2.4; stroke-dasharray: 2 9; stroke-linecap: round; }\n.lc-draw [pathLength] { stroke-dasharray: 1 1; }\n.lc-draw .dash[pathLength] { stroke-dasharray: .006 .018; }\n/* type */\n.lc-title { position: absolute; left: 80px; right: 80px; font: 800 112px/1.02 var(--font-display); letter-spacing: -.01em; text-transform: uppercase; color: var(--ink); }\n.lc-title .w { display: inline-block; overflow: hidden; vertical-align: top; padding: .02em .02em .03em; }\n.lc-title .w > b { display: inline-block; font-weight: inherit; }\n.lc-title em, .lc-title .w.k > b { font-style: normal; color: var(--acc-ink); }\n.lc-label { position: absolute; font: 700 32px/1.2 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink); white-space: nowrap; }\n.lc-note { position: absolute; font: 400 28px/1.3 var(--font-mono); color: color-mix(in srgb, var(--ink) 62%, var(--ground)); }\n.lc-head { position: absolute; left: 80px; right: 80px; top: 192px; display: flex; justify-content: space-between; font: 400 28px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: color-mix(in srgb, var(--ink) 55%, var(--ground)); }\n/* callout: ring with a letter (a digit on screen must be spoken, so letters by default) */\n.lc-call { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; border: 3px solid var(--ink); background: var(--ground); display: grid; place-items: center; font: 700 30px/1 var(--font-mono); color: var(--ink); }\n.lc-call.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }\n/* loupe: magnified detail in a ring, joined to the drawing by a dashed leader */\n.lc-loupe { position: absolute; border-radius: 50%; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 4px var(--ink); }\n.lc-loupe > svg { position: absolute; inset: 0; width: 100%; height: 100%; }\n/* photo / clip plate: grayscale print on the paper with crop marks */\n.lc-plate { position: absolute; }\n.lc-plate .img { position: absolute; inset: 0; overflow: hidden; outline: 3px solid var(--ink); }\n.lc-plate .img > video, .lc-plate .img > img { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.08) brightness(1.06); }\n.lc-plate::before, .lc-plate::after { content: \"\"; position: absolute; width: 46px; height: 46px; border: 0 solid var(--ink); }\n.lc-plate::before { left: -24px; top: -24px; border-width: 3px 0 0 3px; }\n.lc-plate::after { right: -24px; bottom: -24px; border-width: 0 3px 3px 0; }\n.lc-hl { position: absolute; border: 8px solid var(--accent); border-radius: 12px; }\n/* phone outline around a REAL screenshot */\n.lc-phone { position: absolute; padding: 14px; border-radius: 60px; border: 3px solid var(--ink); background: #fff; }\n.lc-phone .screen { width: 100%; height: 100%; border-radius: 46px; overflow: hidden; outline: 2px solid var(--ink); background: #000; }\n.lc-phone .screen > img, .lc-phone .screen > video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }\n.lc-ring { position: absolute; border: 8px solid var(--accent); border-radius: 22px; }\n.lc-loupe::after { content: \"\"; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 0 4px var(--ink); }"
+}

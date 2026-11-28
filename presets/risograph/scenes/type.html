@@ -1,0 +1,64 @@
+<template>
+  <!-- register: type (preset risograph: a printed poster headline over three spot-ink plates)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Plates: rg-a = blue, rg-b = accent (pink by default), rg-c = yellow; shapes inside a plate take its ink
+       (class ht / ht-lo / ht-hi = halftone, rg-solid = full ink). Overlaps mix by multiply. The em word (else the last)
+       gets a yellow marker band; the title's accent copy prints a few px off. Mark "pop" = the sun disc thumps. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-title { top: 250px; }
+    #__ID__-kick { top: 610px; }
+    #__ID__-band { left: -40px; right: -40px; top: 740px; height: 300px; }
+    #__ID__-sun { left: 560px; top: 520px; width: 440px; height: 440px; }
+    #__ID__-hills { left: -20px; top: 900px; width: 1120px; height: 440px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="rg-paper">
+      <div id="__ID__-pc" class="rg-plate rg-c"><div id="__ID__-band" class="ht-hi"></div></div>
+      <div id="__ID__-pb" class="rg-plate rg-b"><div id="__ID__-sun" class="rg-disc ht-hi"></div></div>
+      <div id="__ID__-pa" class="rg-plate rg-a">
+        <svg id="__ID__-hills" class="rg-svg" viewBox="0 0 1120 440"><path class="f" d="M0 180 Q160 60 320 150 T640 140 T960 120 T1120 110 L1120 440 L0 440 Z" opacity=".85" /><path class="s" d="M0 230 Q200 130 420 210 T860 190 T1120 170" /></svg>
+      </div>
+      <div id="__ID__-title" class="rg-title" data-safe="text">__HERO__</div>
+      <div id="__ID__-kick" class="rg-kick" data-safe="text">__JOB__</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push('<span class="w' + (hot ? " k" : "") + '" data-layout-allow-overflow><b data-t="' + w + '">' + w + '</b></span>');
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+      const longest = Math.max(...[...el.querySelectorAll(".w")].map((w) => w.textContent.length));
+      el.style.fontSize = Math.min(170, Math.floor(920 / (0.82 * longest))) + "px";
+    };
+    // misregistration: the accent plate and the title's under-plate jump to a new small offset four times a second
+    const OFF = [[7, 5], [4, 8], [9, 3], [5, 6], [8, 7], [3, 4]];
+    const jitter = (sel, title) => {
+      const n = Math.max(1, Math.ceil(D * 4));
+      for (let i = 0; i < n; i++) {
+        const [x, y] = OFF[i % OFF.length];
+        if (sel) tl.set(sel, { x: x - 6, y: y - 5 }, i * 0.25);
+        if (title) tl.set(title, { "--mx": x + "px", "--my": y + "px" }, i * 0.25);
+      }
+    };
+    // plates are laid down one by one (stepped, like sheets going through the drum)
+    const lay = (sels, at) => sels.forEach((s, i) => tl.fromTo(s, { xPercent: -6 }, { xPercent: 0, duration: 0.18, ease: "steps(3)" }, at + i * 0.08));
+    const rise = (sel, at) => { const w = document.querySelectorAll(sel + " .w > b"); tl.fromTo(w, { yPercent: 30 }, { yPercent: 0, duration: 0.2, ease: "steps(4)", stagger: Math.min(0.05, 0.2 / Math.max(1, w.length - 1)) }, at); };
+    const T = document.querySelector("#__ID__-title"); split(T);
+    lay(["#__ID__-pc", "#__ID__-pb", "#__ID__-pa"], 0);
+    rise("#__ID__-title", 0.02);
+    tl.fromTo("#__ID__-kick", { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "steps(3)" }, 0.3);
+    tl.fromTo("#__ID__-sun", { y: 0 }, { y: -50, duration: D, ease: "steps(" + Math.max(2, Math.round(D * 6)) + ")" }, 0);
+    tl.fromTo("#__ID__-hills", { x: 0 }, { x: -40, duration: D, ease: "none" }, 0);
+    jitter("#__ID__-pb", T);
+    if (C.pop != null) tl.fromTo("#__ID__-sun", { scale: 1.12 }, { scale: 1, duration: 0.2, ease: "steps(4)", immediateRender: false }, C.pop);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

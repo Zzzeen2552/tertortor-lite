@@ -1,0 +1,35 @@
+<!-- Spy Titles blocks: paste into a scene and prefix every id with the beat id (here written __ID__). -->
+
+<!-- 1. WOMAN silhouette (wide-brim hat, A-line coat, red bag = the marked character). Same leg/arm rig as the man in
+     scenes/type.html: legs pivot at svgOrigin "54 182" / "64 182", arm at "70 78". Feet at y 300. -->
+<svg id="__ID__-woman" class="sp-sil" viewBox="0 0 120 300" style="left:700px;top:750px;width:150px;height:375px">
+  <g id="__ID__-wLegB" class="ink"><path d="M50 182 L50 284 L44 300 L58 300 L58 284 L58 182 Z" /></g>
+  <g id="__ID__-wLegF" class="ink"><path d="M60 182 L60 284 L54 300 L70 300 L68 284 L68 182 Z" /></g>
+  <path class="ink" d="M46 66 Q60 58 74 66 L92 190 Q60 200 28 190 Z" />
+  <g id="__ID__-wArm"><path class="ink" d="M70 74 L86 150 L77 153 L62 80 Z" /><path class="hot" d="M74 140 L98 140 L96 172 L76 172 Z" /></g>
+  <circle class="ink" cx="60" cy="48" r="13" />
+  <path class="ink" d="M16 40 Q60 26 104 40 Q60 50 16 40 Z M42 38 Q60 16 78 38 Z" />
+</svg>
+
+<!-- 2. ROOFTOP CHASE: moon spotlight, red roofs with lit windows, two silhouettes running left to right.
+     Put inside a .sp-world (black). Runners: animate x with st(D) and the legs like scenes/type.html (stride 0.24 s). -->
+<div id="__ID__-moon" class="sp-moon" style="left:250px;top:300px;width:580px;height:580px"></div>
+<div id="__ID__-roofs" class="sp-roofs" style="top:900px;height:430px">
+  <i style="height:300px"></i><i style="height:390px"></i><i style="height:260px"></i><i style="height:430px"></i><i style="height:330px"></i>
+</div>
+<!-- runners stand on the roof line (top 900 + roof gap): use the man svg twice, the chaser with class "ink" only -->
+
+<!-- 3. KEYHOLE window for footage (instead of the circle in scenes/footage.html): on #__ID__-hole set
+     clip-path: path("M370 30 A220 220 0 0 1 482 440 L560 1000 L180 1000 L258 440 A220 220 0 0 1 370 30 Z")
+     with width 740 / height 1000, and open it with a scale 0.2 -> 1 steps(4) instead of the circle iris. -->
+
+<!-- 4. SLASH cut (the opening move of a title sequence): a red band crosses the frame in 0.15 s, then holds.
+     tl.fromTo("#__ID__-slash", { scaleX: 0 }, { scaleX: 1, duration: 0.15, ease: "steps(3)" }, 0); -->
+<div id="__ID__-slash" class="sp-slash" style="top:760px;transform:rotate(-58deg)"></div>
+
+<!-- 5. FACE-DOWN PHONE motif (no screenshot available = never draw the UI; show the object instead). -->
+<svg id="__ID__-fdphone" class="sp-sil" viewBox="0 0 300 520" style="left:390px;top:520px;width:300px;height:520px">
+  <rect class="ink" x="20" y="20" width="260" height="480" rx="40" />
+  <circle class="paper" cx="90" cy="90" r="26" /><circle class="paper" cx="90" cy="160" r="26" />
+  <rect class="hot" x="20" y="430" width="260" height="10" />
+</svg>

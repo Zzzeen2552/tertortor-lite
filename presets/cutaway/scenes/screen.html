@@ -1,0 +1,51 @@
+<template>
+  <!-- register: screen (preset cutaway: a REAL screenshot assets/screens/__ID__.png in a thin line phone, one row called out)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Never draw or generate an app UI or a chat. Crop out names, numbers and faces of real people. ROW = top of the
+       row talked about, in screen pixels (screen = 434 x 854); mark "tap" draws the accent ring there and a leader to
+       a mono label at the right. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-phone { left: 120px; top: 250px; width: 470px; height: 890px; }
+    #__ID__-placeholder { width: 100%; height: 100%; display: grid; place-items: center; font: 700 44px var(--font-mono); letter-spacing: .08em; color: #55534d; background: repeating-linear-gradient(45deg, #f4f2ec 0 20px, #e6e3db 20px 40px); }
+    #__ID__-ring { left: 128px; width: 454px; height: 112px; }
+    #__ID__-lead { left: 0; top: 0; width: 1080px; height: 1920px; }
+    #__ID__-lab { left: 640px; width: 380px; white-space: normal; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="lc-paper">
+      <div id="__ID__-head" class="lc-head" data-safe="text"><span>__JOB__</span><span>screen</span></div>
+      <div id="__ID__-phone" class="lc-phone">
+        <div class="screen">
+          <!-- Replace with: <img id="__ID__-shot" src="assets/screens/__ID__.png" alt="" /> -->
+          <div id="__ID__-placeholder">SCREENSHOT</div>
+        </div>
+      </div>
+      <div id="__ID__-ring" class="lc-ring"></div>
+      <svg id="__ID__-lead" class="lc-draw" viewBox="0 0 1080 1920" style="pointer-events:none"><path id="__ID__-leadp" class="t" d="" /></svg>
+      <div id="__ID__-lab" class="lc-label" data-safe="text">__HERO__</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const ROW = 320; // top of the row being talked about (0-854 inside the screen)
+    const top = 250 + 18 + ROW - 8, mid = top + 56;
+    const lp = document.querySelector("#__ID__-leadp");
+    if (lp) { lp.setAttribute("d", `M582 ${mid} L640 ${mid} L640 ${mid - 60} L700 ${mid - 60}`); lp.setAttribute("pathLength", "1"); }
+    tl.set("#__ID__-ring", { top }, 0);
+    tl.set("#__ID__-lab", { top: mid - 140 }, 0);
+    tl.fromTo("#__ID__-head", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, 0);
+    tl.fromTo("#__ID__-phone", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power3.out" }, 0);
+    tl.fromTo("#__ID__-phone", { scale: 1 }, { scale: 1.025, duration: D, ease: "none", immediateRender: false }, 0.3);
+    if (C.tap != null) {
+      tl.fromTo("#__ID__-ring", { opacity: 0, scale: 1.15 }, { opacity: 1, scale: 1, duration: 0.2, ease: "power3.out" }, C.tap);
+      tl.fromTo("#__ID__-leadp", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.25, ease: "power2.out" }, C.tap + 0.08);
+      tl.fromTo("#__ID__-lab", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.22, ease: "power2.out" }, C.tap + 0.2);
+    } else {
+      tl.set(["#__ID__-ring", "#__ID__-leadp"], { opacity: 0 }, 0);
+      tl.fromTo("#__ID__-lab", { opacity: 0 }, { opacity: 1, duration: 0.22, ease: "power2.out" }, 0.3);
+    }
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

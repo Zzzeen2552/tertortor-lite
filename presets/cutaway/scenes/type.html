@@ -1,0 +1,58 @@
+<template>
+  <!-- register: type (preset cutaway: headline on the drawing sheet, measured by a dimension line)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- The headline is set like a title block on a technical sheet: the em word (else the last word) is the accent
+       word and gets an accent rule under it at mark "slam". The dimension line under the headline carries a short
+       mono note (the measurement or the claim); a number in it must be spoken. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-block { position: absolute; left: 80px; right: 80px; top: 360px; }
+    #__ID__-title { position: relative; left: 0; right: 0; font-size: 150px; }
+    #__ID__-dim { position: relative; display: block; width: 920px; height: 80px; margin-top: 56px; }
+    #__ID__-note { position: relative; margin-top: 18px; text-align: center; }
+    #__ID__-cA { left: 80px; top: 300px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="lc-paper">
+      <div id="__ID__-head" class="lc-head" data-safe="text"><span>__JOB__</span><span>sheet</span></div>
+      <div id="__ID__-block">
+        <div id="__ID__-title" class="lc-title" data-safe="text">__HERO__</div>
+        <svg id="__ID__-dim" class="lc-draw" viewBox="0 0 920 80">
+          <path class="t" d="M4 10 L4 70 M916 10 L916 70" />
+          <path class="l" d="M10 40 L910 40 M10 40 L34 28 M10 40 L34 52 M910 40 L886 28 M910 40 L886 52" />
+          <path class="t" d="M100 34 L100 46 M190 34 L190 46 M280 34 L280 46 M370 34 L370 46 M550 34 L550 46 M640 34 L640 46 M730 34 L730 46 M820 34 L820 46" />
+        </svg>
+        <div id="__ID__-note" class="lc-note" data-safe="text">one line that measures the claim</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push(`<span class="w${hot ? " k" : ""}" data-layout-allow-overflow><b>${w}</b></span>`);
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+      const longest = Math.max(...[...el.querySelectorAll(".w")].map((w) => w.textContent.length));
+      el.style.fontSize = Math.min(160, Math.floor(920 / (0.72 * longest))) + "px";
+    };
+    split(document.querySelector("#__ID__-title"));
+    const words = document.querySelectorAll("#__ID__-title .w > b");
+    const key = document.querySelectorAll("#__ID__-title .w.k > b");
+    key.forEach((b) => Object.assign(b.style, { backgroundImage: "linear-gradient(var(--accent), var(--accent))", backgroundRepeat: "no-repeat", backgroundPosition: "0 96%", backgroundSize: "0% 0.07em" }));
+    const lines = [...document.querySelectorAll("#__ID__-dim .l, #__ID__-dim .t")];
+    lines.forEach((p) => p.setAttribute("pathLength", "1"));
+    tl.fromTo(words, { yPercent: 105 }, { yPercent: 0, duration: 0.24, ease: "power3.out", stagger: Math.min(0.06, 0.24 / Math.max(1, words.length - 1)) }, 0);
+    tl.fromTo("#__ID__-head", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, 0);
+    tl.fromTo(lines, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut", stagger: { amount: 0.15 } }, 0.2);
+    tl.fromTo("#__ID__-note", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.24, ease: "power2.out" }, 0.45);
+    tl.fromTo("#__ID__-block", { y: 0 }, { y: -24, duration: D, ease: "none" }, 0);
+    tl.fromTo(key, { backgroundSize: "0% 0.07em" }, { backgroundSize: "100% 0.07em", duration: 0.3, ease: "power2.out" }, C.slam ?? 0.3);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

@@ -1,0 +1,64 @@
+{
+  "id": "spytitles",
+  "label": "Spy Titles (siluet 60-an)",
+  "description": "Pembuka film mata-mata tahun 60-an dari kertas potong: empat tinta datar (hitam, krem, merah bata, satu aksen) dengan butir kertas, huruf League Gothic raksasa yang jadi panggung tempat siluet bertopi dan bermantel berjalan, papan nama tergantung, lubang kunci, mata yang mengintip, lampu sorot di atap kota, footage dilihat lewat lubang (duotone). Gerak patah-patah 12 fps seperti kertas digerakkan tangan, setiap hentakan musik = cut. Tokoh tanpa wajah, cocok untuk kisah rahasia, perselingkuhan, penipuan, dan kejahatan yang tokohnya harus disamarkan.",
+  "colors": {
+    "ground": "#151210",
+    "ink": "#F1E6CF",
+    "muted": "#9C8F78",
+    "accent": "#E8A21C",
+    "alert": "#D9461F",
+    "card": "#F1E6CF",
+    "paper": "#F1E6CF"
+  },
+  "fonts": {
+    "display": "League Gothic",
+    "body": "Bebas Neue",
+    "caption": "Bebas Neue",
+    "mono": "Space Mono"
+  },
+  "captions": {
+    "y": 1190,
+    "size": 72,
+    "weight": 400,
+    "maxWords": 3,
+    "uppercase": true,
+    "color": "#151210",
+    "activeColor": "#B53A16",
+    "pill": "#F1E6CF",
+    "radius": 3,
+    "textShadow": "none"
+  },
+  "css": ":root { --font-giant: \"League Gothic\", \"Oswald\", sans-serif; --font-sign: \"Bebas Neue\", \"Oswald\", sans-serif; --sil: var(--ground); }\n/* worlds: flat ink fields, never gradients */\n.sp-world { position: absolute; inset: 0; overflow: hidden; background: var(--ground); --cut: var(--ground); }\n.sp-cream { background: var(--paper); --cut: var(--paper); }\n.sp-acc { background: var(--accent); --cut: var(--accent); }\n.sp-red { background: var(--alert); --cut: var(--alert); }\n/* paper grain on every field (static noise image, multiplied) */\n.sp-grain::after { content: \"\"; position: absolute; inset: 0; pointer-events: none; z-index: 50; opacity: .28; mix-blend-mode: multiply; background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23n)'/%3E%3C/svg%3E\"); }\n.sp-cream::before { content: \"\"; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(-35deg, transparent 0 46px, color-mix(in srgb, var(--ground) 7%, transparent) 46px 48px); }\n/* giant letters: the set the figures walk through */\n.sp-giant { position: absolute; left: 0; white-space: nowrap; font: 400 600px/0.8 var(--font-giant); letter-spacing: .015em; text-transform: uppercase; color: var(--ground); }\n.sp-giant > b { display: inline-block; font-weight: inherit; transform-origin: 50% 100%; }\n.sp-giant > b.k { color: var(--alert); }\n/* hanging sign: black plate, cream letters, two cords */\n.sp-sign { position: absolute; padding: 16px 30px 8px; background: var(--ground); color: var(--paper); font: 400 70px/1 var(--font-sign); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; box-shadow: inset 0 0 0 5px var(--ground), inset 0 0 0 9px var(--paper); transform-origin: 50% -200px; }\n.sp-sign::before, .sp-sign::after { content: \"\"; position: absolute; bottom: 100%; width: 5px; height: 220px; background: var(--ground); }\n.sp-sign::before { left: 24%; } .sp-sign::after { right: 24%; }\n/* street: black band with a dashed centre line, figures stand on its top edge */\n.sp-road { position: absolute; left: 0; right: 0; top: 1120px; height: 800px; background: var(--ground); }\n.sp-road > i { position: absolute; left: -280px; right: -2400px; top: 72px; height: 12px; background: repeating-linear-gradient(90deg, var(--paper) 0 90px, transparent 90px 180px); }\n/* title lockup type (cream or black), League Gothic */\n.sp-title { position: absolute; left: 80px; right: 80px; text-align: center; font: 400 210px/0.86 var(--font-giant); text-transform: uppercase; color: var(--paper); }\n.sp-title.ink { color: var(--ground); }\n.sp-title .w { display: inline-block; overflow: hidden; vertical-align: top; padding: .03em .02em .02em; }\n.sp-title .w > b { display: inline-block; font-weight: inherit; }\n.sp-title .w.k > b { color: var(--alert); }\n.sp-title em, .sp-giant em, .sp-sign em { font-style: normal; color: var(--alert); }\n.sp-kick { position: absolute; left: 80px; right: 80px; text-align: center; font: 400 60px/1 var(--font-sign); letter-spacing: .12em; text-transform: uppercase; color: var(--paper); }\n.sp-kick.ink { color: var(--ground); }\n/* silhouettes and motifs */\n.sp-sil { position: absolute; overflow: visible; }\n.sp-sil .ink { fill: var(--sil); stroke: var(--cut); stroke-width: 4; paint-order: stroke; }\n.sp-sil .hot, .sp-sil .acc, .sp-sil .paper { stroke: none; }\n.sp-sil .hot { fill: var(--alert); }\n.sp-sil .acc { fill: var(--accent); }\n.sp-sil .paper { fill: var(--paper); }\n/* diagonal ink slash (the cut) */\n.sp-slash { position: absolute; left: -400px; right: -400px; height: 120px; background: var(--alert); transform-origin: 50% 50%; }\n/* spotlight cone + disc */\n.sp-cone { position: absolute; background: color-mix(in srgb, var(--paper) 26%, transparent); clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%); }\n.sp-moon { position: absolute; border-radius: 50%; background: var(--paper); }\n/* rooftops with lit windows (cut paper skyline) */\n.sp-roofs { position: absolute; left: -80px; right: -80px; display: flex; align-items: flex-end; gap: 0; }\n.sp-roofs > i { flex: 1; background-color: var(--alert); background-image: repeating-linear-gradient(180deg, var(--alert) 0 34px, transparent 34px 72px), repeating-linear-gradient(90deg, var(--alert) 0 26px, var(--accent) 26px 54px); background-position: 0 0, 14px 0; border-top: 0; }\n.sp-roofs > i:nth-child(odd) { background-position: 0 18px, 30px 0; }\n/* footage seen through a cut-paper hole, duotone so it belongs to the four inks */\n.sp-hole { position: absolute; overflow: hidden; background: var(--ground); }\n.sp-hole video, .sp-hole img { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.35) brightness(1.08); }\n.sp-hole .tint { position: absolute; inset: 0; background: var(--alert); mix-blend-mode: multiply; }\n.sp-hole .tint.acc { background: var(--accent); }\n/* phone: a black cut-paper slab around a REAL screenshot */\n.sp-phone { position: absolute; padding: 18px; border-radius: 58px; background: var(--ground); box-shadow: 18px 22px 0 color-mix(in srgb, var(--ground) 45%, transparent); }\n.sp-phone .screen { width: 100%; height: 100%; border-radius: 42px; overflow: hidden; background: #000; }\n.sp-phone .screen > img, .sp-phone .screen > video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }\n.sp-ring { position: absolute; border: 9px solid var(--paper); border-radius: 26px; box-shadow: 0 0 0 7px var(--ground); }\n/* red on the accent field is too weak: there the key letter/word is black on a red cut tag */\n.sp-acc .sp-giant > b.k, .sp-acc .sp-title .w.k > b { color: var(--ground); background: var(--alert); padding: 0 .03em; }",
+  "fontFaces": [],
+  "sfx": {
+    "cut": "thump",
+    "marks": {
+      "slam": "hit",
+      "peek": "tick",
+      "tap": "pop"
+    }
+  },
+  "tones": [
+    {
+      "label": "Mustard",
+      "accent": "#E8A21C"
+    },
+    {
+      "label": "Merah muda",
+      "accent": "#E7708E"
+    },
+    {
+      "label": "Tosca 60-an",
+      "accent": "#2F9C95"
+    },
+    {
+      "label": "Biru tinta",
+      "accent": "#3E6DB5"
+    },
+    {
+      "label": "Krem pucat",
+      "accent": "#D9C7A0"
+    }
+  ]
+}

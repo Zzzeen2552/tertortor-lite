@@ -1,0 +1,80 @@
+<template>
+  <!-- register: type (preset spytitles: the hero word as GIANT letters standing on the street; a silhouette walks through them)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Giant = ONE word, at most eight letters (<em> around letters = red ink). Longer lines: put the giant word here and the rest
+       in the hanging sign (#__ID__-sign, at most three words, no digits unless spoken) or leave it to the caption.
+       Mark "slam" = the sign drops in on its cords (no mark = the sign hangs from the first frame; delete it if unused).
+       Every field is flat ink: world class sp-acc (accent), sp-red, sp-cream or plain sp-world (black). Alternate them
+       beat to beat. The walker crosses at stop-motion pace (twelve fps); flip it with data-dir="left". -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-set { position: absolute; inset: 0; }
+    #__ID__-man { left: 0; top: 750px; width: 150px; height: 375px; }
+    #__ID__-sign { left: 540px; top: 300px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="sp-world sp-acc sp-grain">
+      <svg width="0" height="0" style="position:absolute"><filter id="__ID__-rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence id="__ID__-turb" type="fractalNoise" baseFrequency="0.028" numOctaves="2" seed="1" /><feDisplacementMap in="SourceGraphic" scale="8" /></filter></svg>
+      <div id="__ID__-set">
+        <div id="__ID__-giant" class="sp-giant" data-layout-allow-overflow style="filter:url(#__ID__-rough)">__HERO__</div>
+        <svg id="__ID__-man" class="sp-sil" viewBox="0 0 120 300" data-dir="right">
+          <g id="__ID__-legB" class="ink"><path d="M50 176 L46 286 L36 300 L60 300 L58 286 L62 178 Z" /></g>
+          <g id="__ID__-armB" class="ink"><path d="M44 78 L34 156 L44 160 L56 84 Z" /></g>
+          <path class="ink" d="M38 70 Q60 60 82 70 L94 196 Q60 206 26 196 Z" />
+          <g id="__ID__-legF" class="ink"><path d="M60 176 L56 286 L46 300 L70 300 L68 286 L72 178 Z" /></g>
+          <path class="hot" d="M50 66 L70 66 L66 84 L54 84 Z M64 80 L82 112 L73 115 L59 84 Z" />
+          <circle class="ink" cx="60" cy="50" r="14" />
+          <path class="ink" d="M28 42 Q60 33 92 42 Q60 49 28 42 Z M44 41 L47 20 Q60 14 73 20 L76 41 Z" />
+        </svg>
+      </div>
+      <div id="__ID__-road" class="sp-road"><i id="__ID__-dash"></i></div>
+      <div id="__ID__-sign" class="sp-sign" data-safe="text" style="top:300px">The agent</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const FPS = 12; // cut-paper is animated on twos: every move steps at 12 fps
+    const st = (sec) => `steps(${Math.max(1, Math.round(sec * FPS))})`;
+    // giant word: one <b> per letter, size from the letter count so it spans about one screen width
+    const g = document.querySelector("#__ID__-giant");
+    if (g && !g.dataset.split) {
+      g.dataset.split = "1";
+      const tokens = (el) => { const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const out = []; s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) out.push([hot, true]); else if (cold != null) out.push([cold, false]); return ""; }); return out; };
+      const out = [];
+      for (const [txt, hot] of tokens(g)) for (const ch of [...txt.replace(/\s+/g, " ")]) out.push(`<b${hot ? ' class="k"' : ""}>${ch === " " ? "&nbsp;" : ch}</b>`);
+      while (out[0] === "<b>&nbsp;</b>") out.shift();
+      while (out.at(-1) === "<b>&nbsp;</b>") out.pop();
+      g.innerHTML = out.join("");
+    }
+    const letters = g ? g.querySelectorAll("b") : [];
+    const F = Math.min(760, Math.round(1000 / (0.36 * Math.max(1, letters.length))));
+    gsap.set(g, { fontSize: F, top: 1128 - 0.8 * F, left: 0 });
+    // letters drop onto the street like cut card (each 0.12 s, stepped), all down within 0.25 s
+    tl.fromTo(letters, { yPercent: -18, rotate: (i) => (i % 2 ? 6 : -5) }, { yPercent: 0, rotate: 0, duration: 0.12, ease: "steps(3)", stagger: Math.min(0.03, 0.2 / Math.max(1, letters.length)) }, 0);
+    // camera tracks the walker: the set drifts left, the walker moves right (counter-motion), both stepped
+    tl.fromTo(g, { x: 70 }, { x: 10, duration: D, ease: st(D) }, 0);
+    const man = document.querySelector("#__ID__-man"), dir = man?.dataset.dir === "left" ? -1 : 1;
+    if (man) {
+      if (dir < 0) gsap.set(man, { scaleX: -1 });
+      const x0 = dir > 0 ? 90 : 840, x1 = x0 + dir * Math.min(520, 150 * D);
+      tl.fromTo(man, { x: x0 }, { x: x1, duration: D, ease: st(D) }, 0);
+      const stride = 0.34, reps = Math.max(1, Math.ceil(D / stride));
+      tl.fromTo("#__ID__-legF", { rotation: -24, svgOrigin: "66 178" }, { rotation: 22, svgOrigin: "66 178", duration: stride, ease: "steps(4)", repeat: reps, yoyo: true }, 0);
+      tl.fromTo("#__ID__-legB", { rotation: 22, svgOrigin: "56 178" }, { rotation: -24, svgOrigin: "56 178", duration: stride, ease: "steps(4)", repeat: reps, yoyo: true }, 0);
+      tl.fromTo("#__ID__-armB", { rotation: 18, svgOrigin: "50 80" }, { rotation: -16, svgOrigin: "50 80", duration: stride, ease: "steps(4)", repeat: reps, yoyo: true }, 0);
+    }
+    tl.fromTo("#__ID__-dash", { x: 0 }, { x: -180 * Math.ceil(D), duration: D, ease: st(D) }, 0);
+    // sign: hangs from frame 0, or swings down on its cords at mark "slam"
+    const sign = document.querySelector("#__ID__-sign");
+    if (sign) {
+      gsap.set(sign, { xPercent: -50 });
+      if (C.slam != null) tl.fromTo(sign, { y: -520, rotate: -9 }, { y: 0, rotate: 0, duration: 0.34, ease: "back.out(2.2)" }, C.slam);
+      else tl.fromTo(sign, { rotate: -2 }, { rotate: 1.5, duration: D, ease: st(D) }, 0);
+    }
+    // line boil: the hand-cut edges re-cut at 8 fps
+    const B = Math.max(1, Math.round(D * 8));
+    tl.fromTo("#__ID__-turb", { attr: { seed: 1 } }, { attr: { seed: 1 + B }, duration: D, ease: `steps(${B})` }, 0);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

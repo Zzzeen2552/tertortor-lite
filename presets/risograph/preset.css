@@ -1,0 +1,39 @@
+/* Risograph: two or three translucent spot inks on warm paper, halftone, plates slightly off. Source of preset.json -> css (node presets/risograph/build.mjs). */
+:root { --ink-a: var(--blue); --ink-b: var(--accent); --ink-c: var(--yellow); }
+/* paper: warm stock with fibre speckle */
+.rg-paper { position: absolute; inset: 0; overflow: hidden; background-color: var(--ground); isolation: isolate; }
+.rg-paper::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .5; mix-blend-mode: multiply; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .5 0 0 0 0 .4 0 0 0 -1.6 .9'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E"); }
+/* uneven ink: pale speckles knocked out of every plate (sits above the inks, below the type) */
+.rg-paper::after { content: ""; position: absolute; inset: 0; z-index: 40; pointer-events: none; opacity: .55; mix-blend-mode: screen; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .97 0 0 0 0 .9 0 0 0 -3.2 1.25'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23m)'/%3E%3C/svg%3E"); }
+/* a plate = one ink, printed by multiply so overlaps mix (blue + yellow = green, blue + pink = purple) */
+.rg-plate { position: absolute; inset: 0; mix-blend-mode: multiply; pointer-events: none; }
+.rg-plate > * { position: absolute; }
+.rg-a { color: var(--ink-a); } .rg-b { color: var(--ink-b); } .rg-c { color: var(--ink-c); }
+/* halftone fill in the plate colour (currentColor): .ht = mid tone, .ht-lo light, .ht-hi dark */
+.ht, .ht-lo, .ht-hi { background-image: radial-gradient(circle, currentColor 0 var(--dot, 38%), transparent calc(var(--dot, 38%) + 6%)); background-size: 14px 14px; }
+.ht-lo { --dot: 24%; } .ht-hi { --dot: 52%; }
+.rg-b .ht, .rg-b .ht-lo, .rg-b .ht-hi { background-size: 13px 13px; background-position: 4px 2px; }
+.rg-solid { background: currentColor; }
+.rg-disc { border-radius: 50%; }
+/* drawings: SVG shapes use fill/stroke currentColor so they follow their plate */
+.rg-svg { position: absolute; overflow: visible; }
+.rg-svg .f { fill: currentColor; } .rg-svg .s { fill: none; stroke: currentColor; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+/* type: blue key plate on top, the accent plate printed under it a few px off */
+.rg-title { position: absolute; left: 80px; right: 80px; z-index: 50; font: 400 150px/1.08 var(--font-display); text-transform: uppercase; letter-spacing: -.01em; color: var(--blue); }
+.rg-title .w { display: inline-block; position: relative; vertical-align: top; isolation: isolate; }
+.rg-title .w > b { display: inline-block; position: relative; font-weight: inherit; }
+.rg-title .w > b::before { content: attr(data-t); position: absolute; left: 0; top: 0; color: var(--accent); mix-blend-mode: multiply; transform: translate(var(--mx, 7px), var(--my, 5px)); z-index: -1; }
+.rg-title em, .rg-title .w.k > b { font-style: normal; background: linear-gradient(color-mix(in srgb, var(--yellow) 92%, transparent), color-mix(in srgb, var(--yellow) 92%, transparent)) 0 62% / 100% 52% no-repeat; }
+.rg-kick { position: absolute; left: 80px; right: 80px; z-index: 50; font: 700 40px/1.2 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
+/* footage / photo: printed as a blue duotone plate with a halftone screen, framed by a misregistered accent block */
+.rg-print { position: absolute; z-index: 10; }
+.rg-print .under { position: absolute; inset: 0; background: var(--accent); mix-blend-mode: multiply; transform: translate(16px, 14px); }
+.rg-print .img { position: absolute; inset: 0; overflow: hidden; isolation: isolate; background: var(--ground); }
+.rg-print .img > video, .rg-print .img > img { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.45) brightness(1.12); }
+.rg-print .img .tone { position: absolute; inset: 0; background: var(--blue); mix-blend-mode: screen; }
+.rg-print .img .screenx { position: absolute; inset: 0; background-image: radial-gradient(circle, transparent 0 46%, var(--ground) 60%); background-size: 9px 9px; opacity: .75; }
+/* phone: a printed frame around a REAL screenshot (not blended, the screenshot stays readable) */
+.rg-phone { position: absolute; z-index: 30; padding: 16px; border-radius: 58px; background: var(--blue); box-shadow: 16px 14px 0 color-mix(in srgb, var(--accent) 85%, transparent); }
+.rg-phone .screen { width: 100%; height: 100%; border-radius: 44px; overflow: hidden; background: #000; }
+.rg-phone .screen > img, .rg-phone .screen > video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.rg-ring { position: absolute; z-index: 31; border: 12px solid var(--yellow); border-radius: 26px; mix-blend-mode: multiply; }

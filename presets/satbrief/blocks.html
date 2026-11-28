@@ -1,0 +1,28 @@
+<!-- Satellite Briefing blocks: paste into a scene, prefix ids with the beat id (here __ID__). -->
+
+<!-- BEFORE / AFTER WIPE: two images of the same place on two dates, a thin white divider sweeps across at mark "slam".
+     Both images must be real and the same framing (crop them to match before use). -->
+<div id="__ID__-a" class="sb-img"><img src="assets/footage/__ID__-then.jpg" alt="" /></div>
+<div id="__ID__-b" class="sb-img"><img src="assets/footage/__ID__-now.jpg" alt="" /></div>
+<div id="__ID__-div" style="position:absolute;top:0;bottom:0;width:3px;background:var(--ink)"></div>
+<!-- tl.fromTo("#__ID__-b", { clipPath: "inset(0 0 0 100%)" }, { clipPath: "inset(0 0 0 0%)", duration: 0.8, ease: "power2.inOut" }, C.slam);
+     tl.fromTo("#__ID__-div", { left: 1080 }, { left: 0, duration: 0.8, ease: "power2.inOut" }, C.slam); -->
+
+<!-- DISTANCE LINE between two points with end dots and the reading on it (the distance must be spoken and sourced). -->
+<svg class="sb-svg" viewBox="0 0 1080 1920" style="left:0;top:0;width:1080px;height:1920px">
+  <path class="o" d="M260 520 L760 1020" /><circle class="dot" cx="260" cy="520" r="10" /><circle class="dot" cx="760" cy="1020" r="10" />
+</svg>
+<div class="sb-cap" style="left:560px;top:720px">distance spoken</div>
+
+<!-- AREA FILL: a footprint (field, flood, burn scar, new island) filled faintly in accent with a solid accent edge. -->
+<svg class="sb-svg" viewBox="0 0 1080 1920" style="left:0;top:0;width:1080px;height:1920px">
+  <path class="fill" d="M420 700 L640 660 L700 820 L520 900 L400 830 Z" /><path class="acc" d="M420 700 L640 660 L700 820 L520 900 L400 830 Z" />
+</svg>
+
+<!-- SCALE BAR (bottom left of imagery, above the caption band): thin bar with end ticks; its length label must match
+     the real scale of the image and be spoken if it is a number. -->
+<svg class="sb-svg" viewBox="0 0 300 30" style="left:80px;top:1110px;width:300px;height:30px"><path class="l" d="M0 15 L300 15 M0 4 L0 26 M300 4 L300 26" /></svg>
+
+<!-- POINT MARKERS: small rings with a label, for towns, dams, wells. -->
+<svg class="sb-svg" viewBox="0 0 40 40" style="left:600px;top:880px;width:40px;height:40px"><circle class="l" cx="20" cy="20" r="14" /><circle class="dot" cx="20" cy="20" r="4" /></svg>
+<div class="sb-tag" style="left:650px;top:872px;font-size:34px">town name</div>

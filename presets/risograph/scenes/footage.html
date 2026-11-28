@@ -1,0 +1,64 @@
+<template>
+  <!-- register: footage (preset risograph: the real photo or clip printed as a blue duotone with a halftone screen)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- The picture is never shown in its own colours: grayscale under the blue plate, a dot screen over it, an accent
+       block printed off-register behind it. Clip: assets/footage/__ID__.mp4 (muted; Commons first), photo: img.
+       Mark "slam" = the accent block jumps to a new offset. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-title { top: 220px; }
+    #__ID__-print { left: 100px; top: 590px; width: 880px; height: 540px; }
+    #__ID__-media { position: absolute; inset: 0; transform-origin: 50% 50%; }
+    #__ID__-placeholder { position: absolute; inset: 0; display: grid; place-items: center; font: 400 64px var(--font-display); color: #fff; background: linear-gradient(#bbb, #333); }
+    #__ID__-dots { left: 640px; top: 1040px; width: 380px; height: 140px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="rg-paper">
+      <div id="__ID__-pc" class="rg-plate rg-c"><div id="__ID__-dots" class="ht-hi"></div></div>
+      <div id="__ID__-print" class="rg-print">
+        <div id="__ID__-under" class="under"></div>
+        <div class="img"><div id="__ID__-media">
+          <!-- Replace the placeholder with: <video id="__ID__-clip" src="assets/footage/__ID__.mp4" muted playsinline style="width:100%;height:100%;object-fit:cover"></video> -->
+          <div id="__ID__-placeholder">FOOTAGE</div>
+        </div><div class="tone"></div><div class="screenx"></div></div>
+      </div>
+      <div id="__ID__-title" class="rg-title" data-safe="text">__HERO__</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push('<span class="w' + (hot ? " k" : "") + '" data-layout-allow-overflow><b data-t="' + w + '">' + w + '</b></span>');
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+      const longest = Math.max(...[...el.querySelectorAll(".w")].map((w) => w.textContent.length));
+      el.style.fontSize = Math.min(150, Math.floor(920 / (0.82 * longest))) + "px";
+    };
+    // misregistration: the accent plate and the title's under-plate jump to a new small offset four times a second
+    const OFF = [[7, 5], [4, 8], [9, 3], [5, 6], [8, 7], [3, 4]];
+    const jitter = (sel, title) => {
+      const n = Math.max(1, Math.ceil(D * 4));
+      for (let i = 0; i < n; i++) {
+        const [x, y] = OFF[i % OFF.length];
+        if (sel) tl.set(sel, { x: x - 6, y: y - 5 }, i * 0.25);
+        if (title) tl.set(title, { "--mx": x + "px", "--my": y + "px" }, i * 0.25);
+      }
+    };
+    // plates are laid down one by one (stepped, like sheets going through the drum)
+    const lay = (sels, at) => sels.forEach((s, i) => tl.fromTo(s, { xPercent: -6 }, { xPercent: 0, duration: 0.18, ease: "steps(3)" }, at + i * 0.08));
+    const rise = (sel, at) => { const w = document.querySelectorAll(sel + " .w > b"); tl.fromTo(w, { yPercent: 30 }, { yPercent: 0, duration: 0.2, ease: "steps(4)", stagger: Math.min(0.05, 0.2 / Math.max(1, w.length - 1)) }, at); };
+    const T = document.querySelector("#__ID__-title"); split(T);
+    lay(["#__ID__-pc", "#__ID__-print"], 0);
+    rise("#__ID__-title", 0.02);
+    tl.fromTo("#__ID__-media", { scale: 1.02 }, { scale: 1.08, duration: D, ease: "none" }, 0);
+    jitter("#__ID__-under", T);
+    if (C.slam != null) tl.fromTo("#__ID__-under", { x: 26, y: 22 }, { x: 10, y: 9, duration: 0.16, ease: "steps(3)", immediateRender: false }, C.slam);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

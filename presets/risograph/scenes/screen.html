@@ -1,0 +1,62 @@
+<template>
+  <!-- register: screen (preset risograph: a REAL screenshot assets/screens/__ID__.png in a printed blue frame)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Never draw or generate an app UI or a chat. Crop out names, numbers and faces of real people. The screenshot is
+       not blended (it must stay readable); only the frame, the yellow ring and the plates behind it are inks.
+       ROW = top of the row talked about, in screen pixels; mark "tap" lands the ring. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-phone { left: 300px; top: 250px; width: 480px; height: 900px; }
+    #__ID__-placeholder { width: 100%; height: 100%; display: grid; place-items: center; font: 400 52px var(--font-display); color: #5a5a66; background: repeating-linear-gradient(45deg, #f2f2f2 0 20px, #e3e3e3 20px 40px); }
+    #__ID__-ring { left: 290px; width: 500px; height: 124px; }
+    #__ID__-sun { left: 120px; top: 380px; width: 840px; height: 840px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="rg-paper">
+      <div id="__ID__-pc" class="rg-plate rg-c"><div id="__ID__-sun" class="rg-disc ht"></div></div>
+      <div id="__ID__-phone" class="rg-phone"><div class="screen">
+        <!-- Replace with: <img id="__ID__-shot" src="assets/screens/__ID__.png" alt="" /> -->
+        <div id="__ID__-placeholder">SCREENSHOT</div>
+      </div></div>
+      <div id="__ID__-ring" class="rg-ring"></div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push('<span class="w' + (hot ? " k" : "") + '" data-layout-allow-overflow><b data-t="' + w + '">' + w + '</b></span>');
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+      const longest = Math.max(...[...el.querySelectorAll(".w")].map((w) => w.textContent.length));
+      el.style.fontSize = Math.min(160, Math.floor(920 / (0.82 * longest))) + "px";
+    };
+    // misregistration: the accent plate and the title's under-plate jump to a new small offset four times a second
+    const OFF = [[7, 5], [4, 8], [9, 3], [5, 6], [8, 7], [3, 4]];
+    const jitter = (sel, title) => {
+      const n = Math.max(1, Math.ceil(D * 4));
+      for (let i = 0; i < n; i++) {
+        const [x, y] = OFF[i % OFF.length];
+        if (sel) tl.set(sel, { x: x - 6, y: y - 5 }, i * 0.25);
+        if (title) tl.set(title, { "--mx": x + "px", "--my": y + "px" }, i * 0.25);
+      }
+    };
+    // plates are laid down one by one (stepped, like sheets going through the drum)
+    const lay = (sels, at) => sels.forEach((s, i) => tl.fromTo(s, { xPercent: -6 }, { xPercent: 0, duration: 0.18, ease: "steps(3)" }, at + i * 0.08));
+    const rise = (sel, at) => { const w = document.querySelectorAll(sel + " .w > b"); tl.fromTo(w, { yPercent: 30 }, { yPercent: 0, duration: 0.2, ease: "steps(4)", stagger: Math.min(0.05, 0.2 / Math.max(1, w.length - 1)) }, at); };
+    const ROW = 320; // top of the row being talked about inside the screen
+    lay(["#__ID__-pc", "#__ID__-phone"], 0);
+    tl.fromTo("#__ID__-phone", { y: 0 }, { y: -20, duration: D, ease: "none" }, 0.2);
+    tl.fromTo("#__ID__-sun", { rotate: 0 }, { rotate: 20, duration: D, ease: "none" }, 0);
+    tl.set("#__ID__-ring", { top: 250 + 16 + ROW - 12 }, 0);
+    jitter("#__ID__-pc", null);
+    if (C.tap != null) tl.fromTo("#__ID__-ring", { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.18, ease: "steps(3)" }, C.tap);
+    else tl.set("#__ID__-ring", { opacity: 0 }, 0);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

@@ -1,0 +1,39 @@
+<template>
+  <!-- register: screen (preset spytitles: a REAL screenshot assets/screens/__ID__.png in a black cut-paper phone under a spotlight)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Never draw or generate an app UI or a chat. Crop out names, numbers and faces of real people. ROW = top of the
+       row talked about, in screen pixels (screen = 444 x 884); mark "tap" draws the cream ring there. Red field by
+       default; switch to sp-acc when the beat before was red. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-cone { left: 40px; top: -40px; width: 1000px; height: 1300px; }
+    #__ID__-phone { left: 300px; top: 230px; width: 480px; height: 920px; }
+    #__ID__-placeholder { width: 100%; height: 100%; display: grid; place-items: center; font: 400 54px var(--font-sign); letter-spacing: .1em; color: #5f574c; background: repeating-linear-gradient(45deg, #efe7da 0 20px, #e3d9c9 20px 40px); }
+    #__ID__-ring { left: 304px; width: 472px; height: 118px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="sp-world sp-red sp-grain">
+      <div id="__ID__-cone" class="sp-cone"></div>
+      <div id="__ID__-phone" class="sp-phone">
+        <div class="screen">
+          <!-- Replace with: <img id="__ID__-shot" src="assets/screens/__ID__.png" alt="" /> -->
+          <div id="__ID__-placeholder">SCREENSHOT</div>
+        </div>
+      </div>
+      <div id="__ID__-ring" class="sp-ring"></div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const ROW = 320; // top of the row being talked about (0-884 inside the screen)
+    tl.fromTo("#__ID__-cone", { opacity: 0.4 }, { opacity: 1, duration: 0.17, ease: "steps(3)" }, 0);
+    tl.fromTo("#__ID__-phone", { y: 110, rotate: 3 }, { y: 0, rotate: 0, duration: 0.25, ease: "steps(4)" }, 0);
+    tl.fromTo("#__ID__-phone", { scale: 1 }, { scale: 1.035, duration: D, ease: "none", immediateRender: false }, 0.25);
+    if (C.tap != null) {
+      tl.set("#__ID__-ring", { top: 230 + 18 + ROW - 10 }, 0);
+      tl.fromTo("#__ID__-ring", { opacity: 0, scale: 1.25, rotate: -3 }, { opacity: 1, scale: 1, rotate: 0, duration: 0.17, ease: "steps(3)" }, C.tap);
+    } else tl.set("#__ID__-ring", { opacity: 0 }, 0);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

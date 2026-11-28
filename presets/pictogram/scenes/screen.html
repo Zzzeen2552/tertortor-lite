@@ -1,0 +1,59 @@
+<template>
+  <!-- register: screen (preset pictogram: a REAL screenshot assets/screens/__ID__.png in a thick white round phone outline)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Never draw or generate an app UI or a chat. Crop out names, numbers and faces of real people. ROW = top of the
+       row talked about, in screen pixels (screen = 448 x 888); mark "tap" draws the accent ring there and a pointing
+       hand pictogram taps it. Night field by default. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-phone { left: 300px; top: 230px; width: 480px; height: 920px; }
+    #__ID__-placeholder { width: 100%; height: 100%; display: grid; place-items: center; font: 900 54px var(--font-display); letter-spacing: .08em; color: #4a5068; background: repeating-linear-gradient(45deg, #eef0f5 0 20px, #dfe3ec 20px 40px); }
+    #__ID__-ring { left: 304px; width: 472px; height: 118px; }
+    #__ID__-hand { left: 700px; width: 220px; height: 220px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="pg-world pg-night">
+      <div id="__ID__-tiles" class="pg-tiles" data-layout-allow-overflow></div>
+      <div id="__ID__-phone" class="pg-phone">
+        <div class="screen">
+          <!-- Replace with: <img id="__ID__-shot" src="assets/screens/__ID__.png" alt="" /> -->
+          <div id="__ID__-placeholder">SCREENSHOT</div>
+        </div>
+      </div>
+      <div id="__ID__-ring" class="pg-ring"></div>
+      <svg id="__ID__-hand" class="pg-ico" viewBox="0 0 100 100">
+        <path class="s" stroke-width="13" d="M30 14 L30 58 M30 50 L44 44 L58 48 L72 52 L76 74 Q70 92 50 92 L36 92 L22 70" />
+        <circle class="a" cx="30" cy="12" r="9" />
+      </svg>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const ROW = 320; // top of the row being talked about (0-888 inside the screen)
+    const tiles = (sel) => {
+      const box = document.querySelector(sel); if (!box) return [];
+      if (!box.dataset.done) {
+        box.dataset.done = "1";
+        let h = [..."__ID__"].reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffff, 7); const out = [];
+        for (let i = 0; i < 104; i++) { h = (h * 1103515245 + 12345) & 0x7fffffff; out.push(`<i class="t${(h >> 9) % 8}"></i>`); }
+        box.innerHTML = out.join("");
+      }
+      return box.children;
+    };
+    const T = tiles("#__ID__-tiles");
+    tl.fromTo(T, { scaleY: 0 }, { scaleY: 1, duration: 0.18, ease: "power2.out", stagger: { grid: [13, 8], from: "start", amount: 0.22 } }, 0);
+    tl.fromTo("#__ID__-tiles", { x: 0, y: 0 }, { x: -180, y: -180, duration: D, ease: "none" }, 0);
+    tl.fromTo("#__ID__-phone", { y: 160, rotate: 4 }, { y: 0, rotate: 0, duration: 0.32, ease: "back.out(1.4)" }, 0);
+    tl.fromTo("#__ID__-phone", { scale: 1 }, { scale: 1.03, duration: D, ease: "none", immediateRender: false }, 0.32);
+    const top = 230 + 16 + ROW - 10;
+    tl.set("#__ID__-ring", { top }, 0);
+    tl.set("#__ID__-hand", { top: top + 50 }, 0);
+    if (C.tap != null) {
+      tl.fromTo("#__ID__-hand", { x: 120, y: 120, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.22, ease: "power3.out" }, Math.max(0, C.tap - 0.22));
+      tl.fromTo("#__ID__-hand", { scale: 1 }, { scale: 0.88, duration: 0.08, ease: "power2.in", yoyo: true, repeat: 1, immediateRender: false }, C.tap);
+      tl.fromTo("#__ID__-ring", { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(2)" }, C.tap);
+    } else tl.set(["#__ID__-ring", "#__ID__-hand"], { opacity: 0 }, 0);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

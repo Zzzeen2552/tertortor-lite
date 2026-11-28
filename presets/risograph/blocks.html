@@ -1,0 +1,26 @@
+<!-- Risograph blocks: paste into a scene, prefix ids with the beat id (here __ID__). Every shape sits inside ONE plate
+     (rg-plate rg-a / rg-b / rg-c) and takes that plate's ink through currentColor; overlaps mix by multiply. -->
+
+<!-- PERSON ON A BICYCLE (side view, left to right): blue = bike and outline, accent = scarf/top, yellow = hat.
+     Wheels turn with rotate on the two wheel groups (svgOrigin at each hub), the rider bobs y by 4 px each pedal. -->
+<div class="rg-plate rg-a"><svg class="rg-svg" viewBox="0 0 300 260" style="left:380px;top:820px;width:300px;height:260px">
+  <circle class="s" cx="70" cy="200" r="50" /><circle class="s" cx="230" cy="200" r="50" />
+  <path class="s" d="M70 200 L130 120 L200 120 L230 200 M130 120 L160 200 L200 120 M120 100 L150 100 M200 120 L196 92 L216 88" />
+  <circle class="f" cx="160" cy="40" r="20" /><path class="s" d="M160 60 L150 116 L160 200 M156 80 L206 92" />
+</svg></div>
+<div class="rg-plate rg-b"><svg class="rg-svg" viewBox="0 0 300 260" style="left:380px;top:820px;width:300px;height:260px"><path class="f" d="M140 62 L176 62 L170 118 L146 118 Z M176 66 Q220 60 250 84 L236 92 Q210 76 176 80 Z" /></svg></div>
+
+<!-- TREE ROW: accent halftone blobs on blue trunks (the park look). -->
+<div class="rg-plate rg-b"><div class="rg-disc ht-hi" style="left:80px;top:600px;width:220px;height:180px"></div><div class="rg-disc ht-hi" style="left:430px;top:590px;width:220px;height:190px"></div><div class="rg-disc ht-hi" style="left:780px;top:600px;width:220px;height:180px"></div></div>
+
+<!-- RIVER / WATER: blue halftone band with yellow sun reflection stripes. -->
+<div class="rg-plate rg-a"><div class="ht" style="left:0;right:0;top:980px;height:260px"></div></div>
+<div class="rg-plate rg-c"><div class="rg-solid" style="left:420px;top:1000px;width:240px;height:14px"></div><div class="rg-solid" style="left:460px;top:1040px;width:160px;height:12px"></div><div class="rg-solid" style="left:500px;top:1076px;width:90px;height:10px"></div></div>
+
+<!-- SUN SETTING (the closing card): accent disc low on the horizon, yellow sky band, blue skyline silhouette. -->
+<div class="rg-plate rg-c"><div class="ht-hi" style="left:0;right:0;top:620px;height:500px"></div></div>
+<div class="rg-plate rg-b"><div class="rg-disc rg-solid" style="left:330px;top:640px;width:420px;height:420px"></div></div>
+<div class="rg-plate rg-a"><svg class="rg-svg" viewBox="0 0 1080 200" style="left:0;top:960px;width:1080px;height:200px"><path class="f" d="M0 200 L0 120 L80 120 L80 70 L140 70 L140 110 L260 110 L260 40 L300 40 L300 100 L420 100 L420 60 L520 60 L520 120 L640 120 L640 30 L690 30 L690 110 L820 110 L820 80 L940 80 L940 130 L1080 130 L1080 200 Z" /></svg></div>
+
+<!-- STICKER LABEL: a small printed tag for a name or place (mono, blue on yellow). -->
+<div class="rg-kick" style="left:80px;right:auto;top:1080px;background:var(--yellow);padding:10px 18px">Pasar Minggu</div>

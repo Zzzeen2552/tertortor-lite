@@ -1,0 +1,63 @@
+<template>
+  <!-- register: type (preset satbrief: the one READING, a thin amber number over dimmed imagery)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- The hero is the reading: a number (counted up from zero) and its unit (a distance, a share, a count). The number must be spoken and
+       must come from a named source; put that source in the dim line under the scale bar. Mark "read" = the count starts. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-img { opacity: .32; }
+    #__ID__-cap { left: 80px; top: 560px; }
+    #__ID__-read { left: 74px; top: 620px; }
+    #__ID__-bar { left: 80px; top: 900px; width: 920px; height: 40px; }
+    #__ID__-src { left: 80px; top: 960px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="sb-world">
+      <div id="__ID__-img" class="sb-img">
+        <!-- Replace with the REAL imagery: <img id="__ID__-pic" src="assets/footage/__ID__.jpg" alt="" /> or a muted <video> (Commons / NASA / Copernicus, credit in sources.txt + credits.md) -->
+        <div id="__ID__-placeholder" style="position:absolute;inset:0;background:radial-gradient(circle at 50% 40%, #6d7175, #2a2d30 70%)"></div>
+      </div>
+      <div class="sb-vig"></div>
+      <div class="sb-grat" data-layout-allow-overflow></div>
+      <div id="__ID__-meta" class="sb-meta" data-safe="text"><span>reading</span><span>imagery credit</span></div>
+      <div id="__ID__-cap" class="sb-cap" data-safe="text">__JOB__</div>
+      <div id="__ID__-read" class="sb-read" data-safe="text">__HERO__</div>
+      <svg id="__ID__-bar" class="sb-svg" viewBox="0 0 920 40"><path id="__ID__-barp" class="l" d="M0 20 L920 20 M0 6 L0 34 M230 12 L230 28 M460 12 L460 28 M690 12 L690 28 M920 6 L920 34" /></svg>
+      <div id="__ID__-src" class="sb-cap dim" data-safe="text">source</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push('<span class="w' + (hot ? " k" : "") + '" data-layout-allow-overflow><b>' + w + '</b></span>');
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+    };
+    const rise = (sel, at) => { const w = document.querySelectorAll(sel + " .w > b"); tl.fromTo(w, { yPercent: 105 }, { yPercent: 0, duration: 0.3, ease: "power3.out", stagger: Math.min(0.05, 0.2 / Math.max(1, w.length - 1)) }, at); };
+    const RET = '<circle class="r" cx="130" cy="130" r="110" /><path class="r" d="M130 0 L130 34 M130 226 L130 260 M0 130 L34 130 M226 130 L260 130 M130 92 L130 112 M130 148 L130 168 M92 130 L112 130 M148 130 L168 130" />';
+    const R = document.querySelector("#__ID__-read");
+    let target = null, unit = "";
+    if (R && !R.dataset.done) {
+      R.dataset.done = "1";
+      const m = R.textContent.trim().match(/^([+-]?)([d.,]+)s*(.*)$/);
+      if (m) { target = { sign: m[1], n: parseFloat(m[2].replace(",", ".")), dec: (m[2].split(/[.,]/)[1] || "").length }; unit = m[3]; R.innerHTML = '<span id="__ID__-num">' + m[1] + m[2] + '</span>' + (unit ? "<small>" + unit + "</small>" : ""); }
+    }
+    const A = C.read ?? 0.1;
+    tl.fromTo("#__ID__-img", { scale: 1.04 }, { scale: 1.1, duration: D, ease: "none" }, 0);
+    tl.fromTo(["#__ID__-meta", "#__ID__-cap"], { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out", stagger: 0.06 }, 0);
+    tl.fromTo("#__ID__-read", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, ease: "power3.out" }, 0.05);
+    if (target) {
+      const o = { v: 0 }, el = document.querySelector("#__ID__-num");
+      tl.fromTo(o, { v: 0 }, { v: target.n, duration: Math.min(0.9, D * 0.4), ease: "power2.out", onUpdate: () => { el.textContent = target.sign + o.v.toFixed(target.dec); } }, A);
+    }
+    tl.fromTo("#__ID__-bar", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.5, ease: "power2.inOut" }, 0.2);
+    tl.fromTo("#__ID__-src", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, 0.5);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

@@ -94,3 +94,6 @@ presets/aws/fonts/ember/*
 cinematic/*/reference/
 videos/*/assets/logos/
 videos/*/assets/music/
+.events.runner
+.runner.json
+.event-runs/

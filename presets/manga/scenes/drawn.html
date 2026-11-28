@@ -1,0 +1,62 @@
+<template>
+  <!-- register: drawn (preset manga: a three-panel PAGE, one wide panel over two tall ones, each cut open on its own beat)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Art per panel: assets/footage/__ID__-a.jpg / -b.jpg / -c.jpg (generated manga panels or public-domain prints; one
+       moment split into three steps reads best: wide, close, impact). Panel C carries speed lines and the lettered hero.
+       Marks "p2" and "p3" open panels B and C (on the words that name those moments). -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-pa { left: 40px; top: 190px; width: 1000px; height: 380px; }
+    #__ID__-pb { left: 40px; top: 590px; width: 470px; height: 560px; }
+    #__ID__-pc { left: 530px; top: 590px; width: 510px; height: 560px; clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%); }
+    #__ID__-speed { left: 0; top: 0; width: 510px; height: 560px; }
+    #__ID__-sfx { left: 440px; top: 930px; font-size: 128px; }
+    .__ID__-slot { position: absolute; background: #fff; box-shadow: inset 0 0 0 8px var(--ink); }
+    .__ID__-ph { position: absolute; inset: 0; display: grid; place-items: center; font: 400 60px var(--font-sfx); color: #fff; background: linear-gradient(135deg, #999, #333); }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-page" class="mg-page">
+      <!-- empty panel slots: the page layout reads from the first frame, art is cut into them on the beat -->
+      <div class="__ID__-slot" style="left:40px;top:590px;width:470px;height:560px"></div>
+      <div class="__ID__-slot" style="left:530px;top:590px;width:510px;height:560px;clip-path:polygon(8% 0, 100% 0, 100% 100%, 0 100%)"></div>
+      <div id="__ID__-pa" class="mg-panel ink"><div id="__ID__-aa" class="art">
+        <!-- <img src="assets/footage/__ID__-a.jpg" alt="" /> --><div class="__ID__-ph">PANEL A</div>
+      </div><div class="frame"></div></div>
+      <div id="__ID__-pb" class="mg-panel ink"><div id="__ID__-ab" class="art">
+        <!-- <img src="assets/footage/__ID__-b.jpg" alt="" /> --><div class="__ID__-ph">PANEL B</div>
+      </div><div class="frame"></div></div>
+      <div id="__ID__-pc" class="mg-panel ink"><div id="__ID__-ac" class="art">
+        <!-- <img src="assets/footage/__ID__-c.jpg" alt="" /> --><div class="__ID__-ph">PANEL C</div>
+      </div><svg id="__ID__-speed" class="mg-lines" viewBox="0 0 510 560"></svg><div class="frame"></div></div>
+      <div id="__ID__-sfx" class="mg-sfx" data-layout-allow-occlusion data-layout-allow-overflow data-safe="text">__HERO__</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const unEm = (el) => { if (el) el.innerHTML = el.innerHTML.replace(/&lt;(\/?em)&gt;/g, "<$1>"); };
+    // speed lines: horizontal ink strokes of random length (fixed seed), streaming toward the impact
+    const speed = (sel, w, hgt, n, seed) => {
+      const svg = document.querySelector(sel); if (!svg || svg.dataset.done) return; svg.dataset.done = "1";
+      let h = seed, d = "";
+      for (let i = 0; i < n; i++) {
+        h = (h * 1103515245 + 12345) & 0x7fffffff;
+        const y = (i / n) * hgt + ((h >> 6) % 10), len = 80 + ((h >> 3) % 260), x = w - len - ((h >> 9) % 120), t = 1 + ((h >> 12) % 4);
+        d += "M" + x + " " + y + "h" + len + "v" + t + "h" + -len + "Z";
+      }
+      svg.innerHTML = '<path fill="var(--ink)" opacity=".85" d="' + d + '"/>';
+    };
+    speed("#__ID__-speed", 510, 560, 70, [..."__ID__"].reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffff, 11));
+    unEm(document.querySelector("#__ID__-sfx"));
+    const P2 = C.p2 ?? Math.min(0.6, D * 0.3), P3 = C.p3 ?? Math.min(1.2, D * 0.6);
+    // each panel is cut open from its own side, fast (power4), then drifts
+    tl.fromTo("#__ID__-pa", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.22, ease: "power4.out" }, 0);
+    tl.fromTo("#__ID__-aa", { scale: 1.05, x: 20 }, { scale: 1.1, x: -20, duration: D, ease: "none" }, 0);
+    tl.fromTo("#__ID__-pb", { clipPath: "inset(0% 0% 100% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.22, ease: "power4.out" }, P2);
+    tl.fromTo("#__ID__-ab", { scale: 1.06 }, { scale: 1.12, duration: D, ease: "none" }, 0);
+    tl.fromTo("#__ID__-pc", { clipPath: "polygon(100% 0, 100% 0, 100% 100%, 100% 100%)" }, { clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0 100%)", duration: 0.2, ease: "power4.out" }, P3);
+    tl.fromTo("#__ID__-speed", { x: 0 }, { x: 60, duration: D, ease: "none" }, 0);
+    tl.fromTo("#__ID__-sfx", { scale: 1.8, rotate: -16, opacity: 0 }, { scale: 1, rotate: -8, opacity: 1, duration: 0.18, ease: "back.out(2.4)" }, P3 + 0.08);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

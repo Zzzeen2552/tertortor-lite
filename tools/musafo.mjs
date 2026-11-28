@@ -274,9 +274,12 @@ export function approveStoryline(dir, by = "user", hook) {
   const errs = checkHooks(dir);
   if (errs.length) throw new Error(errs.join("; "));
   const h = loadHooks(dir);
-  const pick = hook ?? h.chosen;
-  if (!h.options.some((o) => o.id === pick)) throw new Error("pilih satu hook dulu");
-  writeJSON(join(dir, "hooks.json"), { ...h, chosen: pick });
+  // series part 2+ opens with its own hook (hooks.json → parts.<n>): nothing to pick, the approval records "part<n>"
+  const sp = existsSync(join(dir, "meta.json")) ? readJSON(join(dir, "meta.json")).series : null;
+  const own = sp?.part > 1 && h.parts?.[sp.part];
+  const pick = own ? `part${sp.part}` : hook ?? h.chosen;
+  if (!own && !h.options.some((o) => o.id === pick)) throw new Error("pilih satu hook dulu");
+  if (!own) writeJSON(join(dir, "hooks.json"), { ...h, chosen: pick });
   const p = join(dir, "request.json");
   const r = existsSync(p) ? readJSON(p) : {};
   r.storylineApproval = { hash: storylineHash(dir), at: new Date().toISOString(), by, hook: pick };
@@ -338,6 +341,9 @@ export function checkMusafo(dir) {
   const style = conf(dir).styleAnchor;
   if (!m.shots.length) errors.push("musafo.json belum punya shot");
   { const ch = checkCharacters(dir, m); errors.push(...ch.errors); warns.push(...ch.warns); }
+  // the same hook rules the Studio "Setujui storyline" button applies (user 2026-11-23: "jangan sampai salah nulis hook
+  // lagi" — a hooks.json that passed this check was still refused at approval)
+  if (existsSync(join(dir, "hooks.json"))) errors.push(...checkHooks(dir));
   if (m.shots.length && !storylineApproval(dir).approved) warns.push("storyline belum disetujui user: tulis storyline.md dan tunggu persetujuan sebelum shot");
   // at most 10 shots whatever the story, each one picture and one clip of up to 15 s (user 2026-11-07)
   const maxShots = conf(dir).maxShots ?? 10, maxShotSec = m.clipSeconds ?? conf(dir).maxShotSeconds ?? 15, // the clip tool's length (Flow 10 s, H3 15 s)
@@ -413,7 +419,10 @@ export function checkMusafo(dir) {
     if (total > 90 && at < 0) errors.push('belum ada re-hook: tandai satu baris di tengah video dengan "rehook": true');
     else if (at >= 0 && (at < 0.25 || at > 0.7)) warns.push(`re-hook ada di ${Math.round(at * 100)}% naskah; taruh di 25-70%`);
     const series = readJSON(join(dir, "meta.json")).series;
-    if (series && series.part < series.total && !(lines.at(-1).cliffhanger && /bersambung/i.test(lines.at(-1).text))) errors.push(`bagian ${series.part}/${series.total}: baris terakhir harus cliffhanger ("cliffhanger": true) dan menyebut "bersambung"`);
+    // "bersambung", or a pointer to the next part ("Itu di bagian tiga.", user 2026-11-25 Ciputra 2)
+    const NUM = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh"];
+    const next = series ? new RegExp(`bagian (${series.part + 1}|${NUM[series.part + 1] ?? "-"})\\b`, "i") : null;
+    if (series && series.part < series.total && !(lines.at(-1).cliffhanger && (/bersambung/i.test(lines.at(-1).text) || next.test(lines.at(-1).text)))) errors.push(`bagian ${series.part}/${series.total}: baris terakhir harus cliffhanger ("cliffhanger": true) dan menyebut "bersambung" atau "bagian ${NUM[series.part + 1] ?? series.part + 1}"`);
     // Miracle of Hajj: a real verse from equran.id, quoted word for word, and the fixed closing line (user 2026-11-08)
     if (storyType(dir) === "miracleofhajj") {
       errors.push(...ayatErrors(m));
@@ -654,7 +663,10 @@ function scene(dir, s, dur, lead) {
     const slow = rec?.stretch ? rec : null;
     let starts = null;
     // clips made outside clips[] (Meta Muse, user 2026-11-14): scenes[].clipAt = second in the clip where that scene starts
-    const cutsAt = rec?.sceneCuts?.length ? rec.sceneCuts : s.scenes?.length && s.scenes.every((x) => x.clipAt > 0) ? s.scenes.map((x) => x.clipAt) : null;
+    // A joined clip's measured clipAt wins over a planned sceneCuts (user 2026-11-24, Ciputra 1: a clips[] plan made for
+    // one shot also planned H3 cuts for the others, and build cut the Flow-joined shots at the plan instead of the real joins)
+    const measured = s.scenes?.length && s.scenes.every((x) => x.clipAt > 0) ? s.scenes.map((x) => x.clipAt) : null;
+    const cutsAt = measured ?? (rec?.sceneCuts?.length ? rec.sceneCuts : null);
     try { starts = cutsAt && cutsAt.length === (s.scenes ?? []).length ? lineStarts(dir, m0)[s.id] : null; } catch {}
     if (dur && starts) {
       // user 2026-11-14 (BDP Watugunung 4, shots rebalanced after the clips were made): a multi-scene clip is retimed per
@@ -1231,7 +1243,10 @@ if (process.argv[1]?.endsWith("musafo.mjs")) {
     const synced = syncCharacters(dir);
     if (synced.length) console.log(`✔ dari bagian lain series: ${synced.join(", ")}`);
     // headline + sub headline follow the script (user 2026-11-16); before the build, which can stop on a stale voice
-    try { await (await import("./thumbnail.mjs")).syncOptions(dir); } catch (e) { console.log(`  ⚠ opsi thumbnail belum dibuat: ${e.message}`); }
+    // child process: importing thumbnail.mjs here deadlocks (thumbnail → brandmark → categories → musafo.mjs mid-evaluation)
+    { const t = spawnSync("node", [join(ROOT, "tools", "thumbnail.mjs"), "sync", slug], { encoding: "utf8" });
+      const out = `${t.stdout ?? ""}${t.stderr ?? ""}`.trim();
+      if (t.status) console.log(`  ⚠ opsi thumbnail belum dibuat: ${out.split("\n").pop()}`); else if (out) console.log(out); }
     const r = buildMusafo(dir, slug);
     console.log(`✔ ${r.shots} shot, ${r.words} kata → script.md, beats.json, compositions/`);
   } else if (cmd === "clips") {

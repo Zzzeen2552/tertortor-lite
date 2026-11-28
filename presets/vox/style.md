@@ -102,7 +102,7 @@ stub itu hanya untuk scene baru. Gambar disimpan di `assets/layers/<beat>-bg.jpg
 satu baris di `sources.txt`. Kedalaman lapisan di `par()`: latar 0,35, kata belakang 0,6, subjek 1, kata depan 1,1,
 benda depan 1,6. Kamera boleh bergerak 100-200 px dan scale 1,02-1,15 per beat. Arah geraknya diteruskan ke beat berikutnya.
 
-**Prompt gambar** (Meta Muse = `node tools/muse.mjs image`, atau Flow). Latar ditulis utuh tanpa orang. Subjek dan benda
+**Prompt gambar** (Meta Muse = muse.ai lewat Chrome, atau Flow). Latar ditulis utuh tanpa orang. Subjek dan benda
 memakai pola berikut, kalimat green-screen jangan diubah:
 > A young woman in an 1820s concert dress seen from behind and to the side, … her whole body in shot, soft light from the
 > upper left, realistic photograph, fine film grain, in full colour, on a completely flat solid pure chroma green screen

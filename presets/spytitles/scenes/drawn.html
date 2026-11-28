@@ -1,0 +1,53 @@
+<template>
+  <!-- register: drawn (preset spytitles: one cut-paper MOTIF on a flat field: the keyhole with an eye opening inside)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- The motif is the concept: keyhole + eye = "someone is watching / a secret". Swap the motif for the beat (key,
+       ring, phone, door, heart split in two: flat shapes, red or accent ink, no outlines, no gradients). Title above in
+       League Gothic (<em> word = red). Mark "peek" = the eye opens and glances (default: just under half a second). Field colours alternate
+       beat to beat (black / red / accent / cream); on cream use class "ink" on the title. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-title { top: 220px; font-size: 190px; }
+    #__ID__-motif { position: absolute; left: 310px; top: 520px; width: 460px; height: 680px; overflow: visible; transform-origin: 50% 60%; }
+    #__ID__-hole { fill: var(--alert); }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="sp-world sp-grain">
+      <svg width="0" height="0" style="position:absolute"><filter id="__ID__-rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence id="__ID__-turb" type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="1" /><feDisplacementMap in="SourceGraphic" scale="7" /></filter></svg>
+      <div id="__ID__-title" class="sp-title" data-safe="text" style="top:220px">__HERO__</div>
+      <svg id="__ID__-motif" class="sp-sil" viewBox="0 0 460 680" style="filter:url(#__ID__-rough)">
+        <path id="__ID__-hole" d="M230 20 A170 170 0 0 1 318 336 L372 680 L88 680 L142 336 A170 170 0 0 1 230 20 Z" />
+        <g id="__ID__-eye">
+          <path class="paper" d="M120 190 Q230 104 340 190 Q230 276 120 190 Z" />
+          <circle id="__ID__-iris" class="hot" cx="230" cy="190" r="50" />
+          <circle id="__ID__-pupil" class="ink" cx="230" cy="190" r="24" />
+        </g>
+      </svg>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2, st = (s) => `steps(${Math.max(1, Math.round(s * 12))})`;
+    const el = document.querySelector("#__ID__-title");
+    if (el && !el.dataset.split) {
+      el.dataset.split = "1";
+      const tokens = (el) => { const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const out = []; s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) out.push([hot, true]); else if (cold != null) out.push([cold, false]); return ""; }); return out; };
+      const out = [];
+      for (const [txt, hot] of tokens(el)) for (const w of txt.split(/\s+/).filter(Boolean)) out.push(`<span class="w${hot ? " k" : ""}" data-layout-allow-overflow><b>${w}</b></span>`);
+      el.innerHTML = out.join(" ");
+    }
+    const words = el ? el.querySelectorAll(".w > b") : [];
+    // the motif lands like a card slapped down (stepped), title words pop up through their slots
+    tl.fromTo("#__ID__-motif", { scale: 1.12, rotate: -4 }, { scale: 1, rotate: 0, duration: 0.14, ease: "steps(3)" }, 0);
+    tl.fromTo(words, { yPercent: 105 }, { yPercent: 0, duration: 0.15, ease: "steps(3)", stagger: Math.min(0.06, 0.24 / Math.max(1, words.length - 1)) }, 0.04);
+    tl.fromTo("#__ID__-motif", { y: 0 }, { y: -26, duration: D, ease: st(D), immediateRender: false }, 0.14);
+    // the eye: closed until "peek", opens in 0.17 s, then glances left and back (held poses, no tween between)
+    const pk = C.peek ?? 0.45;
+    tl.fromTo("#__ID__-eye", { scaleY: 0.04, svgOrigin: "230 190" }, { scaleY: 1, svgOrigin: "230 190", duration: 0.17, ease: "steps(3)" }, pk);
+    tl.set(["#__ID__-iris", "#__ID__-pupil"], { x: -40 }, pk + 0.55);
+    tl.set(["#__ID__-iris", "#__ID__-pupil"], { x: 0 }, pk + 1.1);
+    const B = Math.max(1, Math.round(D * 8));
+    tl.fromTo("#__ID__-turb", { attr: { seed: 1 } }, { attr: { seed: 1 + B }, duration: D, ease: `steps(${B})` }, 0);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

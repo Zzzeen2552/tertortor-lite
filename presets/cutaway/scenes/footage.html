@@ -1,0 +1,62 @@
+<template>
+  <!-- register: footage (preset cutaway: the real object as a grayscale print on the sheet, one detail boxed in accent and labelled)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- The photo or clip is the evidence that the drawing is real: grayscale plate with crop marks, an accent box on the
+       one detail, a leader to a mono label. Clip: assets/footage/__ID__.mp4 (muted; Commons first), photo: img.
+       Set the box with HL = left, top, width, height inside the plate. Mark "slam" = the box lands. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-title { top: 250px; }
+    #__ID__-plate { left: 110px; top: 520px; width: 860px; height: 560px; }
+    #__ID__-media { position: absolute; inset: 0; transform-origin: 50% 50%; }
+    #__ID__-placeholder { position: absolute; inset: 0; display: grid; place-items: center; font: 700 54px var(--font-mono); letter-spacing: .1em; color: #fff; background: linear-gradient(#9a978f, #4d4b46); }
+    #__ID__-lead { left: 0; top: 0; width: 1080px; height: 1920px; }
+    #__ID__-lab { left: 110px; top: 1110px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="lc-paper plain">
+      <div id="__ID__-head" class="lc-head" data-safe="text"><span>__JOB__</span><span>reference</span></div>
+      <div id="__ID__-title" class="lc-title" data-safe="text">__HERO__</div>
+      <div id="__ID__-plate" class="lc-plate">
+        <div class="img"><div id="__ID__-media">
+          <!-- Replace the placeholder with: <video id="__ID__-clip" src="assets/footage/__ID__.mp4" muted playsinline style="width:100%;height:100%;object-fit:cover"></video> -->
+          <div id="__ID__-placeholder">FOOTAGE</div>
+        </div></div>
+        <div id="__ID__-hl" class="lc-hl"></div>
+      </div>
+      <svg id="__ID__-lead" class="lc-draw" viewBox="0 0 1080 1920" style="pointer-events:none"><path id="__ID__-leadp" class="t" d="" /></svg>
+      <div id="__ID__-lab" class="lc-label" data-safe="text">this detail</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const HL = [520, 300, 240, 180]; // accent box inside the plate: left, top, width, height
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push(`<span class="w${hot ? " k" : ""}" data-layout-allow-overflow><b>${w}</b></span>`);
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+    };
+    split(document.querySelector("#__ID__-title"));
+    const words = document.querySelectorAll("#__ID__-title .w > b");
+    const hl = document.querySelector("#__ID__-hl");
+    if (hl) Object.assign(hl.style, { left: HL[0] + "px", top: HL[1] + "px", width: HL[2] + "px", height: HL[3] + "px" });
+    // leader: from the box's bottom-left corner down to the label
+    const lp = document.querySelector("#__ID__-leadp");
+    if (lp) { lp.setAttribute("d", `M${110 + HL[0]} ${520 + HL[1] + HL[3]} L${110 + HL[0] - 60} ${1124} L300 1124`); lp.setAttribute("pathLength", "1"); }
+    const S = C.slam ?? Math.min(0.8, D * 0.45);
+    tl.fromTo(words, { yPercent: 105 }, { yPercent: 0, duration: 0.24, ease: "power3.out", stagger: Math.min(0.05, 0.2 / Math.max(1, words.length - 1)) }, 0);
+    tl.fromTo("#__ID__-head", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, 0);
+    tl.fromTo("#__ID__-plate", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(-6% -6% -6% -6%)", duration: 0.4, ease: "power2.inOut" }, 0.04);
+    tl.fromTo("#__ID__-media", { scale: 1.02 }, { scale: 1.08, duration: D, ease: "none" }, 0);
+    tl.fromTo("#__ID__-hl", { scale: 1.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: "power3.out" }, S);
+    tl.fromTo("#__ID__-leadp", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.3, ease: "power2.out" }, S + 0.1);
+    tl.fromTo("#__ID__-lab", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.22, ease: "power2.out" }, S + 0.3);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

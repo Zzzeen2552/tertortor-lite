@@ -291,3 +291,24 @@ Render sukses tidak membuktikan apa-apa.
 - Jangan mempercepat suara. Jangan menyerahkan video tanpa melihat contact sheet.
 - Jangan mem-publish atau mengunggah ke platform tanpa izin eksplisit.
 - Jangan memasukkan rahasia (API key, token, password) ke repo; `.env`, `.tebar-keys.json`, dan `library/voices/clones*` gitignored.
+
+## Dari MOTION (sinkron 2026-11-28)
+
+Perubahan TERTORTOR (MOTION) 2026-11-23 sampai 2026-11-28 yang dibawa ke LITE:
+- **Editor bergaya aplikasi edit video**: tab di tengah baris atas (Naskah, Suara, Beat, Aset, Publikasi), tiga kolom (panel tab,
+  video, kolom kanan Suara narasi + Gaya visual), panel **Timeline** selebar halaman (trek Video/Audio/Caption, playhead), aksen oranye.
+  Token di blok "Editor gaya aplikasi edit video" paling akhir `<style>` `tools/studio/index.html`. Kartu pemberitahuan polos, tanpa garis warna di tepi.
+- **Bar langkah** `#flowDock` di atas editor: satu tombol besar untuk langkah yang menunggu user (`flowSteps`). Tombol yang belum
+  aktif tetap menjawab saat diklik: agent bekerja → pop-up progres (spinner + perkiraan waktu); hook belum dipilih → tab Storyline
+  dibuka di daftar hook. Proses sampingan (character sheet dari foto baru) tidak mengunci persetujuan.
+- **Job line per peran**: `node tools/jobline.mjs <slug> <Peran> "<keputusan>"` → `videos/<slug>/joblines.jsonl`, tampil di halaman video.
+- **Reviewer mata segar**: `node tools/review-pack.mjs <slug>` → agen `video-reviewer` baru tiap ronde, PASS hanya bila semua skor ≥ 8,
+  maks. 3 ronde (kecuali Berakit ke Hulu: cukup contact sheet).
+- **Runner event** (`tools/event-runner.mjs`): klik Studio yang tidak diambil sesi mana pun dalam 45 s dijalankan `claude -p` headless.
+  Hanya menyala bila `.env AGENT=claude`; dengan `AGENT=antigravity` klik menunggu agent di IDE seperti sebelumnya.
+- **Suara satu take lewat Gemini API**: `node tools/gemini-take.mjs <slug>`.
+- **Scene sheet sebelum klip** (Storytelling): `node tools/scene-sheet.mjs <slug>` → `out/scene-sheet.png`, tunggu persetujuan user.
+- **Series**: bagian 2 dst. punya hook sendiri (`hooks.json → parts.<n>`), disetujui tanpa memilih hook.
+- **Muse4AI dihapus** (`tools/muse.mjs`, `local-proxy.mjs`): Meta Muse hanya lewat muse.ai di Chrome.
+- **Enam preset explainer baru** dari galeri lemo-opuscar: Manga Panels, Satellite Briefing, Risograph, Line-Art Cutaway,
+  Pictogram Motion, Spy Titles (`presets/<id>/style.md`).

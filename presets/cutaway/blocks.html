@@ -1,0 +1,40 @@
+<!-- Line-Art Cutaway blocks: paste into a scene, prefix ids with the beat id (here __ID__). All drawings use the
+     classes of preset.css: l = outline, t = inner line, g = grey face, w = white face, a = THE accent path
+     (one per frame), af = accent fill, dash = dotted leader. Give l / t / a paths pathLength 1 and tween
+     strokeDashoffset from 1 to 0 to trace them, as the stubs do. -->
+
+<!-- EXPLODED VIEW: three layers of one object drawn as flat slabs, pulled apart along y at mark "split".
+     tl.fromTo("#__ID__-L1", { y: 120 }, { y: 0, duration: 0.5, ease: "power3.inOut" }, C.split); and L3 from -120. -->
+<svg id="__ID__-exploded" class="lc-draw" viewBox="0 0 900 640" style="left:90px;top:520px;width:900px;height:640px">
+  <g id="__ID__-L1"><path class="w" d="M120 120 L640 60 L800 140 L280 200 Z" /><path class="l" d="M120 120 L640 60 L800 140 L280 200 Z M120 120 L120 136 L280 216 L800 156 L800 140" /></g>
+  <g id="__ID__-L2"><path class="g" d="M120 300 L640 240 L800 320 L280 380 Z" /><path class="l" d="M120 300 L640 240 L800 320 L280 380 Z" /><path class="t" d="M300 300 L420 286 L470 312 L350 326 Z M520 280 L600 270 L640 290 L560 300 Z" /><path class="a" d="M300 300 L420 286 L470 312" /></g>
+  <g id="__ID__-L3"><path class="w" d="M120 480 L640 420 L800 500 L280 560 Z" /><path class="l" d="M120 480 L640 420 L800 500 L280 560 Z M120 480 L120 500 L280 580 L800 520 L800 500" /></g>
+  <path class="dash" d="M280 216 L280 300 M800 156 L800 320 M280 380 L280 480 M800 320 L800 500" />
+</svg>
+
+<!-- SECTION CUT: hatched cut faces with the accent material in between (for a "metal / plastic / metal" story). -->
+<svg class="lc-draw" viewBox="0 0 400 160" style="left:340px;top:600px;width:400px;height:160px">
+  <defs><pattern id="__ID__-hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0 L0 14" stroke="var(--ink)" stroke-width="2" /></pattern></defs>
+  <rect x="10" y="40" width="150" height="80" fill="url(#__ID__-hatch)" /><rect class="af" x="160" y="40" width="40" height="80" />
+  <rect x="200" y="40" width="190" height="80" fill="url(#__ID__-hatch)" /><rect class="l" x="10" y="40" width="380" height="80" />
+</svg>
+
+<!-- DIMENSION LINE with a measured value (the value must be spoken). Vertical version: rotate the svg a quarter turn. -->
+<svg class="lc-draw" viewBox="0 0 600 60" style="left:240px;top:500px;width:600px;height:60px">
+  <path class="t" d="M4 6 L4 54 M596 6 L596 54" /><path class="l" d="M10 30 L590 30 M10 30 L30 20 M10 30 L30 40 M590 30 L570 20 M590 30 L570 40" />
+</svg>
+
+<!-- HAND (line drawing, for "how you hold it"): outline only, finger creases, no skin colour. -->
+<svg class="lc-draw" viewBox="0 0 300 360" style="left:600px;top:700px;width:300px;height:360px">
+  <path class="w" d="M40 340 L40 200 Q40 150 90 140 L230 120 Q262 118 262 146 Q262 172 232 176 L250 176 Q278 178 276 206 Q274 232 246 232 L254 232 Q280 236 276 262 Q272 286 244 286 L230 288 Q254 294 250 316 Q246 336 220 336 L120 340 Z" />
+  <path class="l" d="M40 340 L40 200 Q40 150 90 140 L230 120 Q262 118 262 146 Q262 172 232 176 L250 176 Q278 178 276 206 Q274 232 246 232 L254 232 Q280 236 276 262 Q272 286 244 286 L230 288 Q254 294 250 316 Q246 336 220 336 L120 340" />
+  <path class="t" d="M232 176 L150 180 M246 232 L150 236 M230 288 L150 290" />
+</svg>
+
+<!-- CALLOUT ROW: letters on a rule, the active one in accent (class "on"). Letters, not digits. -->
+<div class="lc-call on" style="left:200px;top:1060px">A</div><div class="lc-call" style="left:540px;top:1060px">B</div><div class="lc-call" style="left:880px;top:1060px">C</div>
+
+<!-- SIGNAL / WAVE: a sine path traced left to right (radio, sound, heat). Accent only if it is the subject. -->
+<svg class="lc-draw" viewBox="0 0 900 120" style="left:90px;top:560px;width:900px;height:120px">
+  <path class="a" d="M0 60 Q56 0 112 60 T224 60 T336 60 T448 60 T560 60 T672 60 T784 60 T896 60" />
+</svg>

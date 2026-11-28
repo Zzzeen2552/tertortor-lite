@@ -1,0 +1,31 @@
+/* Manga Panels: a black-and-white manga page that moves. Source of preset.json -> css (node presets/manga/build.mjs). */
+:root { --font-sfx: "Archivo Black", sans-serif; }
+.mg-page { position: absolute; inset: 0; overflow: hidden; background: var(--paper); }
+.mg-page.black { background: var(--ink); }
+/* panel: thick ink border, white inside; art fills it */
+.mg-panel { position: absolute; overflow: hidden; background: #fff; box-shadow: inset 0 0 0 8px var(--ink); }
+.mg-panel > .art { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.mg-panel > .art > img, .mg-panel > .art > video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.mg-panel.ink > .art > img, .mg-panel.ink > .art > video { filter: grayscale(1) contrast(1.35) brightness(1.05); }
+.mg-panel > .frame { position: absolute; inset: 0; box-shadow: inset 0 0 0 8px var(--ink); pointer-events: none; z-index: 5; }
+/* screentone: grey dot screen (shadow, sky, mood) */
+.mg-tone { position: absolute; pointer-events: none; background-image: radial-gradient(circle, var(--ink) 0 28%, transparent 32%); background-size: 12px 12px; opacity: .5; }
+/* focus lines / speed lines: svg filled by the scene script */
+.mg-lines { position: absolute; overflow: visible; pointer-events: none; }
+/* lettered sound effect: heavy condensed, ink with a white knock-out stroke */
+.mg-sfx { position: absolute; z-index: 20; font: 400 220px/0.9 var(--font-sfx); text-transform: uppercase; letter-spacing: .01em; color: var(--ink); -webkit-text-stroke: 18px #fff; paint-order: stroke fill; white-space: nowrap; transform-origin: 50% 60%; }
+.mg-sfx.red { color: var(--accent); }
+.mg-sfx em { font-style: normal; color: var(--accent); }
+/* speech balloon */
+.mg-balloon { position: absolute; z-index: 15; padding: 34px 44px; border-radius: 50%; background: #fff; border: 6px solid var(--ink); font: 800 50px/1.12 var(--font-body); text-transform: uppercase; text-align: center; color: var(--ink); }
+.mg-balloon em { font-style: normal; color: var(--accent); }
+.mg-balloon::after { content: ""; position: absolute; left: var(--tx, 30%); bottom: -46px; width: 54px; height: 60px; background: #fff; clip-path: polygon(0 0, 100% 0, 10% 100%); filter: drop-shadow(0 0 0 var(--ink)); }
+.mg-balloon::before { content: ""; position: absolute; left: calc(var(--tx, 30%) - 8px); bottom: -58px; width: 70px; height: 74px; background: var(--ink); clip-path: polygon(0 0, 100% 0, 12% 100%); }
+.mg-balloon.shout { border-radius: 12px; clip-path: none; }
+/* narration box (top corner of a panel) */
+.mg-box { position: absolute; z-index: 15; padding: 16px 24px; background: #fff; border: 5px solid var(--ink); font: 700 38px/1.2 var(--font-body); color: var(--ink); }
+/* phone panel around a REAL screenshot */
+.mg-phone { position: absolute; padding: 14px; border-radius: 52px; background: var(--ink); }
+.mg-phone .screen { width: 100%; height: 100%; border-radius: 40px; overflow: hidden; background: #000; }
+.mg-phone .screen > img, .mg-phone .screen > video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.mg-ring { position: absolute; z-index: 16; border: 8px solid var(--accent); border-radius: 24px; }

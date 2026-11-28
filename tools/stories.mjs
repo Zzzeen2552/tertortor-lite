@@ -450,7 +450,7 @@ export function useStory(bookId, storyId, { emit = true, extra = {} } = {}) {
   // a Musafo channel tags the project; another story type (Berakit ke Hulu) is a project type of its own
   const dir = createMusafo(slug, s.title, material, source, type === "musafo" ? { channel } : { type });
   mkdirSync(join(dir, "assets", "reference"), { recursive: true });
-  const excerpt = pages.slice(a - 1, b).map((p, i) => `[[HALAMAN PDF ${a + i}]]\n${p}`).join("\n\n");
+  const excerpt = trimToStory(pages.slice(a - 1, b).map((p, i) => `[[HALAMAN PDF ${a + i}]]\n${p}`).join("\n\n"), s.title);
   writeFileSync(join(dir, "assets", "reference", "bahan.md"), `# ${s.title}\n\n${source}\n\n${excerpt}\n`);
   writeJSON(join(dir, "request.json"), { type, ...(type === "musafo" ? { channel } : {}), title: s.title, story: material, source, story_ref: { book: bookId, id: s.id }, voice: "Gemini TTS", ...extra, created: new Date().toISOString() });
   s.status = "dipakai";
@@ -458,6 +458,25 @@ export function useStory(bookId, storyId, { emit = true, extra = {} } = {}) {
   saveBook(bookId, book);
   if (emit) appendFileSync(join(ROOT, ".events.jsonl"), JSON.stringify({ at: new Date().toISOString(), type: `${type}-new`, slug, ...(type === "musafo" ? { channel } : {}), from: `${bookId}/${s.id}` }) + "\n");
   return { slug, existed: false };
+}
+
+// The pages of a story also hold the tail of the story before it and the start of the next one (user 2026-11-23: Blue
+// Bird's bahan.md opened with Alfamart facts and ended with Indofood). When the text has a heading that names the story,
+// keep only that heading's section (up to the next heading of the same or a higher level), plus the page marker before it.
+export function trimToStory(excerpt, title) {
+  const key = (x) => String(x ?? "").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, " ").trim();
+  const lines = excerpt.split("\n"), want = key(title);
+  if (!want) return excerpt;
+  const i = lines.findIndex((l) => /^#{1,4}\s/.test(l) && key(l).includes(want));
+  if (i < 0) return excerpt;
+  const level = lines[i].match(/^#+/)[0].length;
+  let j = lines.findIndex((l, k) => k > i && new RegExp(`^#{1,${level}}\\s`).test(l));
+  if (j < 0) j = lines.length;
+  // drop page markers left dangling at the end of the section
+  while (j > i + 1 && /^\s*(\[\[HALAMAN PDF \d+\]\])?\s*$/.test(lines[j - 1])) j--;
+  let mark = "";
+  for (let k = i - 1; k >= 0; k--) if (/^\[\[HALAMAN PDF \d+\]\]$/.test(lines[k].trim())) { mark = lines[k].trim() + "\n"; break; }
+  return mark + lines.slice(i, j).join("\n");
 }
 
 // A book scan runs for many minutes: its progress lives in musafo/library/.job.json (not in the Studio process), so a

@@ -1,0 +1,62 @@
+<template>
+  <!-- register: footage (preset satbrief: real satellite imagery in analyst grey, a reticle locks on, an outline is drawn on the ground)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Imagery only from open sources (NASA Earth Observatory, Landsat, ASTER, MODIS, Copernicus Sentinel, Commons PD/CC0/CC BY),
+       never generated. TX/TY = the target in frame pixels (keep it inside the safe band); OUTLINE = the shoreline, boundary or
+       footprint traced from the image itself. Mark "lock" = reticle lands, "slam" = outline turns accent. Add class "color" on
+       the image for the one beat that keeps its real colour. The credit in the meta bar is the real source. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-title { top: 250px; }
+    #__ID__-ret { left: 0; top: 0; }
+    #__ID__-tag { left: 0; top: 0; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="sb-world">
+      <div id="__ID__-img" class="sb-img">
+        <!-- Replace with the REAL imagery: <img id="__ID__-pic" src="assets/footage/__ID__.jpg" alt="" /> or a muted <video> (Commons / NASA / Copernicus, credit in sources.txt + credits.md) -->
+        <div id="__ID__-placeholder" style="position:absolute;inset:0;background:radial-gradient(circle at 50% 40%, #6d7175, #2a2d30 70%)"></div>
+        <!-- ground layer: set viewBox to the image size in pixels and trace OUTLINE in those pixels; it moves with the push -->
+        <svg id="__ID__-out" class="sb-svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" style="left:0;top:0;width:100%;height:100%"><path id="__ID__-outp" class="o" vector-effect="non-scaling-stroke" d="M380 300 Q470 240 600 270 Q720 300 730 420 Q740 540 640 590 Q520 640 430 560 Q330 480 350 380 Z" /></svg>
+      </div>
+      <div class="sb-vig"></div>
+      <svg id="__ID__-leads" class="sb-svg" viewBox="0 0 1080 1920" style="left:0;top:0;width:1080px;height:1920px"><path id="__ID__-lead" class="l" d="" /></svg>
+      <svg id="__ID__-ret" class="sb-ret" viewBox="0 0 260 260"></svg>
+      <div id="__ID__-tag" class="sb-tag" data-safe="text">target</div>
+      <div id="__ID__-meta" class="sb-meta" data-safe="text"><span>__JOB__</span><span>imagery credit</span></div>
+      <div id="__ID__-title" class="sb-title" data-safe="text">__HERO__</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push('<span class="w' + (hot ? " k" : "") + '" data-layout-allow-overflow><b>' + w + '</b></span>');
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+    };
+    const rise = (sel, at) => { const w = document.querySelectorAll(sel + " .w > b"); tl.fromTo(w, { yPercent: 105 }, { yPercent: 0, duration: 0.3, ease: "power3.out", stagger: Math.min(0.05, 0.2 / Math.max(1, w.length - 1)) }, at); };
+    const RET = '<circle class="r" cx="130" cy="130" r="110" /><path class="r" d="M130 0 L130 34 M130 226 L130 260 M0 130 L34 130 M226 130 L260 130 M130 92 L130 112 M130 148 L130 168 M92 130 L112 130 M148 130 L168 130" />';
+    const TX = 540, TY = 760;
+    document.querySelector("#__ID__-ret").innerHTML = RET;
+    gsap.set("#__ID__-ret", { left: TX, top: TY });
+    gsap.set("#__ID__-tag", { left: TX + 170, top: TY - 210 });
+    document.querySelector("#__ID__-lead").setAttribute("d", "M" + (TX + 80) + " " + (TY - 80) + " L" + (TX + 160) + " " + (TY - 160));
+    split(document.querySelector("#__ID__-title"));
+    const L = C.lock ?? 0.15;
+    rise("#__ID__-title", 0);
+    tl.fromTo("#__ID__-img", { scale: 1 }, { scale: 1.1, duration: D, ease: "none", transformOrigin: TX + "px " + TY + "px" }, 0);
+    tl.fromTo("#__ID__-meta", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, 0);
+    tl.fromTo("#__ID__-ret", { scale: 1.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "power3.out" }, L);
+    tl.fromTo("#__ID__-ret", { rotate: 0 }, { rotate: 25, duration: D, ease: "none", immediateRender: false }, L);
+    tl.fromTo("#__ID__-out", { clipPath: "circle(0px at " + TX + "px " + TY + "px)" }, { clipPath: "circle(1400px at " + TX + "px " + TY + "px)", duration: 0.7, ease: "power2.out" }, L + 0.2);
+    tl.fromTo("#__ID__-tag", { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }, L + 0.35);
+    if (C.slam != null) tl.fromTo("#__ID__-outp", { stroke: "var(--ink)" }, { stroke: "var(--accent)", duration: 0.2, ease: "power1.out", immediateRender: false }, C.slam);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

@@ -1,0 +1,79 @@
+<template>
+  <!-- register: type (preset pictogram: headline card, one pictogram in a disc)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Field colour changes every beat: pg-world alone = cobalt, add pg-teal / pg-red / pg-night. The headline is the hero
+       (the em word = accent tag, else the last word). The pictogram in the disc is the beat's object: swap the person for
+       one from presets/pictogram/blocks.html; only the accent object (class "a") carries the accent colour.
+       Mark "pop" = the accent object jumps. Corner label: plain words only (a digit on screen must be spoken). -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-label { left: 80px; top: 196px; }
+    #__ID__-band { top: 250px; height: 380px; }
+    #__ID__-title { top: 270px; }
+    #__ID__-disc { left: 290px; top: 650px; width: 500px; height: 500px; }
+    #__ID__-ico { left: 360px; top: 710px; width: 380px; height: 380px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="pg-world">
+      <div id="__ID__-tiles" class="pg-tiles" data-layout-allow-overflow></div>
+      <div id="__ID__-band" class="pg-band"></div>
+      <div id="__ID__-label" class="pg-label" data-safe="text">__JOB__</div>
+      <div id="__ID__-title" class="pg-title" data-safe="text">__HERO__</div>
+      <div id="__ID__-disc" class="pg-disc"></div>
+      <svg id="__ID__-ico" class="pg-ico" viewBox="0 0 200 200">
+        <g id="__ID__-legA"><path class="s" stroke-width="24" d="M100 122 L82 182" /></g>
+        <g id="__ID__-legB"><path class="s" stroke-width="24" d="M100 122 L120 180" /></g>
+        <path class="s" stroke-width="28" d="M100 66 L100 122" />
+        <path class="s" stroke-width="20" d="M100 76 L72 110 M100 76 L130 104" />
+        <circle class="f" cx="100" cy="36" r="21" />
+        <rect id="__ID__-obj" class="a" x="120" y="102" width="34" height="38" rx="8" />
+      </svg>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    // square tile pattern, picked by a fixed hash of the beat id (same picture on every render)
+    const tiles = (sel) => {
+      const box = document.querySelector(sel); if (!box) return [];
+      if (!box.dataset.done) {
+        box.dataset.done = "1";
+        let h = [..."__ID__"].reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffff, 7); const out = [];
+        for (let i = 0; i < 104; i++) { h = (h * 1103515245 + 12345) & 0x7fffffff; out.push(`<i class="t${(h >> 9) % 8}"></i>`); }
+        box.innerHTML = out.join("");
+      }
+      return box.children;
+    };
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push(`<span class="w${hot ? " k" : ""}" data-layout-allow-overflow><b>${w}</b></span>`);
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+      const longest = Math.max(...[...el.querySelectorAll(".w")].map((w) => w.textContent.length));
+      el.style.fontSize = Math.min(190, Math.floor(920 / (0.8 * longest))) + "px";
+    };
+    const T = tiles("#__ID__-tiles");
+    split(document.querySelector("#__ID__-title"));
+    const words = document.querySelectorAll("#__ID__-title .w > b");
+    // tiles flip in along the diagonal (total under a quarter second), then the pattern slides one tile
+    tl.fromTo(T, { scaleY: 0 }, { scaleY: 1, duration: 0.18, ease: "power2.out", stagger: { grid: [13, 8], from: "start", amount: 0.22 } }, 0);
+    tl.fromTo("#__ID__-tiles", { x: 0 }, { x: -180, duration: D, ease: "none" }, 0);
+    tl.fromTo(words, { yPercent: 110 }, { yPercent: 0, duration: 0.22, ease: "power3.out", stagger: Math.min(0.05, 0.2 / Math.max(1, words.length - 1)) }, 0.03);
+    tl.fromTo("#__ID__-label", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.2, ease: "power3.out" }, 0.08);
+    tl.fromTo("#__ID__-disc", { scale: 0.6 }, { scale: 1, duration: 0.3, ease: "back.out(1.6)" }, 0.06);
+    tl.fromTo("#__ID__-ico", { scale: 0, rotate: -12 }, { scale: 1, rotate: 0, duration: 0.28, ease: "back.out(2)" }, 0.12);
+    // walk cycle in place (legs swing round the hip), counted so it ends with the beat
+    const R = Math.max(1, Math.floor(D / 0.25) - 1);
+    tl.fromTo("#__ID__-legA", { rotate: -14 }, { rotate: 14, duration: 0.25, ease: "sine.inOut", yoyo: true, repeat: R, svgOrigin: "100 122" }, 0);
+    tl.fromTo("#__ID__-legB", { rotate: 14 }, { rotate: -14, duration: 0.25, ease: "sine.inOut", yoyo: true, repeat: R, svgOrigin: "100 122" }, 0);
+    if (C.pop != null) {
+      tl.fromTo("#__ID__-ico", { y: 0 }, { y: -26, duration: 0.1, ease: "power2.out", yoyo: true, repeat: 1, immediateRender: false }, C.pop);
+      tl.fromTo("#__ID__-obj", { scale: 1.45 }, { scale: 1, duration: 0.24, ease: "back.out(2.4)", transformOrigin: "50% 50%", immediateRender: false }, C.pop);
+    }
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

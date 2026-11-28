@@ -14,6 +14,8 @@ import { checkConcepts, pickConcept, refFiles } from "../ref.mjs";
 import { isMusafo, checkMusafo, shotStats, shotWordLimit, createMusafo, STORY_TYPES, storyType, storylineApproval, approveStoryline, loadHooks, checkHooks, editScript, fillEnglish, sourceFlowErrors, draftApproval, saveDraft, approveDraft, productionState, startProduction, saveStoryline, charRefs, charSheet, looksOf, setLook } from "../musafo.mjs";
 import { editScriptMd, scriptParagraphs, pendingEdits } from "../script-edit.mjs";
 import { working, finished, claudeWaiting } from "../progress.mjs";
+import { recentJobs } from "../jobline.mjs";
+import { startRunner, running as runnerRun } from "../event-runner.mjs";
 import { state as chatState, send as chatSend, stop as chatStop, reset as chatReset } from "../studio-chat.mjs";
 import { KINDS as FORMAT_KINDS, listFormats, sourceOf as formatSource } from "../formats.mjs";
 import { createVariant, variantsOf } from "../variant.mjs";
@@ -598,7 +600,7 @@ createServer(async (req, res) => {
       return send(res, 405, { error: "method" });
     }
     // what Claude is doing after the user's clicks, with estimates, and whether a Claude session is listening at all
-    if (p === "/api/working" && req.method === "GET") return send(res, 200, { claude: claudeWaiting(), antigravity: claudeWaiting(), agent: AGENT_NAME, items: working() });
+    if (p === "/api/working" && req.method === "GET") return send(res, 200, { claude: claudeWaiting() || !!runnerRun(), antigravity: claudeWaiting(), agent: AGENT_NAME, runner: AGENT === "claude", items: working(), jobs: recentJobs() });
     if (p === "/api/videos" && req.method === "GET") {
       const slugs = existsSync(VIDEOS) ? readdirSync(VIDEOS).filter((s) => !s.startsWith(".") && statSync(join(VIDEOS, s)).isDirectory()) : [];
       // buffered: networks that got a post for this video (tebar.json, plus buffer.json from before Buffer was removed), a badge on the card
@@ -864,6 +866,14 @@ createServer(async (req, res) => {
     if (ready && req.method === "POST" && existsSync(join(VIDEOS, ready[1])) && !isAd(join(VIDEOS, ready[1]))) {
       emit("explainer-new", ready[1]);
       return send(res, 200, { ok: true });
+    }
+    // ordinary explainer (user 2026-11-23, Ponzi on Risograph "naskah nggak kedevelop"): creating one used to only show
+    // the /video-vertikal command, so no session and no event-runner ever picked it up. Wake Claude once the reference
+    // analysis (npm run ref) is done: concepts.json when there is a reference, otherwise straight to the script.
+    if (ready && req.method === "POST" && !metaOf(join(VIDEOS, ready[1])).type && !isAd(join(VIDEOS, ready[1]))) {
+      const slug = ready[1];
+      (refQueue.get(slug) || Promise.resolve()).then(() => emit("explainer-new", slug));
+      return send(res, 202, { ok: true });
     }
     if (ready && req.method === "POST") {
       if (!isAd(join(VIDEOS, ready[1]))) return send(res, 400, { error: "bukan proyek Advertisement" });
@@ -1449,6 +1459,12 @@ createServer(async (req, res) => {
       const d = join(VIDEOS, apv[1]);
       if (!existsSync(d)) return send(res, 404, { error: "video not found" });
       if (req.method === "DELETE") { unapprove(d); return send(res, 200, { ok: true }); }
+      // a Storytelling script that does not open with the chosen hook (or has a bad hooks.json) is refused here, not later
+      // at Production (user 2026-11-23, Ciputra 1: hook B chosen, script opened with A, Production stopped at build)
+      if (isMusafo(d)) {
+        const bad = checkMusafo(d).errors.filter((x) => /hook/i.test(x));
+        if (bad.length) return send(res, 400, { error: `Naskah belum bisa disetujui: ${bad.join("; ")}. Ubah kalimat pertama naskah, atau pilih hook lain di tab Storyline.` });
+      }
       const a = approve(d, "studio");
       emit("script-approved", apv[1]);
       // the posting caption is written as soon as the script is approved (MOTION user 2026-11-13), in the background; a caption
@@ -1602,6 +1618,8 @@ createServer(async (req, res) => {
   }
 }).listen(PORT, "127.0.0.1", () => {
   console.log(`TERTORTOR: http://localhost:${PORT}`);
+  // a click nobody picks up within 45 s is handled by Claude headless (tools/event-runner.mjs, user 2026-11-23)
+  if (AGENT === "claude") startRunner(); // the headless runner is claude -p; with AGENT=antigravity the IDE takes the click
   // style covers for subs that have none yet (a new sub gets one once it has a render): tools/sub-covers.mjs
   runTool([join(ROOT, "tools", "sub-covers.mjs")]).then((r) => { const made = r.out.split(/\r?\n/).filter((l) => l.startsWith("✔")); if (made.length) console.log(`cover gaya baru: ${made.length}`); });
 });

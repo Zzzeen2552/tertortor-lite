@@ -1,0 +1,45 @@
+<template>
+  <!-- register: footage (preset manga: one big ART panel with a speech balloon and a lettered sound effect)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Art = a black-and-white manga panel image: generated (Flow / GPT Image / Muse, prompt in presets/manga/style.md) or a
+       public-domain print; assets/footage/__ID__.jpg (an mp4 clip works the same). Class "ink" on the panel forces pure
+       black and white; leave it off when the art keeps its one spot colour. The hero goes in the balloon (the em word in
+       the accent colour). SFX = one short sound word, mark "slam" stamps it. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-panel { left: 40px; top: 190px; width: 1000px; height: 960px; clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%); }
+    #__ID__-placeholder { position: absolute; inset: 0; display: grid; place-items: center; font: 400 80px var(--font-sfx); color: #fff; background: linear-gradient(135deg, #888, #222); }
+    #__ID__-tone { left: 40px; top: 1040px; width: 1000px; height: 110px; }
+    #__ID__-balloon { right: 80px; top: 230px; max-width: 560px; --tx: 22%; }
+    #__ID__-sfx { left: 70px; top: 850px; font-size: 170px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-page" class="mg-page">
+      <div id="__ID__-panel" class="mg-panel ink">
+        <div id="__ID__-art" class="art">
+          <!-- Replace with: <img id="__ID__-pic" src="assets/footage/__ID__.jpg" alt="" /> -->
+          <div id="__ID__-placeholder">ART PANEL</div>
+        </div>
+        <div class="frame"></div>
+      </div>
+      <div id="__ID__-tone" class="mg-tone"></div>
+      <div id="__ID__-balloon" class="mg-balloon" data-safe="text">__HERO__</div>
+      <div id="__ID__-sfx" class="mg-sfx red" data-layout-allow-occlusion data-layout-allow-overflow data-safe="text">wham</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const unEm = (el) => { if (el) el.innerHTML = el.innerHTML.replace(/&lt;(\/?em)&gt;/g, "<$1>"); };
+    unEm(document.querySelector("#__ID__-balloon"));
+    const S = C.slam ?? Math.min(0.9, D * 0.5);
+    // the panel is cut open on the beat (diagonal wipe), then the camera drifts inside it
+    tl.fromTo("#__ID__-panel", { clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)" }, { clipPath: "polygon(0 0, 100% 0, 100% 92%, 0 100%)", duration: 0.26, ease: "power4.out" }, 0);
+    tl.fromTo("#__ID__-art", { scale: 1.06, x: 0 }, { scale: 1.12, x: -24, duration: D, ease: "none" }, 0);
+    tl.fromTo("#__ID__-tone", { opacity: 0 }, { opacity: 0.5, duration: 0.2, ease: "power1.out" }, 0.1);
+    tl.fromTo("#__ID__-balloon", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "back.out(2)", transformOrigin: "30% 100%" }, 0.12);
+    tl.fromTo("#__ID__-sfx", { scale: 1.8, rotate: -18, opacity: 0 }, { scale: 1, rotate: -8, opacity: 1, duration: 0.18, ease: "back.out(2.4)" }, S);
+    tl.fromTo("#__ID__-panel", { x: 0 }, { x: -12, duration: 0.2, ease: "elastic.out(1, 0.3)", immediateRender: false }, S);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

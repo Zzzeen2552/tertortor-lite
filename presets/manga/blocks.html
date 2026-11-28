@@ -1,0 +1,24 @@
+<!-- Manga Panels blocks: paste into a scene, prefix ids with the beat id (here __ID__). -->
+
+<!-- SHOUT balloon: jagged edge by clip-path, for a scream or a sudden line. -->
+<div class="mg-balloon shout" style="left:120px;top:260px;max-width:520px;clip-path:polygon(0 12%,8% 0,20% 10%,34% 0,48% 9%,62% 0,76% 10%,90% 0,100% 14%,94% 36%,100% 58%,92% 76%,100% 100%,78% 90%,62% 100%,46% 90%,30% 100%,16% 88%,0 100%,6% 72%,0 50%,6% 30%)">Shout line</div>
+
+<!-- THOUGHT bubble: a soft cloud with two small trailing circles instead of a tail. -->
+<div class="mg-balloon" style="left:540px;top:300px;max-width:420px;border-radius:44% 56% 50% 50% / 60% 50% 50% 40%">thought</div>
+<div style="position:absolute;left:600px;top:560px;width:44px;height:44px;border-radius:50%;background:#fff;border:5px solid var(--ink)"></div>
+<div style="position:absolute;left:570px;top:620px;width:26px;height:26px;border-radius:50%;background:#fff;border:5px solid var(--ink)"></div>
+
+<!-- BLACK PAGE (the impact / the silence): put class "black" on .mg-page, white focus lines and a white word.
+     In the focus() helper fill the path with #fff instead of var(--ink); the sfx gets color #fff and stroke var(--ink). -->
+
+<!-- THREE TALL PANELS (time split into steps): three narrow panels side by side, opening left to right on marks. -->
+<div class="mg-panel ink" style="left:40px;top:190px;width:320px;height:960px"><div class="art"></div><div class="frame"></div></div>
+<div class="mg-panel ink" style="left:380px;top:190px;width:320px;height:960px"><div class="art"></div><div class="frame"></div></div>
+<div class="mg-panel ink" style="left:720px;top:190px;width:320px;height:960px"><div class="art"></div><div class="frame"></div></div>
+
+<!-- SLASH: a white diagonal gutter that cuts one panel into two in the middle of a beat. -->
+<div style="position:absolute;left:-200px;right:-200px;top:640px;height:26px;background:var(--paper);box-shadow:0 8px 0 var(--ink),0 -8px 0 var(--ink);transform:rotate(-12deg)"></div>
+<!-- tl.fromTo("#__ID__-slash", { scaleX: 0 }, { scaleX: 1, duration: 0.14, ease: "power4.out", transformOrigin: "0 50%" }, C.slam); -->
+
+<!-- TONE GRADIENT (shadow falling over a figure): screentone that grows denser toward the bottom. -->
+<div class="mg-tone" style="left:40px;top:700px;width:1000px;height:450px;-webkit-mask-image:linear-gradient(transparent,#000);mask-image:linear-gradient(transparent,#000);opacity:.7"></div>

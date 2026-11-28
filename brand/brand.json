@@ -170,11 +170,11 @@
     "styleAnchor": "Stylized cinematic 3D render with a painterly, matte, clay-like finish — smooth simplified forms, no hyper-detailed skin or fabric pores. Teal-blue and warm amber-orange color palette, golden-hour backlight with soft rim light, gentle volumetric haze and floating dust, fine film grain, soft gradient sky. Serene, contemplative, spiritual mood.",
     "refs": "musafo/reference/gambar",
     "image": {
-      "tool": "Meta Muse (muse4ai)",
-      "script": "node tools/muse.mjs image <out> --prompt-file <txt> --ref <musafo/reference/gambar …>",
+      "tool": "Meta Muse (muse.ai)",
+      "page": "https://muse.ai",
       "ratio": "9:16",
       "outputs": 1,
-      "note": "Default (user 2026-11-11): gambar Musafo di Meta Muse lewat muse4ai, 1 akun, 2-3 gambar dari musafo/reference/gambar sebagai acuan gaya (lebih baik daripada KV proyek). Cadangan: Google Flow (flow), lalu RunningHub Qwen Image 2.1 / zimage3.0 (fallback).",
+      "note": "Default (user 2026-11-11): gambar Musafo di Meta Muse (muse.ai lewat Claude in Chrome; Muse4AI dihapus user 2026-11-25), 1 akun, 2-3 gambar dari musafo/reference/gambar sebagai acuan gaya (lebih baik daripada KV proyek). Cadangan: Google Flow (flow), lalu RunningHub Qwen Image 2.1 / zimage3.0 (fallback).",
       "flow": {
         "tool": "Google Flow",
         "page": "https://labs.google/fx/tools/flow",

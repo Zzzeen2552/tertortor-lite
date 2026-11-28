@@ -215,14 +215,13 @@ Hemat: ±6 generate per video 90 detik, bukan ±18. Tampil di TERTORTOR tab Shot
 ## 4. Gambar per shot
 - **Dengan `clips`, gambar cukup untuk shot pertama tiap generate** (`check` menghitung hanya itu); shot berikutnya
   dibuat H3 dari teks dengan gaya yang sama.
-- **Default: Meta Muse lewat muse4ai** (`brand.json → musafo.image`, user 2026-11-11). Prasyarat: Muse4AI terbuka, satu akun
-  siap, `node tools/local-proxy.mjs` hidup; cek kuota dulu dengan `node tools/muse.mjs status`. Per shot:
-  `node tools/muse.mjs image assets/frames/<shot>.muse.webp --prompt-file <prompt> --ref <3 gambar musafo/reference/gambar>`
-  (±1 menit, 1152×2048). Prompt = `image` shot + "Images 1, 2 and 3 are visual style references only: match their matte
+- **Default: Meta Muse di muse.ai lewat Claude in Chrome** (`brand.json → musafo.image`, user 2026-11-11; Muse4AI dihapus user
+  2026-11-25). Akun Muse user (user login sendiri), satu side chat per gambar: unggah 3 gambar dari `musafo/reference/gambar`
+  (JPG kecil), minta gambar vertikal 9:16, unduh dari tab baru ke `assets/frames/<shot>.muse.webp`. Prompt = `image` shot + "Images 1, 2 and 3 are visual style references only: match their matte
   clay-like 3D rendering, palette and lighting, not their composition or people." Acuan asli channel (mis. no. 4, 10, 18:
   sosok sendiri, duduk, lanskap) lebih baik daripada KV proyek. Muse menambah detail sendiri: tulis yang dilarang secara
   eksplisit (pose tangan "palms open, no mudra", "plain low stone well, no winch", "no lanterns, no lit lamps" di siang
-  hari) dan cek tiap gambar. Catat tiap generate di `costs.md` sebagai kuota Muse; `imageTool` = "Meta Muse (muse4ai)".
+  hari) dan cek tiap gambar. Catat tiap generate di `costs.md` sebagai kuota Muse; `imageTool` = "Meta Muse (muse.ai)".
 - Cadangan pertama: **Google Flow** (`musafo.image.flow`) lewat Claude in Chrome: proyek baru → Image,
   9:16, Nano Banana, x1; tambahkan 1-3 gambar dari `musafo/reference/gambar` sebagai ingredients supaya gayanya sama.
   Gambar di Flow gratis, tidak perlu izin. Satu prompt per kali, tunggu selesai, unduh. "Unusual activity" → jangan retry,
@@ -234,6 +233,15 @@ Hemat: ±6 generate per video 90 detik, bukan ±18. Tampil di TERTORTOR tab Shot
 - `node tools/musafo.mjs add <slug> image <shotId> <file>` (crop 1080×1920, baris `sources.txt`).
 - Cek semua gambar sekaligus lewat agen `frame-checker` (grid): gaya sama dengan referensi, tanpa teks/huruf palsu, tangan
   dan wajah tidak rusak, tidak ada wajah Nabi. Yang gagal diulang sebelum masuk klip.
+
+## 4b. Scene sheet → persetujuan user (default sejak user 2026-11-23, semua Storytelling)
+"Sebelum bikin clip, tahap satu tampilkan scene sheet dulu disini, jadikan ini default baru." Setelah semua gambar
+(key visual + gambar adegan b, c) terpasang: `node tools/scene-sheet.mjs <slug>` → `out/scene-sheet.png` (per shot: waktu,
+framing, gambar tiap bagian klip, kalimat dengan huruf bagiannya, gerak kamera). Kirim gambar itu ke user di chat
+(SendUserFile, render) dan **berhenti sampai user menyetujuinya** atau minta gambar tertentu diulang. Tidak ada klip
+(Muse/H3/Flow) yang dibuat sebelum itu, juga saat user sudah bilang "gak usah nanya" untuk langkah lain. Gambar yang
+diulang → scene sheet baru → tunjukkan lagi. Dalam run tanpa sesi (event-runner): job line "Editor: berhenti, scene sheet
+menunggu persetujuan" lalu berhenti.
 
 ## 5. Klip (koin)
 - Langsung Run Now tanpa minta izin koin (user 2026-11-04). Catat saldo sebelum dan sesudah, laporkan jumlah generate

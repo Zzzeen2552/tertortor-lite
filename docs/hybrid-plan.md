@@ -222,3 +222,8 @@ firewall Sumopod hanya membuka 22, 80, 443 (diuji dari luar: semua port lain tim
 
 Relay disetujui; offline = keputusan kecil diantrekan, buat proyek ditolak; cache VPS 3 GB + preview 540p; login
 password + cookie; domain `tertortor.redactor.my.id`.
+
+## Deploy 2026-11-19
+
+- Relay di VPS diperbarui (route Clone suara: POST/DELETE/PUT `/api/voices/clone*`); cadangan `~/tertortor/relay.mjs.bak-20261119`,
+  `docker compose -p tertortor up -d --build relay` (tunnel tidak disentuh). Worker laptop dijalankan lagi dengan `npm run worker`.

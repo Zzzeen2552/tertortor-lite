@@ -1,0 +1,75 @@
+<template>
+  <!-- register: footage (preset pictogram: a real photo or clip inside one big rounded tile, toned to the field, with a pictogram badge)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- The picture never fills the frame raw: it sits in the tile, grayscale under the field colour, so it belongs to the
+       flat world. Clip: assets/footage/__ID__.mp4 (muted; Commons first, generated only for a dramatisation), photo: img.
+       Badge = a disc with one pictogram (swap from blocks.html) that names what the picture shows. Mark "slam" = badge
+       pops. Red field by default. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-band { top: 180px; height: 380px; }
+    #__ID__-title { top: 220px; }
+    #__ID__-win { left: 90px; top: 560px; width: 900px; height: 560px; }
+    #__ID__-media { position: absolute; inset: 0; transform-origin: 50% 50%; }
+    #__ID__-placeholder { position: absolute; inset: 0; display: grid; place-items: center; font: 900 64px var(--font-display); color: var(--ink); letter-spacing: .08em; background: linear-gradient(#6b7385, #20263a); }
+    #__ID__-badge { left: 780px; top: 960px; width: 230px; height: 230px; background: var(--night); box-shadow: 0 0 0 12px var(--f); }
+    #__ID__-bico { left: 820px; top: 1000px; width: 150px; height: 150px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="pg-world pg-red">
+      <div id="__ID__-tiles" class="pg-tiles" data-layout-allow-overflow></div>
+      <div id="__ID__-band" class="pg-band"></div>
+      <div id="__ID__-title" class="pg-title" data-safe="text">__HERO__</div>
+      <div id="__ID__-win" class="pg-win">
+        <div id="__ID__-media">
+          <!-- Replace the placeholder with: <video id="__ID__-clip" src="assets/footage/__ID__.mp4" muted playsinline style="width:100%;height:100%;object-fit:cover"></video> -->
+          <div id="__ID__-placeholder">FOOTAGE</div>
+        </div>
+        <div class="tint"></div>
+      </div>
+      <div id="__ID__-badge" class="pg-disc"></div>
+      <svg id="__ID__-bico" class="pg-ico" viewBox="0 0 100 100">
+        <path class="a" d="M50 8 L94 88 L6 88 Z" stroke="var(--accent)" stroke-width="10" stroke-linejoin="round" />
+        <path class="ds" stroke-width="11" d="M50 38 L50 60" /><circle class="d" cx="50" cy="75" r="6" />
+      </svg>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const tiles = (sel) => {
+      const box = document.querySelector(sel); if (!box) return [];
+      if (!box.dataset.done) {
+        box.dataset.done = "1";
+        let h = [..."__ID__"].reduce((a, c) => (a * 31 + c.charCodeAt(0)) & 0xffff, 7); const out = [];
+        for (let i = 0; i < 104; i++) { h = (h * 1103515245 + 12345) & 0x7fffffff; out.push(`<i class="t${(h >> 9) % 8}"></i>`); }
+        box.innerHTML = out.join("");
+      }
+      return box.children;
+    };
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push(`<span class="w${hot ? " k" : ""}" data-layout-allow-overflow><b>${w}</b></span>`);
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+      const longest = Math.max(...[...el.querySelectorAll(".w")].map((w) => w.textContent.length));
+      el.style.fontSize = Math.min(160, Math.floor(920 / (0.8 * longest))) + "px";
+    };
+    const T = tiles("#__ID__-tiles");
+    split(document.querySelector("#__ID__-title"));
+    const words = document.querySelectorAll("#__ID__-title .w > b");
+    tl.fromTo(T, { rotate: 90, scale: 0.4 }, { rotate: 0, scale: 1, duration: 0.2, ease: "power2.out", stagger: { grid: [13, 8], from: "center", amount: 0.22 } }, 0);
+    tl.fromTo("#__ID__-tiles", { x: -180 }, { x: 0, duration: D, ease: "none" }, 0);
+    tl.fromTo(words, { yPercent: 110 }, { yPercent: 0, duration: 0.22, ease: "power3.out", stagger: Math.min(0.05, 0.2 / Math.max(1, words.length - 1)) }, 0.03);
+    // the tile opens from its centre line, then the picture pushes in slowly
+    tl.fromTo("#__ID__-win", { clipPath: "inset(48% 0% 48% 0% round 44px)" }, { clipPath: "inset(0% 0% 0% 0% round 44px)", duration: 0.3, ease: "power3.out" }, 0.04);
+    tl.fromTo("#__ID__-media", { scale: 1 }, { scale: 1.06, duration: D, ease: "none" }, 0);
+    tl.fromTo(["#__ID__-badge", "#__ID__-bico"], { scale: 0 }, { scale: 1, duration: 0.26, ease: "back.out(2)", stagger: 0.04 }, 0.2);
+    if (C.slam != null) tl.fromTo("#__ID__-bico", { scale: 1.35, rotate: -10 }, { scale: 1, rotate: 0, duration: 0.24, ease: "back.out(2.4)", immediateRender: false }, C.slam);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

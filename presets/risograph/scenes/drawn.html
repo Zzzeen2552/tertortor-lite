@@ -1,0 +1,66 @@
+<template>
+  <!-- register: drawn (preset risograph: a printed street scene, each ink on its own plate)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Draw the place in three plates: blue = outlines, windows, shadow; yellow = facades and sun; accent = the ONE
+       hero thing (awning, tree, bicycle, sign) plus at most one echo. Ground green = yellow solid under a blue halftone.
+       Mark "pop" = the accent plate bounces. Keep shapes simple and flat, drawn from the real place. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-title { top: 220px; }
+    #__ID__-scene { left: 0; top: 520px; width: 1080px; height: 640px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="rg-paper">
+      <div id="__ID__-pc" class="rg-plate rg-c">
+        <svg class="rg-svg" viewBox="0 0 1080 640" style="left:0;top:520px;width:1080px;height:640px"><circle class="f" cx="880" cy="70" r="70" /><rect class="f" x="60" y="150" width="300" height="360" opacity=".55" /><rect class="f" x="400" y="80" width="280" height="430" opacity=".4" /><rect class="f" x="720" y="190" width="300" height="320" opacity=".55" /><rect class="f" x="0" y="510" width="1080" height="130" /></svg>
+      </div>
+      <div id="__ID__-pa" class="rg-plate rg-a">
+        <svg class="rg-svg" viewBox="0 0 1080 640" style="left:0;top:520px;width:1080px;height:640px">
+          <path class="s" d="M60 510 L60 150 L360 150 L360 510 M40 150 L380 150 M400 510 L400 80 L680 80 L680 510 M380 80 L700 80 M720 510 L720 190 L1020 190 L1020 510 M700 190 L1040 190" />
+          <g class="f"><rect x="100" y="190" width="60" height="80" /><rect x="190" y="190" width="60" height="80" /><rect x="280" y="190" width="50" height="80" /><rect x="100" y="310" width="60" height="80" /><rect x="280" y="310" width="50" height="80" /><rect x="440" y="120" width="70" height="90" /><rect x="560" y="120" width="70" height="90" /><rect x="440" y="250" width="70" height="90" /><rect x="560" y="250" width="70" height="90" /><rect x="760" y="230" width="60" height="70" /><rect x="860" y="230" width="60" height="70" /><rect x="940" y="230" width="50" height="70" /><rect x="500" y="400" width="80" height="110" /></g>
+        </svg>
+        <div class="ht-lo" style="left:0;top:1030px;width:1080px;height:130px"></div>
+      </div>
+      <div id="__ID__-pb" class="rg-plate rg-b">
+        <svg id="__ID__-hero" class="rg-svg" viewBox="0 0 1080 640" style="left:0;top:520px;width:1080px;height:640px"><path class="f" d="M180 410 L300 410 L320 450 L160 450 Z M410 360 L670 360 L690 400 L390 400 Z" /><circle class="f" cx="860" cy="430" r="70" /><rect class="f" x="852" y="470" width="16" height="60" /></svg>
+      </div>
+      <div id="__ID__-title" class="rg-title" data-safe="text">__HERO__</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push('<span class="w' + (hot ? " k" : "") + '" data-layout-allow-overflow><b data-t="' + w + '">' + w + '</b></span>');
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+      const longest = Math.max(...[...el.querySelectorAll(".w")].map((w) => w.textContent.length));
+      el.style.fontSize = Math.min(150, Math.floor(920 / (0.82 * longest))) + "px";
+    };
+    // misregistration: the accent plate and the title's under-plate jump to a new small offset four times a second
+    const OFF = [[7, 5], [4, 8], [9, 3], [5, 6], [8, 7], [3, 4]];
+    const jitter = (sel, title) => {
+      const n = Math.max(1, Math.ceil(D * 4));
+      for (let i = 0; i < n; i++) {
+        const [x, y] = OFF[i % OFF.length];
+        if (sel) tl.set(sel, { x: x - 6, y: y - 5 }, i * 0.25);
+        if (title) tl.set(title, { "--mx": x + "px", "--my": y + "px" }, i * 0.25);
+      }
+    };
+    // plates are laid down one by one (stepped, like sheets going through the drum)
+    const lay = (sels, at) => sels.forEach((s, i) => tl.fromTo(s, { xPercent: -6 }, { xPercent: 0, duration: 0.18, ease: "steps(3)" }, at + i * 0.08));
+    const rise = (sel, at) => { const w = document.querySelectorAll(sel + " .w > b"); tl.fromTo(w, { yPercent: 30 }, { yPercent: 0, duration: 0.2, ease: "steps(4)", stagger: Math.min(0.05, 0.2 / Math.max(1, w.length - 1)) }, at); };
+    const T = document.querySelector("#__ID__-title"); split(T);
+    lay(["#__ID__-pc", "#__ID__-pa", "#__ID__-pb"], 0);
+    rise("#__ID__-title", 0.02);
+    tl.fromTo(["#__ID__-pa", "#__ID__-pc"], { y: 0 }, { y: -30, duration: D, ease: "none", immediateRender: false }, 0.2);
+    jitter("#__ID__-pb", T);
+    if (C.pop != null) tl.fromTo("#__ID__-hero", { y: -40 }, { y: 0, duration: 0.24, ease: "steps(4)", immediateRender: false }, C.pop);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

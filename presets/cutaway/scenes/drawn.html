@@ -1,0 +1,73 @@
+<template>
+  <!-- register: drawn (preset cutaway: the object opened as a black-line drawing, one accent path, callouts, a loupe)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Redraw the real object from a photo or its real proportions: outer shell with class l, inner parts with class t,
+       grey faces with class g, and ONE accent path with class a = the thing this beat explains. Every l / t / a path
+       traces on by itself. Callouts are letters (a digit on screen must be spoken). Marks: "path" = accent path draws,
+       "zoom" = the loupe opens on the accent detail, "call" = callouts pop. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-title { top: 250px; }
+    #__ID__-loupe { left: 100px; top: 430px; width: 300px; height: 300px; }
+    #__ID__-lab { left: 440px; top: 500px; }
+    #__ID__-note { left: 440px; top: 550px; width: 560px; }
+    #__ID__-draw { left: 90px; top: 760px; width: 900px; height: 380px; }
+    #__ID__-lead { left: 0; top: 0; width: 1080px; height: 1920px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="lc-paper">
+      <div id="__ID__-head" class="lc-head" data-safe="text"><span>__JOB__</span><span>cutaway</span></div>
+      <div id="__ID__-title" class="lc-title" data-safe="text">__HERO__</div>
+      <svg id="__ID__-draw" class="lc-draw" viewBox="0 0 900 380">
+        <rect class="g" x="30" y="30" width="840" height="320" rx="60" />
+        <rect class="l" x="30" y="30" width="840" height="320" rx="60" />
+        <rect class="t" x="58" y="58" width="784" height="264" rx="40" />
+        <rect class="w" x="130" y="96" width="300" height="190" rx="14" /><rect class="t" x="130" y="96" width="300" height="190" rx="14" />
+        <path class="t" d="M150 120 L410 262 M190 96 L430 228 M130 150 L350 286 M130 210 L250 286 M260 96 L430 190" />
+        <rect class="t" x="480" y="100" width="150" height="90" rx="8" /><rect class="t" x="660" y="100" width="120" height="180" rx="10" />
+        <rect class="t" x="500" y="220" width="110" height="60" rx="6" /><path class="t" d="M630 145 L660 145 M555 190 L555 220" />
+        <circle class="t" cx="80" cy="80" r="9" /><circle class="t" cx="820" cy="80" r="9" /><circle class="t" cx="80" cy="300" r="9" /><circle class="t" cx="820" cy="300" r="9" />
+        <path id="__ID__-acc" class="a" d="M30 160 L30 90 Q30 30 90 30 L260 30" />
+      </svg>
+      <svg id="__ID__-lead" class="lc-draw" viewBox="0 0 1080 1920" style="pointer-events:none"><path class="dash" d="M226 724 L120 790" /></svg>
+      <div id="__ID__-loupe" class="lc-loupe">
+        <svg viewBox="0 0 300 300"><rect class="g" x="40" y="70" width="400" height="400" rx="140" style="fill:var(--face)" /><path d="M40 300 L40 210 Q40 70 180 70 L300 70" fill="none" stroke="var(--ink)" stroke-width="5" /><path d="M40 300 L40 210 Q40 70 180 70 L300 70" fill="none" stroke="var(--accent)" stroke-width="26" stroke-linecap="round" /><path d="M150 40 L150 100" stroke="var(--ink)" stroke-width="4" /></svg>
+      </div>
+      <div id="__ID__-lab" class="lc-label" data-safe="text">the part</div>
+      <div id="__ID__-note" class="lc-note" data-safe="text">what it does, in one line</div>
+      <div id="__ID__-cA" class="lc-call on" style="left:56px;top:870px">A</div>
+      <div id="__ID__-cB" class="lc-call" style="left:1022px;top:1000px">B</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push(`<span class="w${hot ? " k" : ""}" data-layout-allow-overflow><b>${w}</b></span>`);
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+    };
+    split(document.querySelector("#__ID__-title"));
+    const words = document.querySelectorAll("#__ID__-title .w > b");
+    const lines = [...document.querySelectorAll("#__ID__-draw .l, #__ID__-draw .t")];
+    lines.forEach((p) => p.setAttribute("pathLength", "1"));
+    document.querySelector("#__ID__-acc")?.setAttribute("pathLength", "1");
+    const P = C.path ?? Math.min(1.1, D * 0.45), Z = C.zoom ?? Math.min(P + 0.4, D * 0.7), K = C.call ?? Z + 0.2;
+    tl.fromTo(words, { yPercent: 105 }, { yPercent: 0, duration: 0.24, ease: "power3.out", stagger: Math.min(0.05, 0.2 / Math.max(1, words.length - 1)) }, 0);
+    tl.fromTo("#__ID__-head", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, 0);
+    // the drawing traces on: shell first, inner parts after (the trace is the hero move, so it may take most of a second)
+    tl.fromTo(lines, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut", stagger: { amount: 0.3 } }, 0.05);
+    tl.fromTo("#__ID__-draw .g, #__ID__-draw .w", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, 0.35);
+    tl.fromTo("#__ID__-draw", { scale: 1 }, { scale: 1.035, duration: D, ease: "none", transformOrigin: "20% 20%" }, 0);
+    tl.fromTo("#__ID__-acc", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.4, ease: "power2.out" }, P);
+    tl.fromTo("#__ID__-loupe", { scale: 0 }, { scale: 1, duration: 0.3, ease: "power3.out" }, Z);
+    tl.fromTo(["#__ID__-lead", "#__ID__-lab", "#__ID__-note"], { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.24, ease: "power2.out", stagger: 0.06 }, Z + 0.12);
+    tl.fromTo(["#__ID__-cA", "#__ID__-cB"], { scale: 0 }, { scale: 1, duration: 0.22, ease: "back.out(1.6)", stagger: 0.08 }, K);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

@@ -1,0 +1,53 @@
+<template>
+  <!-- register: drawn (preset satbrief: THEN vs NOW, two outlines of the same place on a dark graticule)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Trace both outlines from real imagery of the two dates (never invent the shape). THEN = dashed white, NOW = solid
+       accent with a faint fill. Legend words only; a year on screen must be spoken. Mark "slam" = the NOW outline draws. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-title { top: 250px; }
+    #__ID__-map { left: 80px; top: 500px; width: 920px; height: 640px; }
+    #__ID__-leg { left: 80px; top: 470px; display: flex; gap: 40px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="sb-world">
+      <div class="sb-grat" data-layout-allow-overflow></div>
+      <div id="__ID__-meta" class="sb-meta" data-safe="text"><span>__JOB__</span><span>traced from imagery</span></div>
+      <div id="__ID__-title" class="sb-title" data-safe="text">__HERO__</div>
+      <svg id="__ID__-map" class="sb-svg" viewBox="0 0 920 640">
+        <path id="__ID__-then" class="o" d="M140 120 Q300 40 520 80 Q760 120 800 300 Q840 480 640 560 Q420 640 260 560 Q90 470 100 300 Q110 180 140 120 Z" />
+        <path id="__ID__-nowf" class="fill" d="M300 200 Q420 150 540 200 Q650 250 620 360 Q590 460 470 470 Q340 480 300 400 Q260 320 300 200 Z" />
+        <path id="__ID__-now" class="acc" d="M300 200 Q420 150 540 200 Q650 250 620 360 Q590 460 470 470 Q340 480 300 400 Q260 320 300 200 Z" />
+      </svg>
+      <div id="__ID__-leg" class="sb-cap" data-safe="text"><span>- - then</span><span style="color:var(--accent)">&mdash; now</span></div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const split = (el) => {
+      if (!el || el.dataset.split) return;
+      el.dataset.split = "1";
+      const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const tok = [];
+      s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) tok.push([hot, true]); else if (cold != null) tok.push([cold, false]); return ""; });
+      const out = [];
+      for (const [txt, hot] of tok) for (const w of txt.split(/\s+/).filter(Boolean)) out.push('<span class="w' + (hot ? " k" : "") + '" data-layout-allow-overflow><b>' + w + '</b></span>');
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+    };
+    const rise = (sel, at) => { const w = document.querySelectorAll(sel + " .w > b"); tl.fromTo(w, { yPercent: 105 }, { yPercent: 0, duration: 0.3, ease: "power3.out", stagger: Math.min(0.05, 0.2 / Math.max(1, w.length - 1)) }, at); };
+    const RET = '<circle class="r" cx="130" cy="130" r="110" /><path class="r" d="M130 0 L130 34 M130 226 L130 260 M0 130 L34 130 M226 130 L260 130 M130 92 L130 112 M130 148 L130 168 M92 130 L112 130 M148 130 L168 130" />';
+    split(document.querySelector("#__ID__-title"));
+    document.querySelector("#__ID__-now").setAttribute("pathLength", "1");
+    gsap.set("#__ID__-now", { strokeDasharray: "1 1" });
+    const S = C.slam ?? Math.min(0.9, D * 0.45);
+    rise("#__ID__-title", 0);
+    tl.fromTo("#__ID__-meta", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, 0);
+    tl.fromTo("#__ID__-then", { opacity: 0, scale: 1.04 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out", transformOrigin: "50% 50%" }, 0.1);
+    tl.fromTo("#__ID__-leg", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, 0.2);
+    tl.fromTo("#__ID__-now", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, S);
+    tl.fromTo("#__ID__-nowf", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, S + 0.45);
+    tl.fromTo("#__ID__-map", { scale: 1 }, { scale: 1.04, duration: D, ease: "none", transformOrigin: "50% 50%" }, 0);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

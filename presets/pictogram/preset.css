@@ -1,0 +1,53 @@
+/* Pictogram Motion: flash-card explainer of signs, objects and bold type. Source of preset.json -> css (node presets/pictogram/build.mjs). */
+:root { --cobalt: #2448A6; --teal: #0F7A72; --night: #141B3C; }
+/* fields: one saturated colour per chapter; --f2/--f3 = its lighter/darker tone for the tile pattern */
+.pg-world { position: absolute; inset: 0; overflow: hidden; --f: var(--cobalt); background: var(--f); --f2: color-mix(in srgb, var(--f) 82%, #fff); --f3: color-mix(in srgb, var(--f) 80%, #000); }
+.pg-teal { --f: var(--teal); }
+.pg-red { --f: var(--alert); }
+.pg-night { --f: var(--night); --f2: color-mix(in srgb, var(--f) 78%, #fff); --f3: color-mix(in srgb, var(--f) 70%, #000); }
+/* square tile pattern (tiles are made by the scene script, 180 px, class t0-t7) */
+.pg-tiles { position: absolute; left: -180px; top: -180px; width: 1440px; display: grid; grid-template-columns: repeat(8, 180px); grid-auto-rows: 180px; }
+.pg-tiles > i { display: block; backface-visibility: hidden; }
+.pg-tiles .t0 { background: radial-gradient(circle at 0 100%, var(--f2) 0 70%, transparent 70.4%); }
+.pg-tiles .t1 { background: radial-gradient(circle at 50% 100%, var(--f3) 0 50%, transparent 50.4%); }
+.pg-tiles .t2 { background: radial-gradient(var(--f3) 0 26%, transparent 28%) 0 0 / 36px 36px; }
+.pg-tiles .t3 { background: repeating-linear-gradient(0deg, var(--f2) 0 12px, transparent 12px 30px); }
+.pg-tiles .t4 { background: radial-gradient(circle, transparent 0 24%, var(--f2) 24.5% 34%, transparent 34.5%); }
+.pg-tiles .t5 { background: var(--f3); }
+.pg-tiles .t6 { background: radial-gradient(circle, var(--f2) 0 16%, transparent 16.5% 25%, var(--f2) 25.5% 29%, transparent 29.5%); }
+.pg-tiles .t7 { background: radial-gradient(circle at 100% 0, var(--f3) 0 100%, transparent 100.4%) 0 0 / 90px 90px; }
+/* plain band behind the headline: keeps the type off the busy pattern */
+.pg-band { position: absolute; left: 0; right: 0; background: var(--f); }
+/* type: heavy geometric sans, white; <em> = accent tag (works on every field) */
+.pg-title { position: absolute; left: 80px; right: 80px; font: 900 170px/1.02 var(--font-display); letter-spacing: -.02em; text-transform: uppercase; color: var(--ink); }
+.pg-title .w { display: inline-block; overflow: hidden; vertical-align: top; padding: .04em .03em .02em; }
+.pg-title .w > b { display: inline-block; font-weight: inherit; }
+.pg-title em, .pg-title .w.k > b { font-style: normal; color: var(--on-accent); background: var(--accent); padding: 0 .06em; border-radius: .08em; }
+.pg-sub { position: absolute; left: 80px; right: 80px; font: 800 56px/1.1 var(--font-body); color: var(--ink); }
+.pg-label { position: absolute; font: 400 30px/1.2 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: color-mix(in srgb, var(--ink) 82%, transparent); white-space: nowrap; }
+/* pictograms: round-capped white bars, disc heads, one accent object */
+.pg-ico { position: absolute; overflow: visible; }
+.pg-ico .s { fill: none; stroke: var(--ink); stroke-linecap: round; stroke-linejoin: round; }
+.pg-ico .f { fill: var(--ink); }
+.pg-ico .a { fill: var(--accent); }
+.pg-ico .as { fill: none; stroke: var(--accent); stroke-linecap: round; stroke-linejoin: round; }
+.pg-ico .d { fill: var(--night); }
+.pg-ico .ds { fill: none; stroke: var(--night); stroke-linecap: round; }
+/* hero disc: darker tone of the field, the object sits inside it */
+.pg-disc { position: absolute; border-radius: 50%; background: var(--f3); }
+/* footage / photo: inside one big rounded tile, toned to the field */
+.pg-win { position: absolute; overflow: hidden; border-radius: 44px; background: var(--night); }
+.pg-win video, .pg-win img { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.2) brightness(1.05); }
+.pg-win .tint { position: absolute; inset: 0; background: var(--f); mix-blend-mode: multiply; opacity: .78; }
+/* phone: thick white round outline around a REAL screenshot */
+.pg-phone { position: absolute; padding: 16px; border-radius: 64px; background: var(--night); box-shadow: 0 0 0 12px var(--ink); }
+.pg-phone .screen { width: 100%; height: 100%; border-radius: 48px; overflow: hidden; background: #000; }
+.pg-phone .screen > img, .pg-phone .screen > video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.pg-ring { position: absolute; border: 10px solid var(--accent); border-radius: 28px; }
+/* line map (route with stops) */
+.pg-line { position: absolute; height: 14px; border-radius: 7px; background: var(--ink); }
+.pg-stop { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: var(--f); box-shadow: inset 0 0 0 10px var(--ink); }
+.pg-stop.on { background: var(--accent); }
+/* the lit one in a count grid */
+.pg-ico.hot .s { stroke: var(--accent); }
+.pg-ico.hot .f { fill: var(--accent); }

@@ -1,0 +1,59 @@
+<template>
+  <!-- register: footage (preset spytitles: the clip seen through a cut-paper HOLE in a cream sheet, duotone red)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Footage never fills the frame raw: it sits in a hole (circle = spotlight/lens; for a peeping beat use the keyhole
+       clip-path from blocks.html) and is turned into two inks (grayscale + red multiply; class "tint acc" = accent ink).
+       A silhouette stands at the hole's edge so the clip belongs to the title sequence. Clip: assets/footage/__ID__.mp4
+       (muted, generated or Commons), photo: <img>. Mark "slam" = the title's key word (<em>, else the last) jolts. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-title { top: 210px; font-size: 170px; }
+    #__ID__-hole { left: 170px; top: 470px; width: 740px; height: 740px; border-radius: 50%; }
+    #__ID__-media { position: absolute; inset: 0; transform-origin: 50% 50%; }
+    #__ID__-placeholder { position: absolute; inset: 0; display: grid; place-items: center; font: 400 60px var(--font-sign); color: var(--paper); letter-spacing: .1em; background: linear-gradient(#5a5048, #201a16); }
+    #__ID__-man { left: 40px; top: 860px; width: 140px; height: 350px; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-world" class="sp-world sp-cream sp-grain">
+      <svg width="0" height="0" style="position:absolute"><filter id="__ID__-rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence id="__ID__-turb" type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="1" /><feDisplacementMap in="SourceGraphic" scale="6" /></filter></svg>
+      <div id="__ID__-title" class="sp-title ink" data-safe="text" style="top:210px">__HERO__</div>
+      <div id="__ID__-hole" class="sp-hole">
+        <div id="__ID__-media">
+          <!-- Replace the placeholder with: <video id="__ID__-clip" src="assets/footage/__ID__.mp4" muted playsinline style="width:100%;height:100%;object-fit:cover"></video> -->
+          <div id="__ID__-placeholder">FOOTAGE</div>
+        </div>
+        <div class="tint"></div>
+      </div>
+      <svg id="__ID__-man" class="sp-sil" viewBox="0 0 120 300" style="filter:url(#__ID__-rough)">
+        <path class="ink" d="M50 176 L46 286 L36 300 L60 300 L58 286 L62 178 Z M60 176 L56 286 L46 300 L70 300 L68 286 L72 178 Z" />
+        <path class="ink" d="M38 70 Q60 60 82 70 L94 196 Q60 206 26 196 Z M78 80 L98 150 L88 154 L70 90 Z" />
+        <path class="hot" d="M50 66 L70 66 L66 84 L54 84 Z" />
+        <circle class="ink" cx="60" cy="50" r="14" />
+        <path class="ink" d="M28 42 Q60 33 92 42 Q60 49 28 42 Z M44 41 L47 20 Q60 14 73 20 L76 41 Z" />
+      </svg>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2, st = (s) => `steps(${Math.max(1, Math.round(s * 12))})`;
+    const el = document.querySelector("#__ID__-title");
+    if (el && !el.dataset.split) {
+      el.dataset.split = "1";
+      const tokens = (el) => { const s = el.innerHTML.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"); const out = []; s.replace(/<em>([\s\S]*?)<\/em>|([^<]+)|<[^>]*>/g, (m, hot, cold) => { if (hot != null) out.push([hot, true]); else if (cold != null) out.push([cold, false]); return ""; }); return out; };
+      const out = [];
+      for (const [txt, hot] of tokens(el)) for (const w of txt.split(/\s+/).filter(Boolean)) out.push(`<span class="w${hot ? " k" : ""}" data-layout-allow-overflow><b>${w}</b></span>`);
+      el.innerHTML = out.join(" ");
+      if (!el.querySelector(".k")) el.querySelector(".w:last-child")?.classList.add("k");
+    }
+    const words = el ? el.querySelectorAll(".w > b") : [];
+    // iris opens from a pinhole (stepped, 0.2 s), the picture pushes in slowly behind it
+    tl.fromTo("#__ID__-hole", { clipPath: "circle(16% at 50% 50%)" }, { clipPath: "circle(50% at 50% 50%)", duration: 0.2, ease: "steps(4)" }, 0);
+    tl.fromTo("#__ID__-media", { scale: 1 }, { scale: 1.08, duration: D, ease: "none" }, 0);
+    tl.fromTo(words, { yPercent: 105 }, { yPercent: 0, duration: 0.15, ease: "steps(3)", stagger: Math.min(0.06, 0.24 / Math.max(1, words.length - 1)) }, 0.03);
+    tl.fromTo("#__ID__-man", { x: -30 }, { x: 20, duration: D, ease: st(D) }, 0);
+    if (C.slam != null) tl.fromTo("#__ID__-title .k > b", { x: -22 }, { x: 0, duration: 0.12, ease: "steps(3)", immediateRender: false }, C.slam);
+    const B = Math.max(1, Math.round(D * 8));
+    tl.fromTo("#__ID__-turb", { attr: { seed: 1 } }, { attr: { seed: 1 + B }, duration: D, ease: `steps(${B})` }, 0);
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>

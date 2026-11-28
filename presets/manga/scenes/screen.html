@@ -1,0 +1,59 @@
+<template>
+  <!-- register: screen (preset manga: a REAL screenshot assets/screens/__ID__.png in an ink phone on a focus-line panel)  |  job: __JOB__  |  hero: __HERO__ -->
+  <!-- Never draw or generate an app UI or a chat (no drawn chat balloons that imitate an app). Crop out names, numbers and
+       faces of real people. ROW = top of the row talked about, in screen pixels; mark "tap" lands the accent ring and the
+       balloon with the hero line. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #__ID__-panel { left: 40px; top: 190px; width: 1000px; height: 960px; }
+    #__ID__-lines { left: 0; top: 0; width: 1000px; height: 960px; }
+    #__ID__-phone { left: 320px; top: 250px; width: 440px; height: 840px; z-index: 6; }
+    #__ID__-placeholder { width: 100%; height: 100%; display: grid; place-items: center; font: 400 56px var(--font-sfx); color: #666; background: repeating-linear-gradient(45deg, #f4f4f4 0 20px, #e6e6e6 20px 40px); }
+    #__ID__-ring { left: 326px; width: 428px; height: 104px; }
+    #__ID__-balloon { left: 60px; max-width: 380px; font-size: 42px; padding: 26px 34px; --tx: 70%; }
+  </style>
+  <div id="root" data-composition-id="__ID__" data-width="1080" data-height="1920">
+    <div id="__ID__-page" class="mg-page">
+      <div id="__ID__-panel" class="mg-panel">
+        <svg id="__ID__-lines" class="mg-lines" viewBox="0 0 1000 960"></svg>
+        <div class="frame"></div>
+      </div>
+      <div id="__ID__-phone" class="mg-phone"><div class="screen">
+        <!-- Replace with: <img id="__ID__-shot" src="assets/screens/__ID__.png" alt="" /> -->
+        <div id="__ID__-placeholder">SCREENSHOT</div>
+      </div></div>
+      <div id="__ID__-ring" class="mg-ring"></div>
+      <div id="__ID__-balloon" class="mg-balloon" data-safe="text">__HERO__</div>
+    </div>
+  </div>
+  <script>
+    const C = /*@cues*/{}/*@end*/;
+    const tl = gsap.timeline({ paused: true });
+    const D = C.dur ?? 2;
+    const ROW = 300; // top of the row being talked about inside the screen
+    const unEm = (el) => { if (el) el.innerHTML = el.innerHTML.replace(/&lt;(\/?em)&gt;/g, "<$1>"); };
+    const focus = (sel, cx, cy, n, r0, seed) => {
+      const svg = document.querySelector(sel); if (!svg || svg.dataset.done) return; svg.dataset.done = "1";
+      let h = seed, d = "";
+      for (let i = 0; i < n; i++) {
+        h = (h * 1103515245 + 12345) & 0x7fffffff;
+        const a = ((i + (h % 100) / 100) / n) * Math.PI * 2, w = 0.003 + (((h >> 8) % 100) / 100) * 0.009, r = r0 + ((h >> 4) % 140), R = 1600;
+        d += "M" + (cx + Math.cos(a - w) * R).toFixed(1) + " " + (cy + Math.sin(a - w) * R).toFixed(1) + "L" + (cx + Math.cos(a) * r).toFixed(1) + " " + (cy + Math.sin(a) * r).toFixed(1) + "L" + (cx + Math.cos(a + w) * R).toFixed(1) + " " + (cy + Math.sin(a + w) * R).toFixed(1) + "Z";
+      }
+      svg.innerHTML = '<path fill="var(--ink)" d="' + d + '"/>';
+    };
+    focus("#__ID__-lines", 500, 470, 150, 380, 23);
+    unEm(document.querySelector("#__ID__-balloon"));
+    const top = 250 + 14 + ROW - 8;
+    tl.set("#__ID__-ring", { top }, 0);
+    tl.set("#__ID__-balloon", { top: Math.max(200, top - 230) }, 0);
+    tl.fromTo("#__ID__-panel", { clipPath: "inset(50% 0% 50% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.2, ease: "power4.out" }, 0);
+    tl.fromTo("#__ID__-phone", { y: 120, rotate: 5 }, { y: 0, rotate: 0, duration: 0.26, ease: "power4.out" }, 0.04);
+    tl.fromTo("#__ID__-phone", { scale: 1 }, { scale: 1.03, duration: D, ease: "none", immediateRender: false }, 0.3);
+    if (C.tap != null) {
+      tl.fromTo("#__ID__-ring", { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: 0.18, ease: "back.out(2)" }, C.tap);
+      tl.fromTo("#__ID__-balloon", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "back.out(2)", transformOrigin: "70% 100%" }, C.tap + 0.06);
+    } else { tl.set("#__ID__-ring", { opacity: 0 }, 0); tl.fromTo("#__ID__-balloon", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "back.out(2)" }, 0.3); }
+    window.__timelines["__ID__"] = tl;
+  </script>
+</template>
