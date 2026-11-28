@@ -15,14 +15,26 @@ gambar. Bahasa jawaban: Indonesia santai.
    atau memakai Library Cerita. Opsional: foto asli tokoh utama (`assets/reference/tokoh/`). Link/teks panjang otomatis masuk
    Library Cerita (`request.json → story_ref.book`) dan semua kisahnya tertaut ke proyek ini: setelah storyline ditulis, kembalikan
    kisah yang tidak dipakai dengan `npm run stories -- release <book> <id>` (sebut di laporan).
-2. **Storyline langsung** (event `berakitkehulu-new`): **tanpa tahap Draft**. Tulis `storyline.md` + `hooks.json` dari
+2. **Riset web dulu (default, user 2026-11-28** "bagian satu terlalu singkat, kerja apa dia di makassar, kenapa dia bikin
+   pabrik di jakarta? cerita inspirasinya kurang, ide cerdasnya, penderitaannya, search di google untuk bikin cerita jadi kaya,
+   jadikan ini default skill"): bahan buku biasanya ringkas. Sebelum storyline, cari di web (WebSearch, lalu baca artikelnya
+   lewat agen `web-fetch`) untuk tiap tokoh utama: masa kecil dan keluarga, pekerjaan sebelum usaha (di mana, sebagai apa,
+   untuk siapa), alasan pindah kota dan memilih usaha itu, modal awal, kegagalan dan penderitaan, ide cerdas (produk, harga,
+   nama, cara jual), kutipan tokoh, dan tahun yang berbeda antar sumber. Tulis hasilnya di `storyline.md → ## Riset web`:
+   satu butir per fakta dengan nomor sumber, daftar sumber (judul, media, tanggal, URL), dan "Beda antar sumber". Aturan:
+   fakta dipakai hanya bila ada sumbernya (media berita/arsip/biografi; blog kerabat atau forum hanya sebagai pendukung,
+   ditulis begitu); yang tidak terkonfirmasi (kutipan yang tidak ketemu, slogan dari satu blog) tidak dipakai atau ditulis
+   "konon"; bila sumber berbeda, ikuti bahan user lalu catat bedanya; jangan pernah menambal celah dengan karangan. Storyline
+   memakai butir riset dengan tanda `R-x` di samping nomor Alur asli, dan `## Beda dari alur asli` menyebut apa yang datang
+   dari riset. Bagian series boleh lebih panjang (tetap < 120 s) supaya perjalanan tokoh (kerja, gagal, ide, bangkit) terasa.
+3. **Storyline langsung** (event `berakitkehulu-new`): **tanpa tahap Draft**. Tulis `storyline.md` + `hooks.json` dari
    `bahan.md` (abaikan komentar pembaca di akhir artikel), lengkap dengan `## Alur asli`, `## Beda dari alur asli`, dan
    `## Tokoh`. Lebih dari 2 menit = series (`## Bagian k`, tiap bagian < 120 s, berakhir di titik tegang; hook/re-hook/
    cliffhanger bagian 2 dst. di `hooks.json → parts`).
-3. **User mengedit storyline di Studio** (tab Storyline, teks sumber di kiri) lalu menyetujuinya. Setelah
+4. **User mengedit storyline di Studio** (tab Storyline, teks sumber di kiri) lalu menyetujuinya. Setelah
    `request.json → storylineEditedAt` ada, storyline itu kata-kata user: naskah mengikutinya, tidak mengembalikan yang ia hapus.
-4. **Character sheet** (bila ada foto tokoh): setelah storyline disetujui, sebelum naskah. Lihat § Tokoh di bawah.
-5. `node tools/musafo.mjs series <slug> <n>` bila series, lalu naskah per bagian, persetujuan, Production, seperti Musafo.
+5. **Character sheet** (bila ada foto tokoh): setelah storyline disetujui, sebelum naskah. Lihat § Tokoh di bawah.
+6. `node tools/musafo.mjs series <slug> <n>` bila series, lalu naskah per bagian, persetujuan, Production, seperti Musafo.
 
 ## Tokoh: foto asli → character sheet per usia (user 2026-11-07)
 - Usia tokoh utama dari `## Tokoh` di storyline (mis. anak 9-12, remaja, pemuda, dewasa, tua). Catat di
@@ -116,8 +128,10 @@ dicek manual dulu.
 ## Cerita (pengganti aturan islami Musafo)
 - Kisah nyata asal-usul merek/pendiri usaha Indonesia. Bentuk: anak muda/keadaan sulit → kerja keras → titik balik (ide,
   kesempatan, keberanian) → sukses → merek/produk hari ini → satu pelajaran untuk penonton → satu ajakan pendek.
-- **Bahan user adalah sumbernya**: tidak menambah nama, tahun, angka, tempat, atau kejadian yang tidak ada di bahan. Yang
-  tidak pasti disebut sebagai "konon"/"cerita yang beredar" atau dihapus.
+- **Bahan user + riset web bersumber** (sejak user 2026-11-28): nama, tahun, angka, tempat, dan kejadian hanya dari bahan
+  user atau dari `## Riset web` yang punya sumber. Yang tidak pasti disebut "konon"/"cerita yang beredar" atau dihapus.
+  Cerita harus kaya: perjalanan tokoh (kerja apa, di mana, kenapa pindah), penderitaan dan kegagalan, ide cerdasnya, dan
+  momen bangkit, bukan hanya daftar tahun.
 - Aturan dalil/ayat/hadis dan larangan menggambar Nabi/sahabat dari Musafo tidak relevan di sini; tokoh nyata (pendiri,
   keluarga) boleh digambar sebagai karakter animasi bergaya, tanpa meniru foto asli wajahnya.
 - Merek hanya disebut di narasi; gambar tanpa logo/teks (lihat Gaya). Produk hari ini di shot penutup.

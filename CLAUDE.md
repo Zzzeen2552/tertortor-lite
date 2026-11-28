@@ -312,3 +312,4 @@ Perubahan TERTORTOR (MOTION) 2026-11-23 sampai 2026-11-28 yang dibawa ke LITE:
 - **Muse4AI dihapus** (`tools/muse.mjs`, `local-proxy.mjs`): Meta Muse hanya lewat muse.ai di Chrome.
 - **Enam preset explainer baru** dari galeri lemo-opuscar: Manga Panels, Satellite Briefing, Risograph, Line-Art Cutaway,
   Pictogram Motion, Spy Titles (`presets/<id>/style.md`).
+- **BKH riset web dulu** (user 2026-11-28): skill `/berakit-ke-hulu` langkah 2, fakta bersumber di `storyline.md → ## Riset web`. Label "Storyline" tampil sebagai "Draft" di proyek Storytelling tanpa tahap Draft sendiri.

@@ -2210,7 +2210,8 @@ async function viewEditor(slug, startTab) {
   const thumb = (b) => (v.video ? `/api/videos/${slug}/thumb/${b.id}.jpg` : "");
   const total = v.duration || v.beats.reduce((s, b) => s + b.duration, 0) || 1;
   const hasRef = v.steps.some((s) => s.name === "Konsep");
-  const isM = !!STORY[v.type], isA = !!v.ad; // Advertisement: no script, voice or Flow prompts (tools/ad.mjs)
+  const isM = !!STORY[v.type], isA = !!v.ad;
+  const SLN = isM && !(v.musafo.draftApproval.needed || v.musafo.draft) ? "Draft" : "Storyline", sln = SLN.toLowerCase(); // label only (user 2026-11-28) // Advertisement: no script, voice or Flow prompts (tools/ad.mjs)
   $("#main").innerHTML = `
     <div class="one-h edtop"><div class="edtitle"><a class="edback" href="${v.sub ? `#/s/${v.category}/${esc(v.sub)}` : "#/"}" aria-label="Kembali" title="Kembali"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a><div><h1>${esc(v.title)}</h1><div class="eyebrow">${esc(slug)}${v.duration ? " · " + fmt(v.duration) : ""}${v.beats.length ? " · " + v.beats.length + " beat" : ""}</div></div></div><div class="edtabs" id="edTabs"></div>
       <div class="vh-r">${v.video ? `<button class="btn" id="shareBtn" title="Link yang bisa diputar tanpa login">${v.share ? (v.share.stale ? "Link: render lama" : "Link berbagi") : "Bagikan"}</button><a class="btn pri" href="${v.video}" download>Unduh MP4</a>` : ""}</div></div>
@@ -2227,7 +2228,7 @@ async function viewEditor(slug, startTab) {
         <div class="tabs" style="padding:0 10px;margin:0" id="tabs">
           ${isM ? `<button data-t="brief">Brief</button>
           ${v.musafo.draftApproval.needed || v.musafo.draft ? `<button data-t="draft">Draft ${v.musafo.draftApproval.approved ? "<span>✓</span>" : ""}</button>` : ""}
-          <button data-t="storyline">Storyline ${v.musafo.storylineApproval.approved ? "<span>✓</span>" : ""}</button>
+          <button data-t="storyline">${SLN} ${v.musafo.storylineApproval.approved ? "<span>✓</span>" : ""}</button>
           ${v.type === "berakitkehulu" || v.type === "cinestory" || v.musafo.charRefs.length || v.musafo.characters.length ? `<button data-t="tokoh">Tokoh <span>${v.musafo.characters.length ? v.musafo.characters.filter((c) => c.sheetUrl).length + "/" + v.musafo.characters.length : v.musafo.charRefs.length || "–"}</span></button>` : ""}
           <button data-t="naskah">Naskah ${v.approval.approved && v.scriptState !== "old" ? "<span>✓</span>" : ""}</button>
           <button data-t="shot">Shot <span>${v.musafo.shots.length}</span></button>
@@ -2294,7 +2295,7 @@ async function viewEditor(slug, startTab) {
     const run = workingNow.find((w) => w.slug === slug && (w.type === "production" || w.type === "explainer-production"));
     if (isM) {
       const pr = v.musafo.production;
-      return `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : "<br>Setujui storyline dan naskah dulu."}${v.voiceKey ? `<br><span class="warn" data-voicekey="${esc(v.voiceKey.key)}">⚠ ${esc(v.voiceKey.msg)}</span>` : ""}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${pr.ready ? 1 : ""}" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
+      return `<div class="notice ${pr.done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${pr.voice ? "✓" : "–"} · key visual ${pr.frames}/${pr.need}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}${pr.ready ? "" : `<br>Setujui ${sln} dan naskah dulu.`}${v.voiceKey ? `<br><span class="warn" data-voicekey="${esc(v.voiceKey.key)}">⚠ ${esc(v.voiceKey.msg)}</span>` : ""}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${pr.ready ? 1 : ""}" ${!pr.ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : pr.done ? "Production lagi" : "Production"}</button></span></div>`;
     }
     const ready = v.approval.approved && v.scriptState !== "old", voice = !!v.voice?.seconds && !v.voice.draft, done = voice && v.beats.length > 0;
     return `<div class="notice ${done ? "ok" : ""}" style="margin-bottom:14px"><span><b>Production</b> · suara ${voice ? "✓" : "–"} · beat ${v.beats.length || "–"}${run ? ` · berjalan sejak ${hhmm(run.since)}` : ""}<br><small class="muted">Antigravity membuat suara, beat, dan scene sampai lolos check. Render menunggu thumbnail kamu setujui.</small>${ready ? "" : "<br>Setujui naskah dulu."}${v.voiceKey ? `<br><span class="warn" data-voicekey="${esc(v.voiceKey.key)}">⚠ ${esc(v.voiceKey.msg)}</span>` : ""}</span><span class="sp"><button class="btn pri sm" id="prodGo" data-slug="${esc(slug)}" data-ready="${ready ? 1 : ""}" ${!ready || run ? "disabled" : ""}>${run ? "Production berjalan…" : done ? "Production lagi" : "Production"}</button></span></div>`;
@@ -2317,7 +2318,7 @@ async function viewEditor(slug, startTab) {
     naskah: () => {
       const a = v.approval;
       const bar = !v.script ? "" : v.scriptState === "old"
-        ? `<div class="notice"><span><b>Ini naskah lama.</b> Storyline belum disetujui${v.musafo?.draftApproval?.needed && !v.musafo.draftApproval.approved ? " (draft cerita juga belum)" : ""}, jadi naskah ini belum bisa disetujui.${v.musafo?.series?.part > 1 && v.musafo.hooks?.parts?.[v.musafo.series.part] ? " Bagian ini tidak perlu memilih hook: hook-nya sudah tertulis di tab Storyline. Setujui storyline-nya, lalu kembali ke sini." : " Claude menulis naskah baru dari storyline yang kamu setujui."}</span><span class="sp"><button class="btn pri sm" data-goto="storyline">Buka storyline</button></span></div>`
+        ? `<div class="notice"><span><b>Ini naskah lama.</b> ${SLN} belum disetujui${v.musafo?.draftApproval?.needed && !v.musafo.draftApproval.approved ? " (draft cerita juga belum)" : ""}, jadi naskah ini belum bisa disetujui.${v.musafo?.series?.part > 1 && v.musafo.hooks?.parts?.[v.musafo.series.part] ? " Bagian ini tidak perlu memilih hook: hook-nya sudah tertulis di tab Storyline. Setujui storyline-nya, lalu kembali ke sini." : " Claude menulis naskah baru dari storyline yang kamu setujui."}</span><span class="sp"><button class="btn pri sm" data-goto="storyline">Buka storyline</button></span></div>`
         : a.approved
         ? `<div class="notice ok"><span><b>Naskah disetujui</b> · ${new Date(a.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}</span><span class="sp"><button class="btn sm" id="unapprove">Batalkan</button></span></div>`
         : `<div class="notice"><span>${a.stale ? (STORY[v.type] ? "<b>Naskah berubah setelah disetujui.</b> Setujui lagi supaya Antigravity melanjutkan suara, gambar, dan klip." : "<b>Naskah berubah setelah disetujui.</b> Prompt Flow yang lama tidak berlaku.") : (STORY[v.type] ? "<b>Naskah menunggu persetujuanmu.</b> Setelah disetujui, Antigravity membuat suara, lalu gambar dan klip per shot." : v.oneTake ? "<b>Naskah menunggu persetujuanmu.</b> Setelah disetujui, Antigravity membuat suara lalu beat table (waktu, narasi, hero, teks layar) untuk kamu setujui." : "<b>Naskah menunggu persetujuanmu.</b> Setelah disetujui, Antigravity menulis prompt Google Flow.")}</span><span class="sp"><button class="btn pri sm" id="approve">Setujui naskah</button></span></div>`;
@@ -2423,10 +2424,10 @@ async function viewEditor(slug, startTab) {
     },
     storyline: () => {
       const m = v.musafo, a = m.storylineApproval;
-      if (!a.written) return `<div class="pad"><div class="empty"><b>Storyline belum ditulis</b>Antigravity menyusunnya dari ${m.draftApproval.needed ? "draft yang kamu setujui" : "bahan mentahmu (lihat tab Brief)"}.<br><br>${m.draftApproval.needed && !m.draftApproval.approved ? `<small class="muted">Setujui draft dulu.</small>` : `<button class="btn pri" data-start-story>Tulis storyline</button>`}</div></div>`;
+      if (!a.written) return `<div class="pad"><div class="empty"><b>${SLN} belum ditulis</b>Antigravity menyusunnya dari ${m.draftApproval.needed ? "draft yang kamu setujui" : "bahan mentahmu (lihat tab Brief)"}.<br><br>${m.draftApproval.needed && !m.draftApproval.approved ? `<small class="muted">Setujui draft dulu.</small>` : `<button class="btn pri" data-start-story>Tulis storyline</button>`}</div></div>`;
       const bar = a.approved
-        ? `<div class="notice ok"><span><b>Storyline disetujui</b> · ${m.series?.part > 1 && m.hooks?.parts?.[m.series.part] ? `hook bagian ${m.series.part}` : `hook ${esc(a.hook ?? "–")}`} · ${new Date(a.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}. Claude menulis naskah per shot.</span></div>`
-        : `<div class="notice"><span>${a.stale ? "<b>Storyline berubah setelah disetujui.</b>" : "<b>Storyline menunggu persetujuanmu.</b>"} Edit langsung di bawah bila perlu, simpan, ${m.series?.part > 1 && m.hooks?.parts?.[m.series.part] ? "lalu setujui (hook bagian ini sudah tertulis di bawah, tidak perlu dipilih)" : "pilih satu hook, lalu setujui"}.</span><span class="sp"><button class="btn pri sm" id="slApprove" ${m.hooks?.options?.length && !m.hooks.chosen && !(m.series?.part > 1 && m.hooks?.parts?.[m.series.part]) ? "disabled" : ""}>${m.hooks?.options?.length && !m.hooks.chosen && !(m.series?.part > 1 && m.hooks?.parts?.[m.series.part]) ? "Pilih hook di bawah dulu" : "Setujui storyline"}</button></span></div>`;
+        ? `<div class="notice ok"><span><b>${SLN} disetujui</b> · ${m.series?.part > 1 && m.hooks?.parts?.[m.series.part] ? `hook bagian ${m.series.part}` : `hook ${esc(a.hook ?? "–")}`} · ${new Date(a.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}. Claude menulis naskah per shot.</span></div>`
+        : `<div class="notice"><span>${a.stale ? `<b>${SLN} berubah setelah disetujui.</b>` : `<b>${SLN} menunggu persetujuanmu.</b>`} Edit langsung di bawah bila perlu, simpan, ${m.series?.part > 1 && m.hooks?.parts?.[m.series.part] ? "lalu setujui (hook bagian ini sudah tertulis di bawah, tidak perlu dipilih)" : "pilih satu hook, lalu setujui"}.</span><span class="sp"><button class="btn pri sm" id="slApprove" ${m.hooks?.options?.length && !m.hooks.chosen && !(m.series?.part > 1 && m.hooks?.parts?.[m.series.part]) ? "disabled" : ""}>${m.hooks?.options?.length && !m.hooks.chosen && !(m.series?.part > 1 && m.hooks?.parts?.[m.series.part]) ? "Pilih hook di bawah dulu" : `Setujui ${sln}`}</button></span></div>`;
       const hk = m.hooks, typeName = { "cold open": "Langsung ke kejadian", pertanyaan: "Pertanyaan", kutipan: "Kutipan dari buku" };
       // a series part 2+ opens with its own hook (hooks.json → parts.<n>, the one check holds the script to), not part 1's
       // A/B/C options (user 2026-11-25, Ciputra EPS 3 showed EPS 1's hooks)
@@ -2445,12 +2446,12 @@ async function viewEditor(slug, startTab) {
         : '<div class="notice"><span>Pilihan hook belum ditulis.</span></div>';
       // editable (user 2026-11-07): the user's words from then on; saving an approved storyline makes the approval lapse
       const editor = `<textarea id="slText" class="drtext" spellcheck="false">${esc(m.storyline)}</textarea>
-        <div class="meta-row" style="justify-content:flex-end;gap:8px;margin-top:10px"><span class="muted" style="margin-right:auto;font-size:12.5px">${m.storylineEditedAt ? "Terakhir kamu edit " + new Date(m.storylineEditedAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "Storyline dari Antigravity · bisa kamu edit"}</span><button class="btn" id="slSave" disabled>Simpan storyline</button></div>`;
+        <div class="meta-row" style="justify-content:flex-end;gap:8px;margin-top:10px"><span class="muted" style="margin-right:auto;font-size:12.5px">${m.storylineEditedAt ? "Terakhir kamu edit " + new Date(m.storylineEditedAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : `${SLN} dari Antigravity · bisa kamu edit`}</span><button class="btn" id="slSave" disabled>Simpan storyline</button></div>`;
       // a series part shares the whole series storyline; show this project's own "## Bagian n" first (part 2 used to open on Bagian 1)
       const part = m.series?.part, partSec = part ? (m.storyline.match(new RegExp(`^## Bagian ${part}\\b[^\\n]*\\n[\\s\\S]*?(?=^## |(?![\\s\\S]))`, "m")) ?? [""])[0].trim() : "";
       const partBox = partSec ? `<div class="notice ok" style="display:block;margin-bottom:14px"><div style="margin-bottom:6px"><b>Proyek ini Bagian ${part} dari ${m.series.total ?? "?"}.</b> Storyline di bawah berisi seluruh series; naskah proyek ini mengikuti bagian ini:</div><div class="doc" style="white-space:pre-wrap;margin:0">${esc(partSec)}</div></div>` : "";
       // no source text in the tab (user 2026-11-28 "hapus aja text sumber"); assets/reference/bahan.md stays for the writer
-      const main = `<div class="eyebrow sub">Storyline · bisa kamu edit</div>${editor}`;
+      const main = `<div class="eyebrow sub">${SLN} · bisa kamu edit</div>${editor}`;
       return `<div class="pad">${bar}${partBox}${hooksHtml}${main}</div>`;
     },
     // main characters (user 2026-11-07): the user's photos of the real person, Antigravity's character sheets per life stage
@@ -2800,7 +2801,7 @@ async function viewEditor(slug, startTab) {
     document.querySelectorAll("input[name=hook]").forEach((r) => (r.onchange = () => {
       HOOK_PICK[slug] = r.value;
       document.querySelectorAll("input[name=hook]").forEach((x) => (x.closest(".shot").style.borderColor = x.checked ? "var(--accent)" : ""));
-      if (sl) { sl.disabled = false; sl.textContent = `Setujui storyline · hook ${r.value}`; }
+      if (sl) { sl.disabled = false; sl.textContent = `Setujui ${sln} · hook ${r.value}`; }
     }));
     // a re-render keeps the hook the user picked (user 2026-11-28: "hooknya balik gak kepilih")
     const kept = HOOK_PICK[slug] && document.querySelector(`#edPanel input[name=hook][value="${HOOK_PICK[slug]}"]`);
@@ -2812,8 +2813,8 @@ async function viewEditor(slug, startTab) {
       if (v.musafo.hooks?.options?.length && !hook && !own) return toast("Pilih satu hook dulu");
       sl.disabled = true; sl.textContent = "Menyimpan…";
       const r = await fetch(`/api/videos/${slug}/storyline-approve`, { method: "POST", body: JSON.stringify({ hook }) });
-      if (!r.ok) { sl.disabled = false; sl.textContent = "Setujui storyline"; return alert((await r.json()).error); }
-      toast("Storyline disetujui"); await loadVideos(); await viewEditor(slug, "storyline"); showWorking(slug, r.status === 202);
+      if (!r.ok) { sl.disabled = false; sl.textContent = `Setujui ${sln}`; return alert((await r.json()).error); }
+      toast(`${SLN} disetujui`); await loadVideos(); await viewEditor(slug, "storyline"); showWorking(slug, r.status === 202);
     };
     const slT = $("#slText"), slS = $("#slSave");
     if (slT) slT.oninput = () => { if (slS) slS.disabled = false; };
@@ -2821,12 +2822,12 @@ async function viewEditor(slug, startTab) {
     const slPart = v.musafo?.series?.part, slAt = slT && slPart ? slT.value.search(new RegExp(`^## Bagian ${slPart}\\b`, "m")) : -1;
     if (slAt > 0) { const lh = parseFloat(getComputedStyle(slT).lineHeight) || 20; slT.scrollTop = Math.max(0, (slT.value.slice(0, slAt).split("\n").length - 2) * lh); }
     if (slS) slS.onclick = async () => {
-      if (v.musafo.storylineApproval.approved && !confirm("Storyline ini sudah disetujui. Menyimpan perubahan membuat persetujuannya gugur; setujui lagi setelahnya. Lanjut?")) return;
+      if (v.musafo.storylineApproval.approved && !confirm(`${SLN} ini sudah disetujui. Menyimpan perubahan membuat persetujuannya gugur; setujui lagi setelahnya. Lanjut?`)) return;
       slS.disabled = true; slS.textContent = "Menyimpan…";
       const r = await fetch(`/api/videos/${slug}/storyline`, { method: "POST", body: JSON.stringify({ text: slT.value }) });
       slS.textContent = "Simpan storyline";
       if (!r.ok) { slS.disabled = false; return toast((await r.json()).error); }
-      toast("Storyline disimpan"); await loadVideos(); viewEditor(slug, "storyline");
+      toast(`${SLN} disimpan`); await loadVideos(); viewEditor(slug, "storyline");
     };
     // tab Musik
     const muPost = async (btn, body, label) => {
@@ -3443,7 +3444,7 @@ async function viewEditor(slug, startTab) {
     if (isM) {
       const m = v.musafo, d = m.draftApproval, s = m.storylineApproval, pr = m.production;
       if (d.needed || m.draft) S.push({ key: "draft", label: "Draft", act: "Setujui draft", tab: "draft", btn: "#drApprove", done: d.approved, ready: d.written, wait: "Claude sedang menulis draft…" });
-      S.push({ key: "storyline", label: "Storyline", act: "Setujui storyline", tab: "storyline", btn: "#slApprove", done: s.approved, ready: s.written, wait: "Claude sedang menulis storyline…" });
+      S.push({ key: "storyline", label: SLN, act: `Setujui ${sln}`, tab: "storyline", btn: "#slApprove", done: s.approved, ready: s.written, wait: `Claude sedang menulis ${sln}…` });
       S.push({ key: "naskah", label: "Naskah", act: "Setujui naskah", tab: "naskah", btn: "#approve", done: v.scriptState === "approved", ready: v.scriptState === "waiting" || v.scriptState === "stale", wait: "Claude sedang menulis naskah…" });
       S.push({ key: "prod", label: "Production", act: "Mulai Production", tab: "shot", btn: "#prodGo", done: pr.done, ready: pr.ready, wait: "Production berjalan…" });
       S.push(render);
@@ -3482,7 +3483,7 @@ async function viewEditor(slug, startTab) {
     let label = cur ? cur.act : "Semua langkah selesai", note = "", off = !cur || !cur.act;
     if (cur && run) { label = run.label ? `${run.label}…` : "Claude sedang bekerja…"; off = true; note = `Sejak ${new Date(run.since).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} · perkiraan ${etaText(run)}. Klik untuk lihat progres.`; }
     else if (cur && !cur.ready) { label = cur.wait || "Menunggu Claude…"; off = true; }
-    else if (el) { label = el.textContent.trim() || label; off = el.disabled; if (off) note = cur.key === "storyline" ? "Pilih satu hook di tab Storyline." : ""; }
+    else if (el) { label = el.textContent.trim() || label; off = el.disabled; if (off) note = cur.key === "storyline" ? `Pilih satu hook di tab ${SLN}.` : ""; }
     if (cur?.key === "storyline" && !run && cur.ready && !el && v.musafo.hooks?.options?.length && !v.musafo.hooks.chosen && !(v.musafo.series?.part > 1 && v.musafo.hooks?.parts?.[v.musafo.series.part])) note = "Pilih satu hook dulu di tab Storyline.";
     if (!run && side && !note) note = `Di latar: ${side.label} (perkiraan ${etaText(side)}).`;
     const i = cur ? S.indexOf(cur) : S.length;
@@ -3514,7 +3515,7 @@ async function viewEditor(slug, startTab) {
         const hook = cur.key === "storyline" && document.querySelector("#edPanel input[name=hook]");
         (hook ? hook.closest(".shot") : b?.closest(".pad, .ocard"))?.scrollIntoView({ behavior: "smooth", block: "center" });
         if (hook) document.querySelectorAll("#edPanel input[name=hook]").forEach((x) => { const c = x.closest(".shot"); c.classList.remove("fd-flash"); void c.offsetWidth; c.classList.add("fd-flash"); });
-        toast(hook ? "Pilih satu hook dulu, lalu klik Setujui storyline lagi" : b?.textContent.trim() || "Lengkapi langkah ini di panelnya dulu"); paintDock(); return;
+        toast(hook ? `Pilih satu hook dulu, lalu klik Setujui ${sln} lagi` : b?.textContent.trim() || "Lengkapi langkah ini di panelnya dulu"); paintDock(); return;
       }
       b.click();
     };
