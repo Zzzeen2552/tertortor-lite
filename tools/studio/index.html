@@ -924,9 +924,12 @@ button.ichip:hover{filter:brightness(1.1)}
 .fd-steps li > button{padding:6px 12px;gap:0;font-weight:500}
 /* warna di blok, bukan di teks (user 2026-11-28) */
 .fd-steps li > button{background:var(--panel-2);color:var(--muted)}
-.fd-steps li.done > button{background:color-mix(in srgb,var(--ok) 72%,#000);color:#fff}
+.fd-steps li.done > button{background:var(--c-purple);color:#fff}
+.fd-steps li.done:nth-child(4n+2) > button{background:var(--c-coral)}
+.fd-steps li.done:nth-child(4n+3) > button{background:var(--c-sky)}
+.fd-steps li.done:nth-child(4n+4) > button{background:var(--c-pink)}
 .fd-steps li.now > button{background:var(--grad,var(--accent));color:#fff;font-weight:600}
-.fd-steps li.view > button{box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--fg)}
+.fd-steps li.view > button,.fd-steps li > button{box-shadow:none}
 .fd-steps li.done > button:hover,.fd-steps li.now > button:hover{color:#fff;filter:brightness(1.08)}
 .ocard-h.has-csw{font-size:0;gap:8px}
 .ocard-h.has-csw > small{display:none}
@@ -957,6 +960,7 @@ button.ichip:hover{filter:brightness(1.1)}
 .jrole{display:inline-flex;align-items:center;gap:6px}
 .jrole::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--rc)}
 .pill.ok{background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.wbar i,.fd-bar i{background:linear-gradient(90deg,var(--c-purple),var(--c-sky))}
 </style>
 </head>
 <body>
