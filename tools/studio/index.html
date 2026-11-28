@@ -2419,17 +2419,14 @@ async function viewEditor(slug, startTab) {
             <dl class="kv" style="margin-top:8px"><dt>Gambar pertama</dt><dd>${esc(o.image)}</dd><dt>Rasa penasaran</dt><dd>${esc(o.loop)}</dd><dt>Kenapa</dt><dd>${esc(o.why)}</dd></dl></div></label>`).join("")}
         <dl class="kv" style="margin:6px 0 16px">${hk.rehook ? `<dt>Re-hook</dt><dd>“${esc(hk.rehook.line)}” <span class="muted">(${esc(hk.rehook.at ?? "tengah video")})</span></dd>` : ""}${hk.cliffhanger ? `<dt>Cliffhanger</dt><dd>“${esc(hk.cliffhanger)}”</dd>` : ""}</dl>`
         : '<div class="notice"><span>Pilihan hook belum ditulis.</span></div>';
-      // the source text next to the storyline, so the user can check the order of events before approving
-      const src = m.sourceText ? `<details style="margin-top:16px"><summary class="eyebrow sub" style="cursor:pointer">Teks sumber (bandingkan dengan "Alur asli")</summary><div class="doc" style="margin-top:8px">${esc(m.sourceText)}</div></details>` : "";
       // editable (user 2026-11-07): the user's words from then on; saving an approved storyline makes the approval lapse
       const editor = `<textarea id="slText" class="drtext" spellcheck="false">${esc(m.storyline)}</textarea>
         <div class="meta-row" style="justify-content:flex-end;gap:8px;margin-top:10px"><span class="muted" style="margin-right:auto;font-size:12.5px">${m.storylineEditedAt ? "Terakhir kamu edit " + new Date(m.storylineEditedAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "Storyline dari Antigravity · bisa kamu edit"}</span><button class="btn" id="slSave" disabled>Simpan storyline</button></div>`;
       // a series part shares the whole series storyline; show this project's own "## Bagian n" first (part 2 used to open on Bagian 1)
       const part = m.series?.part, partSec = part ? (m.storyline.match(new RegExp(`^## Bagian ${part}\\b[^\\n]*\\n[\\s\\S]*?(?=^## |(?![\\s\\S]))`, "m")) ?? [""])[0].trim() : "";
       const partBox = partSec ? `<div class="notice ok" style="display:block;margin-bottom:14px"><div style="margin-bottom:6px"><b>Proyek ini Bagian ${part} dari ${m.series.total ?? "?"}.</b> Storyline di bawah berisi seluruh series; naskah proyek ini mengikuti bagian ini:</div><div class="doc" style="white-space:pre-wrap;margin:0">${esc(partSec)}</div></div>` : "";
-      const main = m.sourceText
-        ? `<div class="drgrid"><div><div class="eyebrow sub">Teks sumber (bandingkan dengan "Alur asli")</div><div class="doc drsrc">${esc(m.sourceText)}</div></div><div><div class="eyebrow sub">Storyline · bisa kamu edit</div>${editor}</div></div>`
-        : `<div class="eyebrow sub">Storyline · bisa kamu edit</div>${editor}`;
+      // no source text in the tab (user 2026-11-28 "hapus aja text sumber"); assets/reference/bahan.md stays for the writer
+      const main = `<div class="eyebrow sub">Storyline · bisa kamu edit</div>${editor}`;
       return `<div class="pad">${bar}${partBox}${hooksHtml}${main}</div>`;
     },
     // main characters (user 2026-11-07): the user's photos of the real person, Antigravity's character sheets per life stage

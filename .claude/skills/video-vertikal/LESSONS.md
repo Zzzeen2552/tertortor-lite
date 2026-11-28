@@ -152,3 +152,4 @@ Aturan yang terbukti umum (berlaku di semua video) dipindah ke CLAUDE.md atau ke
 - 2026-11-28 (UI Studio, user: "warna bloknya aja, bukan warna teks"): status langkah ditandai warna blok (hijau gelap selesai, gradasi oranye berjalan, teks putih), bukan warna teks.
 - 2026-11-28 (UI Studio, user: "banyak bgt tab redundant ya"): satu baris tab di card kiri saja (Brief · Storyline · Tokoh · Naskah · Shot · Suara · Beat · Aset); Suara/Beat/Aset jadi pane di card Naskah, tanpa baris tab card terpisah. Bar langkah = status + tombol besar.
 - 2026-11-28 (UI Studio, user: "pas storyline di klik tiba2 size card membesar, harusnya tetap sama"): card kiri satu lebar di semua tab (tanpa `pwide`); teks sumber + storyline bertumpuk di dalam card.
+- 2026-11-28 (UI Studio, user: "hapus aja text sumber"): tab Storyline tanpa teks sumber (hanya hook + editor storyline); `bahan.md` tetap dipakai penulis.
