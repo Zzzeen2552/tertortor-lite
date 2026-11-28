@@ -923,9 +923,12 @@ button.ichip:hover{filter:brightness(1.1)}
 .fd-steps{flex-wrap:nowrap;gap:4px}
 .fd-steps i{display:none}
 .fd-steps li > button{padding:6px 12px;gap:0;font-weight:500}
-.fd-steps li.done > button{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
-.fd-steps li.now > button{color:var(--accent-text);background:var(--accent-soft);font-weight:600}
-.fd-steps li.view > button{box-shadow:inset 0 0 0 1px currentColor}
+/* warna di blok, bukan di teks (user 2026-11-28) */
+.fd-steps li > button{background:var(--panel-2);color:var(--muted)}
+.fd-steps li.done > button{background:color-mix(in srgb,var(--ok) 72%,#000);color:#fff}
+.fd-steps li.now > button{background:var(--grad,var(--accent));color:#fff;font-weight:600}
+.fd-steps li.view > button{box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--fg)}
+.fd-steps li.done > button:hover,.fd-steps li.now > button:hover{color:#fff;filter:brightness(1.08)}
 .ocard-h.has-csw{font-size:0;gap:8px}
 .ocard-h.has-csw > small{display:none}
 .ocard-h.has-csw .pclose{font-size:18px}
