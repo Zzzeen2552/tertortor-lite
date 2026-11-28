@@ -919,6 +919,13 @@ button.ichip:hover{filter:brightness(1.1)}
 .ed2 > .flowdock .fd-bar{order:3;width:100%;margin:0}
 @media (max-width:1180px){.ed2,.ed2[data-p=""]{grid-template-columns:minmax(0,1fr) minmax(240px,280px);grid-template-rows:auto;grid-template-areas:"dock dock" "panel panel" "stage insp" "tl tl" "hf hf"}}
 @media (max-width:900px){.ed2,.ed2[data-p=""],.ed2.pwide{grid-template-columns:minmax(0,1fr);grid-template-areas:"dock" "stage" "panel" "insp" "tl" "hf"}}
+.fd-seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;margin:10px 2px 2px}
+.fd-seg span{display:block;height:8px;border-radius:99px;background:color-mix(in srgb,var(--fg) 10%,transparent);overflow:hidden}
+.fd-seg i{display:block;height:100%;border-radius:99px;transition:width .8s ease}
+.fd-seg .done i{background:linear-gradient(90deg,color-mix(in srgb,var(--accent-2) 55%,#fff),var(--accent-2))}
+.fd-seg .cur i{background:linear-gradient(90deg,var(--accent-2),var(--accent) 70%,color-mix(in srgb,var(--accent) 70%,#000))}
+.wbar{height:8px;background:color-mix(in srgb,var(--fg) 10%,transparent)}
+.wbar i{background:linear-gradient(90deg,var(--accent-2),var(--accent) 70%,color-mix(in srgb,var(--accent) 70%,#000))}
 </style>
 </head>
 <body>
@@ -3426,9 +3433,9 @@ async function viewEditor(slug, startTab) {
     const shows = (s) => (s.tab ? pnl === "naskah" && tabOn === s.tab : !!s.panel && pnl === s.panel);
     const SUB = [["suara", "Suara"], ["beat", "Beat"], ["aset", "Aset"]].filter(([k]) => ed2.querySelector(`[data-panel="${k}"]`));
     const subAt = S.findIndex((s) => s.key === "prod") >= 0 ? S.findIndex((s) => s.key === "prod") : S.findIndex((s) => s.key === "render") - 1;
-    dock.innerHTML = `<div class="fd-main"><ol class="fd-steps">${S.map((s, k) => `<li class="${s.done ? "done" : k === i ? "now" : ""}${shows(s) ? " view" : ""}"><button type="button" data-step="${k}" title="Buka ${esc(s.label)}"><i>${s.done ? "✓" : k + 1}</i><span>${esc(s.label)}</span></button>${k === subAt && SUB.length ? `<span class="fd-sub">${SUB.map(([key, lab]) => `<button type="button" data-sub="${key}" class="${pnl === key ? "on" : ""}">${lab}</button>`).join("")}</span>` : ""}</li>`).join("")}</ol></div>
+    dock.innerHTML = `<div class="fd-main"><ol class="fd-steps">${S.map((s, k) => `<li class="${s.done ? "done" : k === i ? "now" : ""}${shows(s) ? " view" : ""}"><button type="button" data-step="${k}" title="Buka ${esc(s.label)}"><i>${s.done ? "✓" : k + 1}</i><span>${esc(s.label)}</span></button>${k === subAt && SUB.length ? `<span class="fd-sub">${SUB.map(([key, lab]) => `<button type="button" data-sub="${key}" class="${pnl === key ? "on" : ""}">${lab}</button>`).join("")}</span>` : ""}</li>`).join("")}</ol><div class="fd-seg" role="progressbar" aria-valuemin="0" aria-valuemax="${S.length}" aria-valuenow="${S.filter((x) => x.done).length}">${S.map((s, k) => `<span class="${s.done ? "done" : k === i ? "cur" : ""}"><i style="width:${s.done ? 100 : k === i ? (run ? workPct(run) : 12) : 0}%"></i></span>`).join("")}</div></div>
       <div class="fd-act">${note ? `<small class="fd-note">${esc(note)}</small>` : ""}
-      <button type="button" class="btn pri fd-go${off ? " is-off" : ""}${run ? " is-run" : ""}" id="fdGo" aria-disabled="${off}">${run ? `<span class="fd-spin"></span>` : ""}${esc(label)}${run ? ` <b class="fd-pct">${workPct(run)} %</b>` : ""}</button>${run ? `<div class="wbar fd-bar"><i style="width:${workPct(run)}%"></i></div>` : ""}</div>`;
+      <button type="button" class="btn pri fd-go${off ? " is-off" : ""}${run ? " is-run" : ""}" id="fdGo" aria-disabled="${off}">${run ? `<span class="fd-spin"></span>` : ""}${esc(label)}${run ? ` <b class="fd-pct">${workPct(run)} %</b>` : ""}</button></div>`;
     dock.classList.toggle("all-done", !cur);
     dock.querySelectorAll("[data-step]").forEach((b) => (b.onclick = () => {
       const s = S[+b.dataset.step];
