@@ -116,7 +116,7 @@ Perubahan TERTORTOR (MOTION) 2026-11-23 sampai 2026-11-28 yang dibawa ke LITE:
 - **Editor bergaya aplikasi edit video**: tab di tengah baris atas (Naskah, Suara, Beat, Aset, Publikasi), tiga kolom (panel tab,
   video, kolom kanan Suara narasi + Gaya visual), panel **Timeline** selebar halaman (trek Video/Audio/Caption, playhead), aksen oranye.
   Token di blok "Editor gaya aplikasi edit video" paling akhir `<style>` `tools/studio/index.html`. Kartu pemberitahuan polos, tanpa garis warna di tepi.
-- **Langkah = tab**: bar langkah `#flowDock` di atas kolom kiri editor (selebar panel); klik langkah membuka tab/panelnya, Production membawa Suara · Beat · Aset, baris tab lama hanya untuk proyek tanpa langkah; bar + persen saat agent bekerja. Sebelumnya: bar langkah: satu tombol besar untuk langkah yang menunggu user (`flowSteps`). Tombol yang belum
+- **Langkah = tab**: bar langkah `#flowDock` di atas kolom kiri editor (selebar panel); klik langkah membuka tab/panelnya, langkah satu baris tanpa nomor (hijau selesai, oranye berjalan), Naskah · Suara · Beat · Aset = tab di kepala card kiri, baris tab lama hanya untuk proyek tanpa langkah; bar + persen saat agent bekerja. Sebelumnya: bar langkah: satu tombol besar untuk langkah yang menunggu user (`flowSteps`). Tombol yang belum
   aktif tetap menjawab saat diklik: agent bekerja → pop-up progres (spinner + perkiraan waktu); hook belum dipilih → tab Storyline
   dibuka di daftar hook. Proses sampingan (character sheet dari foto baru) tidak mengunci persetujuan.
 - **Job line per peran**: `node tools/jobline.mjs <slug> <Peran> "<keputusan>"` → `videos/<slug>/joblines.jsonl`, tampil di halaman video.
