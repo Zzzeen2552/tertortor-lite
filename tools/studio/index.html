@@ -961,6 +961,9 @@ button.ichip:hover{filter:brightness(1.1)}
 .jrole::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--rc)}
 .pill.ok{background:color-mix(in srgb,var(--ok) 12%,transparent)}
 .wbar i,.fd-bar i{background:linear-gradient(90deg,var(--c-purple),var(--c-sky))}
+/* kartu shot di panel kiri: gambar + klip berdampingan di baris satu, teks di bawahnya selebar kartu (user 2026-11-28) */
+#edPanel .shotrow{grid-template-columns:1fr 1fr !important}
+#edPanel .shotrow > :nth-child(n+3){grid-column:1 / -1}
 </style>
 </head>
 <body>
@@ -2506,7 +2509,7 @@ async function viewEditor(slug, startTab) {
         ${m.shots.map((s, i) => `<div class="shot">
           <div class="shot-h"><b>${i + 1} · ${esc(s.id)}</b><span class="pill">${esc(s.framing)}</span>${s.clip ? `<span class="pill acc">${esc(s.clip)}</span>` : ""}<span class="muted" style="font-size:12.5px">${esc(s.hero)}</span></div>
           <div class="shot-b">
-            <div class="row" style="grid-template-columns:120px 120px 1fr">
+            <div class="row shotrow" style="grid-template-columns:120px 120px 1fr">
               ${s.frameUrl ? `<a href="${s.frameUrl}" target="_blank"><img src="${s.frameUrl}" alt="" style="aspect-ratio:9/16;object-fit:cover"></a>` : '<span class="muted" style="font-size:12px">belum ada gambar</span>'}
               ${s.clipUrl ? `<video src="${s.clipUrl}" muted loop playsinline preload="metadata" style="width:100%;aspect-ratio:9/16;object-fit:cover" onmouseenter="this.play()" onmouseleave="this.pause()"></video>` : '<span class="muted" style="font-size:12px">belum ada klip</span>'}
               <div>${s.lines.map((l) => `<div style="margin-bottom:8px"><b>${esc(l.text)}</b><br><i style="color:var(--accent)">${esc(l.en)}</i></div>`).join("")}</div>

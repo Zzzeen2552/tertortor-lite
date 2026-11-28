@@ -53,7 +53,7 @@ const out = join(dir, "out");
 mkdirSync(out, { recursive: true });
 const hf = join(out, "scene-sheet.html"), png = join(out, "scene-sheet.png");
 writeFileSync(hf, html);
-const chrome = [process.env.CHROME, "C:/Program Files/Google/Chrome/Application/chrome.exe", "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"].find((p) => p && existsSync(p));
+const chrome = [process.env.CHROME, "C:/Program Files/Google/Chrome/Application/chrome.exe", "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"].find((p) => p && existsSync(p));
 if (!chrome) die(`Chrome tidak ditemukan; buka ${hf} di browser`);
 // puppeteer-core (comes with HyperFrames) on the installed Chrome: a full-page screenshot is exactly as tall as the cards
 const { default: puppeteer } = await import("puppeteer-core");
