@@ -887,6 +887,38 @@ button.ichip:hover{filter:brightness(1.1)}
 }
 /* kartu pemberitahuan polos, tanpa garis warna melengkung di tepi kiri (user 2026-11-28 "hapus curva yang membesar ini, bikin simple aja") */
 .notice,.notice.ok,.notice.work,.notice.work.idle{box-shadow:none;border:1px solid var(--line);background:var(--panel-2)}
+.wbar{height:6px;border-radius:99px;background:color-mix(in srgb,var(--fg) 12%,transparent);overflow:hidden;margin:8px 0 2px}
+.wbar i{display:block;height:100%;border-radius:99px;background:var(--grad,var(--accent));transition:width .6s ease}
+.wpct{display:block;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.fd-act{flex-wrap:wrap;justify-content:flex-end}
+.fd-act .fd-bar{flex-basis:100%;width:100%;margin:6px 0 0}
+.fd-pct{font-variant-numeric:tabular-nums;font-weight:700}
+/* bar langkah = tab, di atas kolom kiri saja (user 2026-11-28 "tab layar harusnya diatas kolom kiri aja gak perlu full width") */
+.edtop{margin:0 0 12px}
+.edtop .edtabs{display:none}
+.edtop.nosteps .edtabs{display:flex}
+.ed2,.ed2[data-p=""]{grid-template-columns:minmax(300px,380px) minmax(0,1fr) minmax(250px,300px);grid-template-rows:auto 1fr;grid-template-areas:"dock stage insp" "panel stage insp" "tl tl tl" "hf hf hf"}
+.ed2.pwide{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(240px,280px)}
+.ed2 > .flowdock{grid-area:dock;position:sticky;top:8px;z-index:20;margin:0;padding:10px;border-radius:18px;box-shadow:none;flex-direction:column;align-items:stretch;gap:10px;flex-wrap:nowrap}
+.ed2 > .flowdock[hidden]{display:none}
+.ed2:has(> .flowdock[hidden]){grid-template-areas:"panel stage insp" "panel stage insp" "tl tl tl" "hf hf hf"}
+.fd-main{min-width:0}
+.fd-steps{flex-wrap:wrap;gap:4px}
+.fd-steps li{padding:0;background:none}
+.fd-steps li+li::before{display:none}
+.fd-steps li > button{display:flex;align-items:center;gap:7px;padding:5px 11px 5px 5px;border:0;border-radius:99px;background:none;color:inherit;font:inherit;cursor:pointer;white-space:nowrap}
+.fd-steps li > button:hover{background:var(--panel-2);color:var(--fg)}
+.fd-steps li.now{background:none} .fd-steps li.now > button{background:var(--accent-soft)}
+.fd-steps li.view > button{box-shadow:inset 0 0 0 1px var(--accent);color:var(--fg)}
+.fd-sub{display:inline-flex;gap:2px;margin-left:2px;padding:2px;border-radius:99px;background:var(--panel-2)}
+.fd-sub button{border:0;background:none;color:var(--muted);font:inherit;font-size:12.5px;padding:4px 9px;border-radius:99px;cursor:pointer}
+.fd-sub button:hover{color:var(--fg)} .fd-sub button.on{background:var(--accent-soft);color:var(--accent-text)}
+.ed2 > .flowdock .fd-act{margin:0;width:100%;flex-direction:column;align-items:stretch;gap:6px;flex-wrap:nowrap}
+.ed2 > .flowdock .btn.pri.fd-go{width:100%;min-width:0;min-height:48px;padding:12px 18px;font-size:15.5px}
+.ed2 > .flowdock .fd-note{font-size:11.5px;color:var(--muted);text-align:left;max-width:none;order:2}
+.ed2 > .flowdock .fd-bar{order:3;width:100%;margin:0}
+@media (max-width:1180px){.ed2,.ed2[data-p=""]{grid-template-columns:minmax(0,1fr) minmax(240px,280px);grid-template-rows:auto;grid-template-areas:"dock dock" "panel panel" "stage insp" "tl tl" "hf hf"}}
+@media (max-width:900px){.ed2,.ed2[data-p=""],.ed2.pwide{grid-template-columns:minmax(0,1fr);grid-template-areas:"dock" "stage" "panel" "insp" "tl" "hf"}}
 </style>
 </head>
 <body>
@@ -1030,6 +1062,9 @@ const progressHtml = (w) => {
   if (p.idle) return `<span class="wprog"><span class="wbar"><i style="width:0"></i></span><b>Belum mulai</b> · ${esc(p.step)}</span>`;
   return `<span class="wprog"><span class="wbar"><i style="width:${p.pct}%"></i></span><b>${p.estimated ? "±" : ""}${p.pct}%</b>${p.step ? ` · sekarang: ${esc(p.step)}` : p.estimated ? " · perkiraan dari waktu" : ""}</span>${steps}`;
 };
+// percent from the time spent against the upper estimate; stays below 95 % until the result file is really there
+const workPct = (w) => { if (w.progress && !w.progress.idle && w.progress.pct != null) return w.progress.pct; const el = (Date.now() - Date.parse(w.since)) / 60e3, hi = w.eta?.[1] || 10; return Math.max(3, Math.min(95, Math.round((el / hi) * 100))); };
+const pctBar = (w) => { const p = workPct(w); return `<div class="wbar" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p}%"></i></div><small class="wpct">${p} %${p >= 95 ? " · hampir selesai, menunggu hasilnya ditulis" : ""}</small>`; };
 function paintWork() {
   if (document.getElementById("flowDock")) window.__paintDock?.();
   document.querySelectorAll("[data-workbar]").forEach((el) => {
@@ -1061,7 +1096,7 @@ const LOCK_SEL = ["#approve", "#unapprove", "#bApprove", "#bUnapprove", "#clAppr
   "#thVideo", "#awsRender", "#kvRender", "#fmtRatioGo", "#vSave", "#muApprove", "#muUnapprove", "#muRemake"].join(",");
 function applyLocks() {
   const slug = document.querySelector("[data-workbar]")?.dataset.workbar;
-  const run = !!slug && workingNow.some((x) => x.slug === slug);
+  const run = !!slug && workingNow.some((x) => x.slug === slug && x.type !== "characters"); // a side job does not lock approvals
   document.querySelectorAll(LOCK_SEL).forEach((b) => {
     if (run) {
       if (b.dataset.lockWas == null) b.dataset.lockWas = b.disabled ? "1" : "0";
@@ -1096,6 +1131,7 @@ async function pollWorking() {
 $("#doneX").onclick = () => ($("#doneBox").hidden = true);
 $("#doneLink").onclick = () => { $("#doneBox").hidden = true; setTimeout(() => route?.(), 0); };
 setInterval(pollWorking, 10000);
+setInterval(() => workingNow.length && paintWork(), 30000); // the percent moves between polls too
 pollWorking();
 // call after a successful approval; queued = the relay answered 202 (laptop offline)
 async function showWorking(slug, queued) {
@@ -2122,6 +2158,7 @@ const timelineHtml = (v, isM, thumb) => {
     </section>`;
 };
 
+const HOOK_PICK = {};
 async function viewEditor(slug, startTab) {
   const v = await (await fetch(`/api/videos/${slug}`)).json();
   if (v.error) { $("#main").innerHTML = `<div class="empty"><b>Video tidak ditemukan</b><a class="btn" href="#/">Kembali</a></div>`; return; }
@@ -2132,8 +2169,8 @@ async function viewEditor(slug, startTab) {
   $("#main").innerHTML = `
     <div class="one-h edtop"><div class="edtitle"><a class="edback" href="${v.sub ? `#/s/${v.category}/${esc(v.sub)}` : "#/"}" aria-label="Kembali" title="Kembali"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a><div><h1>${esc(v.title)}</h1><div class="eyebrow">${esc(slug)}${v.duration ? " · " + fmt(v.duration) : ""}${v.beats.length ? " · " + v.beats.length + " beat" : ""}</div></div></div><div class="edtabs" id="edTabs"></div>
       <div class="vh-r">${v.video ? `<button class="btn" id="shareBtn" title="Link yang bisa diputar tanpa login">${v.share ? (v.share.stale ? "Link: render lama" : "Link berbagi") : "Bagikan"}</button><a class="btn pri" href="${v.video}" download>Unduh MP4</a>` : ""}</div></div>
-    <div class="flowdock" id="flowDock" hidden></div>
     <div class="ed2${v.wide ? " cine" : ""}" id="ed2" data-p="">
+      <div class="flowdock" id="flowDock" hidden></div>
     <nav class="rail" aria-label="Panel editor">
       <button type="button" data-rail="naskah" aria-pressed="false" title="Naskah"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg><span>Naskah</span></button>
       ${isA ? "" : `<button type="button" data-rail="suara" aria-pressed="false" title="Suara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Suara</span></button>`}
@@ -2716,11 +2753,15 @@ async function viewEditor(slug, startTab) {
     const sl = $("#slApprove");
     // the button stays off until a hook is picked: a toast at the bottom was easy to miss and the click felt stuck
     document.querySelectorAll("input[name=hook]").forEach((r) => (r.onchange = () => {
+      HOOK_PICK[slug] = r.value;
       document.querySelectorAll("input[name=hook]").forEach((x) => (x.closest(".shot").style.borderColor = x.checked ? "var(--accent)" : ""));
       if (sl) { sl.disabled = false; sl.textContent = `Setujui storyline · hook ${r.value}`; }
     }));
+    // a re-render keeps the hook the user picked (user 2026-11-28: "hooknya balik gak kepilih")
+    const kept = HOOK_PICK[slug] && document.querySelector(`#edPanel input[name=hook][value="${HOOK_PICK[slug]}"]`);
+    if (kept && !kept.checked) { kept.checked = true; kept.onchange?.(); }
     if (sl) sl.onclick = async () => {
-      const hook = $("input[name=hook]:checked")?.value;
+      const hook = $("input[name=hook]:checked")?.value || HOOK_PICK[slug];
       // series part 2+ has its own hook (hooks.json → parts.<n>), nothing to pick
       const own = v.musafo.series?.part > 1 && v.musafo.hooks?.parts?.[v.musafo.series.part];
       if (v.musafo.hooks?.options?.length && !hook && !own) return toast("Pilih satu hook dulu");
@@ -3284,6 +3325,7 @@ async function viewEditor(slug, startTab) {
     ed2.querySelectorAll("[data-panel]").forEach((c) => c.classList.toggle("on", c.dataset.panel === pnl));
     document.querySelectorAll("#main [data-rail]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rail === pnl)));
     try { localStorage.setItem("tt_panel", pnl); } catch {}
+    window.__paintDock?.();
   };
   window.__edPanel = setPanel;
   document.querySelectorAll("#main [data-rail]").forEach((b) => (b.onclick = () => setPanel(b.dataset.rail)));
@@ -3366,7 +3408,9 @@ async function viewEditor(slug, startTab) {
   const dock = $("#flowDock");
   const liveBtn = (st) => (st?.btn ? document.querySelector(`#edPanel ${st.btn}`) : null);
   const paintDock = () => {
+    if (!document.body.contains(dock)) return; // a dock from an editor that is no longer on screen
     const { S, cur, run, side } = flowSteps();
+    document.querySelector(".edtop")?.classList.toggle("nosteps", !S.length); // no steps (ads, AWS, animation): the old tab row stays
     if (!S.length) { dock.hidden = true; return; }
     dock.hidden = false;
     const el = liveBtn(cur);
@@ -3377,16 +3421,29 @@ async function viewEditor(slug, startTab) {
     if (cur?.key === "storyline" && !run && cur.ready && !el && v.musafo.hooks?.options?.length && !v.musafo.hooks.chosen && !(v.musafo.series?.part > 1 && v.musafo.hooks?.parts?.[v.musafo.series.part])) note = "Pilih satu hook dulu di tab Storyline.";
     if (!run && side && !note) note = `Di latar: ${side.label} (perkiraan ${etaText(side)}).`;
     const i = cur ? S.indexOf(cur) : S.length;
-    dock.innerHTML = `<ol class="fd-steps">${S.map((s, k) => `<li class="${s.done ? "done" : k === i ? "now" : ""}"><i>${s.done ? "✓" : k + 1}</i><span>${esc(s.label)}</span></li>`).join("")}</ol>
-      <div class="fd-act">${note ? `<small>${esc(note)}</small>` : cur ? `<small>Langkah ${i + 1} dari ${S.length}</small>` : `<small>${v.video ? "Video siap dikirim lewat Tebar." : ""}</small>`}
-      <button type="button" class="btn pri fd-go${off ? " is-off" : ""}${run ? " is-run" : ""}" id="fdGo" aria-disabled="${off}">${run ? '<span class="fd-spin"></span>' : ""}${esc(label)}</button></div>`;
+    // which step is on screen: its panel (Render = Publikasi) or its tab inside the Naskah panel
+    const pnl = ed2.dataset.p, tabOn = document.querySelector("#tabs button.on")?.dataset.t;
+    const shows = (s) => (s.tab ? pnl === "naskah" && tabOn === s.tab : !!s.panel && pnl === s.panel);
+    const SUB = [["suara", "Suara"], ["beat", "Beat"], ["aset", "Aset"]].filter(([k]) => ed2.querySelector(`[data-panel="${k}"]`));
+    const subAt = S.findIndex((s) => s.key === "prod") >= 0 ? S.findIndex((s) => s.key === "prod") : S.findIndex((s) => s.key === "render") - 1;
+    dock.innerHTML = `<div class="fd-main"><ol class="fd-steps">${S.map((s, k) => `<li class="${s.done ? "done" : k === i ? "now" : ""}${shows(s) ? " view" : ""}"><button type="button" data-step="${k}" title="Buka ${esc(s.label)}"><i>${s.done ? "✓" : k + 1}</i><span>${esc(s.label)}</span></button>${k === subAt && SUB.length ? `<span class="fd-sub">${SUB.map(([key, lab]) => `<button type="button" data-sub="${key}" class="${pnl === key ? "on" : ""}">${lab}</button>`).join("")}</span>` : ""}</li>`).join("")}</ol></div>
+      <div class="fd-act">${note ? `<small class="fd-note">${esc(note)}</small>` : ""}
+      <button type="button" class="btn pri fd-go${off ? " is-off" : ""}${run ? " is-run" : ""}" id="fdGo" aria-disabled="${off}">${run ? `<span class="fd-spin"></span>` : ""}${esc(label)}${run ? ` <b class="fd-pct">${workPct(run)} %</b>` : ""}</button>${run ? `<div class="wbar fd-bar"><i style="width:${workPct(run)}%"></i></div>` : ""}</div>`;
     dock.classList.toggle("all-done", !cur);
+    dock.querySelectorAll("[data-step]").forEach((b) => (b.onclick = () => {
+      const s = S[+b.dataset.step];
+      if (s.tab) { setPanel("naskah"); if (document.querySelector("#tabs button.on")?.dataset.t !== s.tab) openTab(s.tab); }
+      else if (s.panel) setPanel(s.panel);
+      paintDock();
+    }));
+    dock.querySelectorAll("[data-sub]").forEach((b) => (b.onclick = () => { setPanel(b.dataset.sub); paintDock(); }));
     $("#fdGo").onclick = () => {
       // an inactive button still answers: Claude at work → the progress pop-up; otherwise go to what is missing
       if (!cur) return;
       if (run) return showWorking(slug);
       if (off && !cur.ready) return toast(cur.wait || "Menunggu Claude…");
-      if (cur.tab) { setPanel("naskah"); openTab(cur.tab); } else if (cur.panel) setPanel(cur.panel);
+      const open = document.querySelector(`#tabs button.on`)?.dataset.t === cur.tab && document.querySelector("#tabBody")?.children.length;
+      if (cur.tab) { setPanel("naskah"); if (!open) openTab(cur.tab); } else if (cur.panel) setPanel(cur.panel);
       const b = liveBtn(cur);
       if (!cur.btn) { $("#tabBody")?.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
       if (!b || b.disabled) {
