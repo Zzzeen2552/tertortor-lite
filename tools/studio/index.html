@@ -898,7 +898,6 @@ button.ichip:hover{filter:brightness(1.1)}
 .edtop .edtabs{display:none}
 .edtop.nosteps .edtabs{display:flex}
 .ed2,.ed2[data-p=""]{grid-template-columns:minmax(300px,380px) minmax(0,1fr) minmax(250px,300px);grid-template-rows:auto 1fr;grid-template-areas:"dock stage insp" "panel stage insp" "tl tl tl" "hf hf hf"}
-.ed2.pwide{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(240px,280px)}
 .ed2 > .flowdock{grid-area:dock;position:sticky;top:8px;z-index:20;margin:0;padding:10px;border-radius:18px;box-shadow:none;flex-direction:column;align-items:stretch;gap:10px;flex-wrap:nowrap}
 .ed2 > .flowdock[hidden]{display:none}
 .ed2:has(> .flowdock[hidden]){grid-template-areas:"panel stage insp" "panel stage insp" "tl tl tl" "hf hf hf"}
@@ -939,6 +938,8 @@ button.ichip:hover{filter:brightness(1.1)}
 #edPanel #tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:0}
 #edPanel #tabs::-webkit-scrollbar{display:none}
 #edPanel #tabs button{flex:none;padding-left:9px;padding-right:9px;font-size:13.5px}
+#edPanel .drgrid{grid-template-columns:minmax(0,1fr)}
+#edPanel .drgrid .drsrc{max-height:260px;overflow:auto}
 </style>
 </head>
 <body>
@@ -2676,7 +2677,8 @@ async function viewEditor(slug, startTab) {
       document.querySelectorAll("#edPanel .tabpane").forEach((p) => (p.hidden = true));
       if ($("#tabBody")) $("#tabBody").hidden = false;
       document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.t === t));
-      document.querySelector(".ed2")?.classList.toggle("pwide", t === "draft" || (t === "storyline" && !!v.musafo?.sourceText));
+      // the card keeps one width on every tab (user 2026-11-28 "pas storyline di klik tiba2 size card membesar")
+      document.querySelector(".ed2")?.classList.remove("pwide");
     }
     host.innerHTML = body[t]();
     document.querySelectorAll(".blist li").forEach((li) => (li.onclick = () => showBeat(+li.dataset.i, true)));
