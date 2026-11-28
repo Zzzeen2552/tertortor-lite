@@ -2968,13 +2968,18 @@ async function viewEditor(slug, startTab) {
         ? { shots: [...document.querySelectorAll("[data-sid]")].map((el) => ({ id: el.dataset.sid, lines: [...el.querySelectorAll(".lrow")].map((r) => ({ text: val(r, "text"), en: val(r, "en") })) })) }
         : { paragraphs: [...document.querySelectorAll("[data-k=para]")].map((x) => x.value) };
       const auto = isM && payload.shots.some((x) => x.lines.some((l) => l.text.trim() && !l.en.trim()));
-      ss.disabled = true; ss.textContent = auto ? "Menerjemahkan & menyimpan…" : "Menyimpan…";
+      // visible progress on the button, and a note that stays after the re-render (user 2026-11-28 "klik simpan naskah nggak ada progress")
+      ss.disabled = true; ss.innerHTML = `<span class="fd-spin"></span> ${auto ? "Menerjemahkan & menyimpan…" : "Menyimpan…"}`;
       const r = await fetch(`/api/videos/${slug}/script`, { method: "POST", body: JSON.stringify(payload) });
       const j = await r.json();
       if (!r.ok) { ss.disabled = false; ss.textContent = "Simpan naskah"; return toast(j.error); }
       naskahWarns[slug] = j.warns ?? [];
-      toast(j.queued ? "Laptop offline: perubahan masuk antrean" : j.changed?.length ? `Naskah disimpan: ${j.changed.length} ${isM ? "shot" : "paragraf"} berubah${j.translated ? `, ${j.translated} terjemahan otomatis` : ""}` : "Tidak ada yang berubah");
-      editing = false; await loadVideos(); viewEditor(slug, "naskah");
+      const msg = j.queued ? "Laptop offline: perubahan masuk antrean dan disimpan begitu laptop menyala."
+        : j.changed?.length ? `Naskah tersimpan: ${j.changed.length} ${isM ? "shot" : "paragraf"} berubah${j.translated ? `, ${j.translated} caption Inggris diterjemahkan otomatis` : ""}. Persetujuan lama gugur, setujui lagi bila sudah pas.`
+        : "Tidak ada yang berubah: naskah sama dengan versi tersimpan.";
+      toast(msg);
+      editing = false; await loadVideos(); await viewEditor(slug, "naskah");
+      $("#tabBody")?.insertAdjacentHTML("afterbegin", `<div class="notice ${j.changed?.length ? "ok" : ""} save-note" style="margin:12px 12px 0"><span><b>${new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</b> · ${esc(msg)}</span></div>`);
     };
     if (t === "beat") showBeat(sel);
   };
