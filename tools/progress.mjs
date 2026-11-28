@@ -14,6 +14,7 @@ import { isAws } from "./aws.mjs";
 
 const EVENTS = join(ROOT, ".events.jsonl"), TIMES = join(ROOT, ".process-times.json"), BEAT = join(ROOT, ".waiting");
 const VIDEOS = join(ROOT, "videos");
+const hasShots = (d) => { try { return (readJSON(join(d, "musafo.json")).shots ?? []).length > 0; } catch { return false; } };
 const mtime = (d, f) => (existsSync(join(d, f)) ? statSync(join(d, f)).mtimeMs : 0);
 const typeOf = (d) => (existsSync(join(d, "meta.json")) ? readJSON(join(d, "meta.json")).type ?? "" : "");
 // one-take explainer preset (Docucine): no Flow step; voice → beat table → world
@@ -35,7 +36,9 @@ export const PROCESSES = {
   // Ubah format (user 2026-11-13): a ticked ratio → its own project; pictures, clips and layout are remade, then rendered
   "format-new": { label: "Antigravity membuat ulang gambar, klip, dan tata letak untuk rasio baru, lalu merender", eta: [30, 90], done: (d, at) => { const s = d.split(/[\\/]/).pop(), f = join(d, "out", `${s}.mp4`); return existsSync(f) && statSync(f).mtimeMs > at ? statSync(f).mtimeMs : 0; }, next: "versi rasio baru siap ditonton" },
   "draft-approved": { label: "Antigravity menulis storyline dari draftmu", eta: [3, 6], out: () => "storyline.md", next: "storyline siap disetujui" },
-  "storyline-approved": { label: "Antigravity menulis naskah per shot", eta: [5, 12], out: () => "script.md", next: "naskah siap disetujui" },
+  // a script that already exists is checked against the approved draft, never rewritten (user 2026-11-28 "simpan naskah,
+  // setujui draft kok dia nulis naskah baru lagi?")
+  "storyline-approved": { label: (d) => (hasShots(d) ? "Claude mencocokkan naskah yang ada dengan draft (kata-katamu tidak ditulis ulang)" : "Claude menulis naskah per shot"), eta: (d) => (hasShots(d) ? [1, 4] : [5, 12]), out: () => "script.md", next: (d) => (hasShots(d) ? "naskah sudah cocok dengan draft, siap disetujui" : "naskah siap disetujui") },
   "docucine-new": { label: "Antigravity menulis naskah dari sumber dan idemu", eta: [4, 10], out: () => "script.md", next: "naskah siap kamu edit dan setujui" },
   "beats-approved": { label: "Antigravity membangun dunia, mengecek still dan gerak kamera, lalu thumbnail", eta: [20, 45], out: () => "compositions/world.html", next: "dunia siap; setujui thumbnail lalu render" },
   // Video Explainer baru (user 2026-11-22: progres sesudah brief): Studio memanggil /ready → Antigravity melengkapi brief, lalu
